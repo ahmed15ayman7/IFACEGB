@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { AlertTriangle, Coins, Globe, Megaphone, Award, ClipboardList } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/lib/motion/dashboard";
@@ -16,22 +17,24 @@ type KPIs = {
 
 type CardDef = {
   key: keyof KPIs;
-  label: string;
+  labelKey: "kpiCertsToday" | "kpiFinancialFlow" | "kpiActiveExams" | "kpiActiveAgents" | "kpiPendingDirectives" | "kpiCriticalAlerts";
   Icon: LucideIcon;
   color: string;
   format?: "coins";
 };
 
 const KPI_CARDS: CardDef[] = [
-  { key: "certsToday", label: "Certificates Today", Icon: Award, color: "#C9A227" },
-  { key: "financialFlow", label: "Financial Flow (Coins)", Icon: Coins, color: "#e8c84a", format: "coins" },
-  { key: "activeExams", label: "Active Exams", Icon: ClipboardList, color: "#A8B5C8" },
-  { key: "activeAgents", label: "Active Agents", Icon: Globe, color: "#A8B5C8" },
-  { key: "pendingDirectives", label: "Pending Directives", Icon: Megaphone, color: "#e8c84a" },
-  { key: "criticalAlerts", label: "Critical Alerts (24h)", Icon: AlertTriangle, color: "#9C2A2A" },
+  { key: "certsToday", labelKey: "kpiCertsToday", Icon: Award, color: "#C9A227" },
+  { key: "financialFlow", labelKey: "kpiFinancialFlow", Icon: Coins, color: "#e8c84a", format: "coins" },
+  { key: "activeExams", labelKey: "kpiActiveExams", Icon: ClipboardList, color: "#A8B5C8" },
+  { key: "activeAgents", labelKey: "kpiActiveAgents", Icon: Globe, color: "#A8B5C8" },
+  { key: "pendingDirectives", labelKey: "kpiPendingDirectives", Icon: Megaphone, color: "#e8c84a" },
+  { key: "criticalAlerts", labelKey: "kpiCriticalAlerts", Icon: AlertTriangle, color: "#9C2A2A" },
 ];
 
 export function GodViewKPIStrip({ kpis }: { kpis: KPIs }) {
+  const t = useTranslations("dashboard.godView");
+
   return (
     <motion.div {...staggerContainer} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       {KPI_CARDS.map((card) => {
@@ -63,7 +66,7 @@ export function GodViewKPIStrip({ kpis }: { kpis: KPIs }) {
               >
                 {display}
               </p>
-              <p className="text-[#6e7d93] text-xs mt-0.5">{card.label}</p>
+              <p className="text-[#6e7d93] text-xs mt-0.5">{t(card.labelKey)}</p>
             </div>
           </motion.div>
         );

@@ -149,6 +149,7 @@ export function DashboardNav({
   const pathname = usePathname();
   const items = getNavItems(role, sectorId, locale);
   const t = useTranslations("dashboard.nav");
+  const tDash = useTranslations("dashboard");
 
   return (
     <aside className="w-56 shrink-0 hidden md:flex flex-col border-r border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.95)] min-h-screen sticky top-0">
@@ -158,7 +159,7 @@ export function DashboardNav({
           className="text-[#C9A227] text-sm font-semibold"
           style={{ fontFamily: "var(--font-eb-garamond)" }}
         >
-          iFACE OS
+          {tDash("brand_os")}
         </span>
       </div>
 

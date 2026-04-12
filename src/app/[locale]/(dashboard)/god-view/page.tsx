@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { GodViewKPIStrip } from "@/features/god-view/components/KPIStrip";
 import { GodViewKillSwitch } from "@/features/god-view/components/KillSwitch";
@@ -9,6 +9,8 @@ import { EDirectiveComposer } from "@/features/god-view/components/EDirectiveCom
 import { AuditTrailFeed } from "@/features/god-view/components/AuditTrailFeed";
 import { SectorWalletChart } from "@/features/god-view/components/SectorWalletChart";
 import { EmployeeStatusGrid } from "@/features/god-view/components/EmployeeStatusGrid";
+
+export const dynamic = "force-dynamic";
 
 async function getGodViewData() {
   const today = new Date();
@@ -76,59 +78,76 @@ async function getGodViewData() {
 export default async function GodViewPage() {
   const session = await auth();
   const locale = await getLocale();
+  const t = await getTranslations("dashboard.godView");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
   if (session.user.role !== "super_admin") {
     redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
   }
 
-  const data = await getGodViewData();
+  let data: Awaited<ReturnType<typeof getGodViewData>> | null = null;
+  try {
+    data = await getGodViewData();
+  } catch {
+    data = null;
+  }
+
+  const dateLocale = locale === "ar" ? "ar-EG" : "en-GB";
+
+  if (!data) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <p className="text-[#9C2A2A] text-sm text-center max-w-md">{t("loadError")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 lg:p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1
             className="text-2xl font-bold text-[#C9A227]"
             style={{ fontFamily: "var(--font-eb-garamond)" }}
           >
-            God View — Sovereign Command Center
+            {t("title")}
           </h1>
           <p className="text-[#6e7d93] text-sm mt-1">
-            Real-time platform oversight • {new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+            {t("subtitle")} ·{" "}
+            {new Date().toLocaleDateString(dateLocale, {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </p>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(201,162,39,0.3)] bg-[rgba(201,162,39,0.06)]">
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-[#C9A227] text-xs font-medium">LIVE</span>
+          <span className="text-[#C9A227] text-xs font-medium">{t("live")}</span>
         </div>
       </div>
 
-      {/* Kill Switch */}
       <GodViewKillSwitch adminId={session.user.id} />
 
-      {/* KPI Strip */}
       <GodViewKPIStrip kpis={data.kpis} />
 
-      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Sector Wallets Chart */}
         <div className="lg:col-span-2">
-          <SectorWalletChart wallets={data.sectorWallets.map(w => ({
-          ...w,
-          balanceCoins: Number(w.balanceCoins),
-          sector: w.sector ? { nameEn: w.sector.nameEn, color: w.sector.color } : null,
-        }))} />
+          <SectorWalletChart
+            wallets={data.sectorWallets.map((w) => ({
+              ...w,
+              balanceCoins: Number(w.balanceCoins),
+              sector: w.sector ? { nameEn: w.sector.nameEn, color: w.sector.color } : null,
+            }))}
+          />
         </div>
 
-        {/* E-Directive Composer */}
         <div>
           <EDirectiveComposer authorId={session.user.id} />
         </div>
       </div>
 
-      {/* Bottom Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <AuditTrailFeed entries={data.recentAudit} />
         <EmployeeStatusGrid employees={data.employees} />

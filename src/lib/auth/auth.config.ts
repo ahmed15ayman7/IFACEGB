@@ -71,11 +71,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
+        token.id = user.id ?? "";
         token.role = (user as { role: UserRole }).role;
         token.sectorId = (user as { sectorId: string | null }).sectorId;
         token.nameAr = (user as { nameAr: string | null }).nameAr;
-        token.locale = (user as { locale: string }).locale;
+        token.locale = (user as { locale: string | null }).locale ?? "en";
       }
       return token;
     },
@@ -85,23 +85,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role as UserRole;
         session.user.sectorId = token.sectorId as string | null;
         session.user.nameAr = token.nameAr as string | null;
-        session.user.locale = token.locale as string;
+        session.user.locale = (token.locale as string | undefined) ?? "en";
       }
       return session;
-    },
-    async authorized({ auth, request }) {
-      const pathname = request.nextUrl.pathname;
-      const isLoggedIn = !!auth?.user;
-      const role = auth?.user?.role;
-
-      // Protected dashboard routes
-      if (pathname.includes("/dashboard") || pathname.includes("/god-view")) {
-        if (!isLoggedIn) return false;
-        // God view — super_admin only
-        if (pathname.includes("/god-view") && role !== "super_admin") return false;
-      }
-
-      return true;
     },
   },
 });

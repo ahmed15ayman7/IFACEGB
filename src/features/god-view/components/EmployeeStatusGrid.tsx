@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Users } from "lucide-react";
 import { staggerContainer, staggerItem } from "@/lib/motion/dashboard";
 
@@ -22,6 +23,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export function EmployeeStatusGrid({ employees }: { employees: Employee[] }) {
+  const t = useTranslations("dashboard.godView");
   const online = employees.filter((e) => e.user.presence?.status === "online").length;
 
   return (
@@ -34,10 +36,10 @@ export function EmployeeStatusGrid({ employees }: { employees: Employee[] }) {
           <span className="flex size-8 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)]">
             <Users className="size-4" aria-hidden />
           </span>
-          Employee Status
+          {t("employeeStatus")}
         </span>
         <span className="text-xs text-[#6e7d93] font-normal">
-          {online} / {employees.length} online
+          {t("employeeOnline", { online, total: employees.length })}
         </span>
       </h3>
 

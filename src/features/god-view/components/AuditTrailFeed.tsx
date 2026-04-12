@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import type { AuditSeverity } from "@prisma/client";
 import { staggerContainer, staggerItem } from "@/lib/motion/dashboard";
@@ -22,6 +23,8 @@ const SEVERITY_STYLE: Record<AuditSeverity, { color: string; dot: string }> = {
 };
 
 export function AuditTrailFeed({ entries }: { entries: Entry[] }) {
+  const t = useTranslations("dashboard.godView");
+
   return (
     <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-5">
       <h3
@@ -31,12 +34,12 @@ export function AuditTrailFeed({ entries }: { entries: Entry[] }) {
         <span className="flex size-8 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)]">
           <Search className="size-4" aria-hidden />
         </span>
-        Audit Trail
+        {t("auditTrail")}
       </h3>
 
       <motion.div {...staggerContainer} className="space-y-2 max-h-64 overflow-y-auto pr-1">
         {entries.length === 0 ? (
-          <p className="text-[#6e7d93] text-sm">No audit entries yet.</p>
+          <p className="text-[#6e7d93] text-sm">{t("auditEmpty")}</p>
         ) : (
           entries.map((entry) => {
             const style = SEVERITY_STYLE[entry.severity];
@@ -53,10 +56,10 @@ export function AuditTrailFeed({ entries }: { entries: Entry[] }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate" style={{ color: style.color }}>
                     {entry.action}
-                    <span className="text-[#6e7d93] font-normal ml-2">· {entry.entityType}</span>
+                    <span className="text-[#6e7d93] font-normal ms-2">· {entry.entityType}</span>
                   </p>
                   <p className="text-[#6e7d93] text-xs mt-0.5">
-                    {entry.user?.name ?? entry.user?.email ?? "System"} ·{" "}
+                    {entry.user?.name ?? entry.user?.email ?? t("auditSystem")} ·{" "}
                     {new Date(entry.createdAt).toLocaleTimeString()}
                   </p>
                 </div>

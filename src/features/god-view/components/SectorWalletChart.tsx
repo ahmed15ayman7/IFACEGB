@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Briefcase } from "lucide-react";
 import {
   BarChart,
@@ -19,6 +20,7 @@ type Wallet = {
 };
 
 export function SectorWalletChart({ wallets }: { wallets: Wallet[] }) {
+  const t = useTranslations("dashboard.godView");
   const data = wallets.map((w) => ({
     name: w.sector?.nameEn?.split(" ")[0] ?? "N/A",
     balance: Number(w.balanceCoins),
@@ -39,7 +41,7 @@ export function SectorWalletChart({ wallets }: { wallets: Wallet[] }) {
         <span className="flex size-8 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)]">
           <Briefcase className="size-4" aria-hidden />
         </span>
-        Sector Wallet Balances
+        {t("sectorWalletsTitle")}
       </h3>
 
       <ResponsiveContainer width="100%" height={200}>

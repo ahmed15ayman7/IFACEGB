@@ -1,10 +1,12 @@
 import createMiddleware from "next-intl/middleware";
-import { auth } from "@/lib/auth/auth.config";
+import { getToken } from "next-auth/jwt";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import type { UserRole } from "@prisma/client";
+
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -56,20 +58,25 @@ export default async function proxy(req: NextRequest) {
 
   const needsAuth = pathRequiresAuth(pathname);
   if (needsAuth) {
-    const session = await auth();
-    if (!session?.user) {
+    // Use JWT from the request (Edge-safe). `auth()` without args relies on `headers()` and is unreliable in proxy/middleware.
+    const token = authSecret
+      ? await getToken({ req, secret: authSecret })
+      : null;
+
+    if (!token) {
       const locale = pathname.split("/")[1] || "en";
       return NextResponse.redirect(new URL(`/${locale}/auth/login`, req.url));
     }
 
-    // God View RBAC — send to role home in one step (avoid /dashboard → /employee → … loops)
-    if (pathname.includes("/god-view") && session.user.role !== "super_admin") {
+    const role = token.role as UserRole | undefined;
+    const sectorId = (token.sectorId as string | null | undefined) ?? null;
+
+    if (pathname.includes("/god-view") && role !== "super_admin") {
       const locale = pathname.split("/")[1] || "en";
-      const home = getRoleHomePath(
-        locale,
-        session.user.role as UserRole,
-        session.user.sectorId ?? null,
-      );
+      if (!role) {
+        return NextResponse.redirect(new URL(`/${locale}/auth/login`, req.url));
+      }
+      const home = getRoleHomePath(locale, role, sectorId);
       return NextResponse.redirect(new URL(home, req.url));
     }
   }
