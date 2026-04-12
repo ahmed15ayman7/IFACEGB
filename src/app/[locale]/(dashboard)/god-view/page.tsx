@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth/auth.config";
+import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
@@ -76,8 +77,9 @@ export default async function GodViewPage() {
   const session = await auth();
   const locale = await getLocale();
 
-  if (!session?.user || session.user.role !== "super_admin") {
-    redirect(`/${locale}/dashboard`);
+  if (!session?.user) redirect(`/${locale}/auth/login`);
+  if (session.user.role !== "super_admin") {
+    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
   }
 
   const data = await getGodViewData();

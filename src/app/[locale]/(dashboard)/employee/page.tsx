@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth/auth.config";
+import { getRoleHomePath } from "@/lib/auth/role-home";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
@@ -53,7 +54,7 @@ export default async function EmployeePortalPage() {
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
   if (!["employee", "trainer"].includes(session.user.role)) {
-    redirect(`/${locale}/dashboard`);
+    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
   }
 
   const data = await getEmployeePortalData(session.user.id);

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
+import { getRoleHomePath } from "@/lib/auth/role-home";
 import { getTranslations, getLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -100,7 +101,9 @@ export default async function SectorDashboard({ params }: Props) {
   if (!session?.user) redirect(`/${locale}/auth/login`);
 
   const data = await getSectorData(slug);
-  if (!data) redirect(`/${locale}/dashboard`);
+  if (!data) {
+    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
+  }
 
   const { sector, metrics, revenueChart } = data;
   const icon = SECTOR_ICONS[slug] ?? "🏢";

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
+import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
@@ -9,7 +10,7 @@ export default async function FranchisePage() {
   const locale = await getLocale();
   if (!session?.user) redirect(`/${locale}/auth/login`);
   if (!["super_admin", "admin", "agent"].includes(session.user.role)) {
-    redirect(`/${locale}/dashboard`);
+    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
   }
 
   const isAr = locale === "ar";

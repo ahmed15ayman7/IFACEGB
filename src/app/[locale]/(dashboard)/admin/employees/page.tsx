@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
+import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
@@ -7,8 +8,9 @@ import Link from "next/link";
 export default async function AdminEmployeesPage() {
   const session = await auth();
   const locale = await getLocale();
-  if (!session?.user || !["super_admin", "admin"].includes(session.user.role)) {
-    redirect(`/${locale}/dashboard`);
+  if (!session?.user) redirect(`/${locale}/auth/login`);
+  if (!["super_admin", "admin"].includes(session.user.role)) {
+    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
   }
 
   const employees = await prisma.employee.findMany({
