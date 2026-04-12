@@ -107,16 +107,16 @@ export function Header() {
               aria-label={locale === "en" ? "العربية" : "English"}
             >
               <Globe className="size-3.5 shrink-0" aria-hidden />
-              <span className="hidden sm:inline">{locale === "en" ? "العربية" : "English"}</span>
+              <span className="hidden sm:inline">{locale === "en" ? "ar" : "en"}</span>
             </button>
 
-            <Link
+            {/* <Link
               href={`/${locale}/auth/register`}
               className="hidden h-9 shrink-0 items-center justify-center gap-1.5 rounded-md border border-[rgba(201,162,39,0.35)] px-3 text-xs font-medium text-[#C9A227] transition-colors hover:bg-[rgba(201,162,39,0.08)] sm:inline-flex"
             >
               <UserPlus className="size-3.5 shrink-0" aria-hidden />
               {t("register")}
-            </Link>
+            </Link> */}
 
             <Link
               href={`/${locale}/auth/login`}
@@ -155,14 +155,14 @@ export function Header() {
                   </Link>
                 );
               })}
-              <Link
+              {/* <Link
                 href={`/${locale}/auth/register`}
                 onClick={() => setMobileOpen(false)}
                 className="mt-1 flex min-h-11 items-center justify-center gap-2 rounded-md border border-[rgba(201,162,39,0.3)] px-3 py-2 text-sm font-medium text-[#C9A227]"
               >
                 <UserPlus className="size-4 shrink-0" aria-hidden />
                 {t("register")}
-              </Link>
+              </Link> */}
               <Link
                 href={`/${locale}/auth/login`}
                 onClick={() => setMobileOpen(false)}
