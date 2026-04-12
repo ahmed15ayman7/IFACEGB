@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmployeePortalContent } from "@/components/dashboard/EmployeePortalContent";
 
 async function getEmployeePortalData(userId: string) {
@@ -39,6 +39,7 @@ async function getEmployeePortalData(userId: string) {
 export default async function EmployeePortalPage() {
   const session = await auth();
   const locale = await getLocale();
+  const t = await getTranslations("dashboard.employee");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
   if (!["employee", "trainer"].includes(session.user.role)) {
@@ -49,18 +50,15 @@ export default async function EmployeePortalPage() {
   if (!data.employee) {
     return (
       <div className="p-6 text-center">
-        <p className="text-[#6e7d93]">Employee profile not found. Contact HR admin.</p>
+        <p className="text-[#6e7d93]">{t("profile_missing")}</p>
       </div>
     );
   }
 
   const { employee, wallet, bonuses, attendance, hrRequests } = data;
-  const isAr = locale === "ar";
 
   return (
     <EmployeePortalContent
-      locale={locale}
-      isAr={isAr}
       employee={{
         user: employee.user,
         jobTitleEn: employee.jobTitleEn,

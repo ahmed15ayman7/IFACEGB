@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Award,
   CalendarDays,
@@ -16,23 +17,21 @@ import {
 import { fadeInUp, staggerContainer, staggerItem } from "@/lib/motion/dashboard";
 
 const PORTAL_TABS = [
-  { key: "profile", labelEn: "My Profile", labelAr: "بروفايلي", Icon: User },
-  { key: "wallet", labelEn: "My Wallet", labelAr: "محفظتي", Icon: Wallet },
-  { key: "rewards", labelEn: "Rewards", labelAr: "المكافآت", Icon: Award },
-  { key: "attendance", labelEn: "Attendance", labelAr: "الحضور والانصراف", Icon: CalendarDays },
-  { key: "leaves", labelEn: "Leaves & Requests", labelAr: "الإجازات والطلبات", Icon: ClipboardList },
-  { key: "contracts", labelEn: "My Contracts", labelAr: "عقودي", Icon: FileText },
-  { key: "calendar", labelEn: "Calendar & Notes", labelAr: "التقويم والنوتس", Icon: CalendarRange },
-  { key: "connect", labelEn: "Connect", labelAr: "التواصل", Icon: MessageCircle },
-  { key: "cv", labelEn: "My CV", labelAr: "سيرتي الذاتية", Icon: FileUser },
+  { key: "profile", Icon: User },
+  { key: "wallet", Icon: Wallet },
+  { key: "rewards", Icon: Award },
+  { key: "attendance", Icon: CalendarDays },
+  { key: "leaves", Icon: ClipboardList },
+  { key: "contracts", Icon: FileText },
+  { key: "calendar", Icon: CalendarRange },
+  { key: "connect", Icon: MessageCircle },
+  { key: "cv", Icon: FileUser },
 ] as const;
 
 type AttendanceRow = { id: string; date: Date; status: string };
 type HrRequestRow = { id: string; type: string; status: string };
 
 type Props = {
-  locale: string;
-  isAr: boolean;
   employee: {
     user: {
       name: string | null;
@@ -53,16 +52,47 @@ type Props = {
 };
 
 export function EmployeePortalContent({
-  locale,
-  isAr,
   employee,
   walletBalance,
   bonusesCount,
   attendance,
   hrRequests,
 }: Props) {
+  const t = useTranslations("dashboard.employeePortal");
+  const locale = useLocale();
+  const isAr = locale === "ar";
+
   const { user, jobTitleEn, jobTitleAr, employeeCode, kineticPoints, profitSharePct, sector } =
     employee;
+
+  const dateLocale = locale === "ar" ? "ar-EG" : "en-GB";
+
+  const kpiCards = [
+    {
+      value: walletBalance.toLocaleString(),
+      label: t("kpi_wallet"),
+      sub: t("kpi_wallet_sub"),
+      color: "#C9A227",
+    },
+    {
+      value: String(bonusesCount),
+      label: t("kpi_rewards"),
+      sub: "",
+      color: "#e8c84a",
+    },
+    {
+      value: String(kineticPoints),
+      label: t("kpi_kinetic"),
+      sub: "",
+      color: "#A8B5C8",
+    },
+    {
+      value: `${Number(profitSharePct).toFixed(1)}%`,
+      label: t("kpi_profit"),
+      sub: "",
+      color: "#C9A227",
+    },
+  ];
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
@@ -84,10 +114,10 @@ export function EmployeePortalContent({
           </h1>
           <p className="text-[#6e7d93] text-sm">
             {isAr ? jobTitleAr ?? jobTitleEn ?? "—" : jobTitleEn ?? "—"}
-            {sector && ` · ${isAr ? sector.nameAr : sector.nameEn}`}
+            {sector && ` · ${isAr ? sector.nameAr ?? sector.nameEn : sector.nameEn}`}
           </p>
           <p className="text-[#6e7d93] text-xs mt-0.5">
-            Code: {employeeCode} · Kinetic Points: {kineticPoints}
+            {t("code_label")}: {employeeCode} · {t("kinetic_label")}: {kineticPoints}
           </p>
         </div>
       </motion.header>
@@ -99,6 +129,16 @@ export function EmployeePortalContent({
       >
         {PORTAL_TABS.map((tab) => {
           const Icon = tab.Icon;
+          const labelKey = `tabs_${tab.key}` as
+            | "tabs_profile"
+            | "tabs_wallet"
+            | "tabs_rewards"
+            | "tabs_attendance"
+            | "tabs_leaves"
+            | "tabs_contracts"
+            | "tabs_calendar"
+            | "tabs_connect"
+            | "tabs_cv";
           return (
             <motion.div key={tab.key} {...staggerItem} className="shrink-0">
               <Link
@@ -106,43 +146,15 @@ export function EmployeePortalContent({
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[rgba(201,162,39,0.15)] text-[#A8B5C8] hover:text-[#C9A227] hover:border-[rgba(201,162,39,0.35)] transition-colors whitespace-nowrap text-xs"
               >
                 <Icon className="size-3.5 shrink-0 opacity-90" aria-hidden />
-                <span>{isAr ? tab.labelAr : tab.labelEn}</span>
+                <span>{t(labelKey)}</span>
               </Link>
             </motion.div>
           );
         })}
       </motion.nav>
 
-      <motion.div
-        {...staggerContainer}
-        className="grid grid-cols-2 sm:grid-cols-4 gap-3"
-      >
-        {[
-          {
-            value: walletBalance.toLocaleString(),
-            label: isAr ? "رصيد المحفظة" : "Wallet Balance",
-            sub: "coins",
-            color: "#C9A227",
-          },
-          {
-            value: String(bonusesCount),
-            label: isAr ? "مكافآت معلقة" : "Pending Rewards",
-            sub: "",
-            color: "#e8c84a",
-          },
-          {
-            value: String(kineticPoints),
-            label: isAr ? "نقاط كينيتيك" : "Kinetic Points",
-            sub: "",
-            color: "#A8B5C8",
-          },
-          {
-            value: `${Number(profitSharePct).toFixed(1)}%`,
-            label: isAr ? "نسبة الأرباح" : "Profit Share",
-            sub: "",
-            color: "#C9A227",
-          },
-        ].map((card) => (
+      <motion.div {...staggerContainer} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {kpiCards.map((card) => (
           <motion.div
             key={card.label}
             {...staggerItem}
@@ -168,11 +180,11 @@ export function EmployeePortalContent({
             className="text-[#C9A227] font-semibold mb-3 text-sm"
             style={{ fontFamily: "var(--font-eb-garamond)" }}
           >
-            {isAr ? "سجل الحضور (آخر 7 أيام)" : "Attendance (Last 7 Days)"}
+            {t("attendance_title")}
           </h3>
           <div className="space-y-2">
             {attendance.length === 0 ? (
-              <p className="text-[#6e7d93] text-xs">No attendance records yet.</p>
+              <p className="text-[#6e7d93] text-xs">{t("no_attendance")}</p>
             ) : (
               attendance.map((a) => (
                 <div
@@ -180,7 +192,7 @@ export function EmployeePortalContent({
                   className="flex items-center justify-between py-1.5 border-b border-[rgba(201,162,39,0.06)] last:border-0"
                 >
                   <span className="text-xs text-[#A8B5C8]">
-                    {new Date(a.date).toLocaleDateString("en-GB")}
+                    {new Date(a.date).toLocaleDateString(dateLocale)}
                   </span>
                   <span
                     className="text-xs font-medium px-2 py-0.5 rounded-full"
@@ -202,11 +214,11 @@ export function EmployeePortalContent({
             className="text-[#C9A227] font-semibold mb-3 text-sm"
             style={{ fontFamily: "var(--font-eb-garamond)" }}
           >
-            {isAr ? "الطلبات الأخيرة" : "Recent HR Requests"}
+            {t("hr_recent")}
           </h3>
           <div className="space-y-2">
             {hrRequests.length === 0 ? (
-              <p className="text-[#6e7d93] text-xs">No requests yet.</p>
+              <p className="text-[#6e7d93] text-xs">{t("no_requests")}</p>
             ) : (
               hrRequests.map((r) => (
                 <div
@@ -241,7 +253,7 @@ export function EmployeePortalContent({
             href={`/${locale}/employee/leaves`}
             className="mt-3 w-full h-8 text-xs rounded-lg border border-[rgba(201,162,39,0.2)] text-[#C9A227] hover:bg-[rgba(201,162,39,0.06)] flex items-center justify-center transition-colors"
           >
-            {isAr ? "طلب إجازة جديدة" : "New Leave Request"}
+            {t("new_leave")}
           </Link>
         </div>
       </motion.div>

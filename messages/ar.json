@@ -357,6 +357,160 @@
       "saving": "جاري الحفظ…",
       "saved": "تم حفظ الإعدادات.",
       "save_error": "تعذر حفظ الإعدادات. حاول مرة أخرى."
+    },
+    "sectorPortal": {
+      "kpi_wallet": "رصيد المحفظة",
+      "kpi_wallet_suffix": "عملة",
+      "kpi_revenue": "إيرادات الشهر",
+      "kpi_pending": "طلبات معلقة",
+      "kpi_pending_suffix": "مفتوحة",
+      "kpi_resolved": "مُنجَز اليوم",
+      "kpi_resolved_suffix": "مكتمل",
+      "kpi_sla": "تجاوزات SLA",
+      "kpi_sla_suffix": "متأخر",
+      "revenue_trend": "اتجاه الإيرادات (6 أشهر)",
+      "isr_inbox": "صندوق الطلبات",
+      "inter_ops": "العمليات المشتركة",
+      "action_new_request": "طلب خدمة جديد",
+      "action_employees": "عرض الموظفين",
+      "action_wallet": "المحفظة والمالية",
+      "action_certificates": "الشهادات",
+      "action_reports": "التقارير",
+      "fallback": {
+        "training": {
+          "name": "التدريب والتطوير",
+          "description": "برامج تدريب مهني، منصة تعلم، فصول افتراضية، ودبلومات معتمدة."
+        },
+        "accreditation": {
+          "name": "الاعتماد الدولي",
+          "description": "اعتماد مؤسسي وبرامج معترف به عالمياً."
+        },
+        "consultancy": {
+          "name": "الاستشارات والتميز",
+          "description": "استشارات مؤسسية استراتيجية وتميز أداء."
+        },
+        "tech": {
+          "name": "محرك التقنية",
+          "description": "تقنيات تعليمية بالذكاء الاصطناعي، خدمات التعرف على الوجه، وبنية رقمية."
+        },
+        "partnerships": {
+          "name": "الشراكات العالمية",
+          "description": "شبكة امتياز رئيسية وتحالفات دولية."
+        }
+      }
+    },
+    "lms": {
+      "title": "منصة التعلم السيادية",
+      "subtitle": "دورات تدريبية، مختبرات VR، موسوعة المعرفة، ومسارات مهنية.",
+      "my_progress": "مساراتي التعليمية",
+      "completed": "مكتمل",
+      "available_courses": "الدورات المتاحة",
+      "general": "عام",
+      "hours_suffix": "س",
+      "continue_learning": "متابعة التعلم",
+      "enroll_now": "ابدأ الآن",
+      "vr_lab": "سيناريوهات مختبر VR"
+    },
+    "connect": {
+      "title": "iFACE Connect",
+      "badge": "داخلي — مشفّر",
+      "no_rooms": "لا توجد غرف بعد. ستظهر عند إضافتك.",
+      "encrypted": "مشفّر",
+      "placeholder": "اكتب رسالة… (Enter للإرسال)",
+      "send": "إرسال",
+      "select_room": "اختر غرفة لبدء المحادثة"
+    },
+    "franchise": {
+      "title": "مركز الامتياز العالمي",
+      "kpi_franchises": "الامتيازات",
+      "kpi_licenses": "التراخيص النشطة",
+      "kpi_pending_apps": "طلبات معلقة",
+      "kpi_sub": "فروع فرعية",
+      "hierarchy": "هيكل الامتيازات",
+      "tier_subline": "{tier} · {country} · {count} فرع فرعي",
+      "active_licenses": "{count} ترخيص نشط",
+      "empty": "لم يتم العثور على امتيازات.",
+      "pending_apps_title": "طلبات الوكالة المعلقة",
+      "approve": "قبول",
+      "reject": "رفض"
+    },
+    "finance": {
+      "title": "التحكم المالي",
+      "total_coins": "إجمالي عملات المنصة",
+      "vat_rate": "نسبة ضريبة القيمة المضافة",
+      "multisig_threshold": "حد التوقيع المتعدد",
+      "reconciliations_done": "تسويات مكتملة",
+      "wallets": "المحافظ",
+      "col_type": "النوع",
+      "col_owner": "المالك / القطاع",
+      "col_balance": "الرصيد (عملات)",
+      "col_reserved": "محجوز",
+      "col_status": "الحالة",
+      "status_active": "نشط",
+      "status_locked": "مقفل",
+      "recent_txns": "أحدث المعاملات",
+      "coins": "عملات"
+    },
+    "hrEmployees": {
+      "title": "الموارد البشرية — الموظفون",
+      "add_employee": "إضافة موظف",
+      "col_name": "الاسم",
+      "col_email": "البريد",
+      "col_role": "الدور",
+      "col_sector": "القطاع",
+      "col_profit": "حصة الأرباح",
+      "col_status": "الحالة",
+      "col_last_login": "آخر دخول",
+      "col_actions": "إجراءات",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "never": "أبداً",
+      "view": "عرض",
+      "empty": "لا يوجد موظفون. أضف أول موظف."
+    },
+    "employee": {
+      "profile_missing": "لم يُعثر على ملف الموظف. تواصل مع مسؤول الموارد البشرية."
+    },
+    "employeePortal": {
+      "code_label": "الرمز",
+      "kinetic_label": "نقاط كينيتيك",
+      "kpi_wallet": "رصيد المحفظة",
+      "kpi_wallet_sub": "عملات",
+      "kpi_rewards": "مكافآت معلقة",
+      "kpi_kinetic": "نقاط كينيتيك",
+      "kpi_profit": "نسبة الأرباح",
+      "attendance_title": "الحضور (آخر 7 أيام)",
+      "no_attendance": "لا سجلات حضور بعد.",
+      "hr_recent": "أحدث طلبات الموارد البشرية",
+      "no_requests": "لا طلبات بعد.",
+      "new_leave": "طلب إجازة جديدة",
+      "tabs_profile": "بروفايلي",
+      "tabs_wallet": "محفظتي",
+      "tabs_rewards": "المكافآت",
+      "tabs_attendance": "الحضور والانصراف",
+      "tabs_leaves": "الإجازات والطلبات",
+      "tabs_contracts": "عقودي",
+      "tabs_calendar": "التقويم والملاحظات",
+      "tabs_connect": "التواصل",
+      "tabs_cv": "سيرتي الذاتية"
+    },
+    "exam": {
+      "alert_ilock": "تم حظر تركيبة المفاتيح بواسطة متصفح iLock الآمن",
+      "alert_tab": "تم اكتشاف تبديل تبويب ({current}/3). سيتم إيقاف الامتحان مؤقتاً بعد 3 مخالفات.",
+      "alert_proctor_pause": "تم إيقاف الامتحان مؤقتاً من المراقب. تواصل مع المشرف.",
+      "alert_face_low": "درجة التحقق من الوجه منخفضة: {score}%. تحقق من هويتك.",
+      "submitted_title": "تم إرسال الامتحان بنجاح",
+      "submitted_body": "ستُراجع نتائجك وتُنشر قريباً.",
+      "paused_title": "الامتحان متوقف مؤقتاً",
+      "paused_body": "تم إيقاف الامتحان مؤقتاً بسبب مخالفات أمنية. تواصل مع المشرف للاستئناف.",
+      "loading": "جاري تحميل بيئة الامتحان الآمنة…",
+      "ilock_badge": "iLock آمن",
+      "question_progress": "س {current} / {total}",
+      "face_id": "الوجه",
+      "tab_warnings": "{count} تحذير تبويب",
+      "previous": "السابق",
+      "next": "التالي",
+      "submit": "إرسال الامتحان"
     }
   }
 }

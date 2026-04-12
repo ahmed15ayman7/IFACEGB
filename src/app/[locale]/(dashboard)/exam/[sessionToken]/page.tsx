@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocale, useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import {
   AlertTriangle,
   Check,
@@ -22,10 +24,11 @@ type Question = {
   topic: string;
 };
 
-type Props = { params: { sessionToken: string; locale: string } };
-
-export default function ExamPage({ params }: Props) {
-  const { sessionToken, locale } = params;
+export default function ExamPage() {
+  const params = useParams<{ sessionToken: string }>();
+  const sessionToken = params.sessionToken;
+  const locale = useLocale();
+  const t = useTranslations("dashboard.exam");
   const isAr = locale === "ar";
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -45,7 +48,6 @@ export default function ExamPage({ params }: Props) {
     setTimeout(() => setAlert(null), 4000);
   }, []);
 
-  // iLock: Block keyboard shortcuts
   useEffect(() => {
     function blockKeys(e: KeyboardEvent) {
       const blocked = [
@@ -56,25 +58,26 @@ export default function ExamPage({ params }: Props) {
       ];
       if (blocked.some(Boolean)) {
         e.preventDefault();
-        showAlert("Key combination blocked by iLock secure browser");
+        showAlert(t("alert_ilock"));
       }
     }
-    function blockContext(e: MouseEvent) { e.preventDefault(); }
+    function blockContext(e: MouseEvent) {
+      e.preventDefault();
+    }
     window.addEventListener("keydown", blockKeys);
     window.addEventListener("contextmenu", blockContext);
     return () => {
       window.removeEventListener("keydown", blockKeys);
       window.removeEventListener("contextmenu", blockContext);
     };
-  }, [showAlert]);
+  }, [showAlert, t]);
 
-  // iLock: Block tab switching / visibility change
   useEffect(() => {
     function handleVisibilityChange() {
       if (document.hidden && status === "active") {
         setTabWarnings((prev) => {
           const next = prev + 1;
-          showAlert(`Tab switch detected (${next}/3). Exam will be paused after 3 violations.`);
+          showAlert(t("alert_tab", { current: String(next) }));
           if (next >= 3) {
             setStatus("paused");
             socketRef.current?.emit("proctor:alert", {
@@ -89,9 +92,8 @@ export default function ExamPage({ params }: Props) {
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [status, sessionToken, showAlert]);
+  }, [status, sessionToken, showAlert, t]);
 
-  // Socket.io proctoring
   useEffect(() => {
     const s = io({ path: "/api/socket", transports: ["websocket"] });
     socketRef.current = s;
@@ -99,24 +101,28 @@ export default function ExamPage({ params }: Props) {
 
     s.on("proctor:pause", () => {
       setStatus("paused");
-      showAlert("Exam paused by proctor. Contact your supervisor.");
+      showAlert(t("alert_proctor_pause"));
     });
 
     s.on("face:score-update", ({ score }: { score: number }) => {
       setProctorScore(score);
       if (score < 95) {
-        showAlert(`Face verification score low: ${score}%. Verify your identity.`);
+        showAlert(t("alert_face_low", { score: String(score) }));
       }
     });
 
-    return () => { s.disconnect(); };
-  }, [sessionToken, showAlert]);
+    return () => {
+      s.disconnect();
+    };
+  }, [sessionToken, showAlert, t]);
 
-  // Load exam session
   useEffect(() => {
     async function loadExam() {
       const res = await fetch(`/api/exam/${sessionToken}`);
-      if (!res.ok) { setStatus("paused"); return; }
+      if (!res.ok) {
+        setStatus("paused");
+        return;
+      }
       const data = await res.json();
       setQuestions(data.questions ?? []);
       setTimeLeft(data.durationMinutes * 60);
@@ -124,18 +130,6 @@ export default function ExamPage({ params }: Props) {
     }
     loadExam();
   }, [sessionToken]);
-
-  // Countdown timer
-  useEffect(() => {
-    if (status !== "active" || timeLeft <= 0) return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t <= 1) { clearInterval(timerRef.current!); submitExam(); return 0; }
-        return t - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timerRef.current!);
-  }, [status, timeLeft > 0]);
 
   async function submitExam() {
     setStatus("completed");
@@ -145,6 +139,21 @@ export default function ExamPage({ params }: Props) {
       body: JSON.stringify({ answers }),
     });
   }
+
+  useEffect(() => {
+    if (status !== "active" || timeLeft <= 0) return;
+    timerRef.current = setInterval(() => {
+      setTimeLeft((tick) => {
+        if (tick <= 1) {
+          clearInterval(timerRef.current!);
+          submitExam();
+          return 0;
+        }
+        return tick - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerRef.current!);
+  }, [status, timeLeft > 0]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -162,9 +171,9 @@ export default function ExamPage({ params }: Props) {
             <CheckCircle2 className="size-9" aria-hidden />
           </span>
           <h2 className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-            {isAr ? "تم إرسال الامتحان بنجاح" : "Exam Submitted Successfully"}
+            {t("submitted_title")}
           </h2>
-          <p className="text-[#6e7d93] text-sm">Your results will be reviewed and published shortly.</p>
+          <p className="text-[#6e7d93] text-sm">{t("submitted_body")}</p>
         </motion.div>
       </div>
     );
@@ -182,10 +191,8 @@ export default function ExamPage({ params }: Props) {
           <span className="inline-flex size-16 items-center justify-center rounded-full bg-[rgba(156,42,42,0.12)] text-[#9C2A2A] border border-[rgba(156,42,42,0.35)] mx-auto">
             <Lock className="size-8" aria-hidden />
           </span>
-          <h2 className="text-2xl font-bold text-[#9C2A2A]">Exam Paused</h2>
-          <p className="text-[#6e7d93] text-sm">
-            Your exam has been paused due to security violations. Contact your supervisor to resume.
-          </p>
+          <h2 className="text-2xl font-bold text-[#9C2A2A]">{t("paused_title")}</h2>
+          <p className="text-[#6e7d93] text-sm">{t("paused_body")}</p>
         </motion.div>
       </div>
     );
@@ -196,7 +203,7 @@ export default function ExamPage({ params }: Props) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-[#C9A227] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-[#6e7d93] text-sm">Loading secure exam environment...</p>
+          <p className="text-[#6e7d93] text-sm">{t("loading")}</p>
         </div>
       </div>
     );
@@ -206,7 +213,6 @@ export default function ExamPage({ params }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col select-none" style={{ userSelect: "none" }}>
-      {/* Alert Banner */}
       <AnimatePresence mode="popLayout">
         {alert && (
           <motion.div
@@ -225,20 +231,19 @@ export default function ExamPage({ params }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Header Bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between px-6 py-3 bg-[rgba(6,15,30,0.98)] border-b border-[rgba(201,162,39,0.12)] backdrop-blur">
         <div className="flex items-center gap-4">
           <span className="text-xs px-2 py-1 rounded-full bg-[rgba(156,42,42,0.15)] text-[#9C2A2A] border border-[rgba(156,42,42,0.3)] font-medium inline-flex items-center gap-1">
             <Shield className="size-3.5 shrink-0" aria-hidden />
-            iLock Secure
+            {t("ilock_badge")}
           </span>
           <span className="text-xs text-[#6e7d93]">
-            Q {currentQ + 1} / {questions.length}
+            {t("question_progress", { current: String(currentQ + 1), total: String(questions.length) })}
           </span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-[#6e7d93]">Face ID:</span>
+            <span className="text-xs text-[#6e7d93]">{t("face_id")}:</span>
             <span className="text-xs font-mono" style={{ color: proctorScore >= 95 ? "#22c55e" : "#9C2A2A" }}>
               {proctorScore}%
             </span>
@@ -253,13 +258,12 @@ export default function ExamPage({ params }: Props) {
           {tabWarnings > 0 && (
             <span className="text-xs text-[#9C2A2A] font-medium inline-flex items-center gap-1">
               <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
-              {tabWarnings} tab warning{tabWarnings > 1 ? "s" : ""}
+              {t("tab_warnings", { count: String(tabWarnings) })}
             </span>
           )}
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="h-0.5 bg-[rgba(201,162,39,0.1)]">
         <div
           className="h-full bg-[#C9A227] transition-all"
@@ -267,7 +271,6 @@ export default function ExamPage({ params }: Props) {
         />
       </div>
 
-      {/* Question */}
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <motion.div
           key={currentQ}
@@ -294,6 +297,7 @@ export default function ExamPage({ params }: Props) {
                 return (
                   <button
                     key={option.value}
+                    type="button"
                     onClick={() => setAnswers((a) => ({ ...a, [q.id]: option.value }))}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all"
                     style={{
@@ -317,29 +321,32 @@ export default function ExamPage({ params }: Props) {
 
             <div className="flex items-center justify-between pt-2">
               <button
-                onClick={() => setCurrentQ((q) => Math.max(0, q - 1))}
+                type="button"
+                onClick={() => setCurrentQ((idx) => Math.max(0, idx - 1))}
                 disabled={currentQ === 0}
                 className="h-9 px-4 text-xs rounded-lg border border-[rgba(201,162,39,0.2)] text-[#6e7d93] hover:text-[#A8B5C8] disabled:opacity-30 inline-flex items-center gap-1"
               >
                 <ChevronLeft className="size-3.5 rtl:rotate-180" aria-hidden />
-                Previous
+                {t("previous")}
               </button>
 
               {currentQ < questions.length - 1 ? (
                 <button
-                  onClick={() => setCurrentQ((q) => q + 1)}
+                  type="button"
+                  onClick={() => setCurrentQ((idx) => idx + 1)}
                   className="h-9 px-4 text-xs font-semibold rounded-lg bg-[rgba(201,162,39,0.9)] text-[#060f1e] hover:bg-[#C9A227] inline-flex items-center gap-1"
                 >
-                  Next
+                  {t("next")}
                   <ChevronRight className="size-3.5 rtl:rotate-180" aria-hidden />
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={submitExam}
                   className="h-9 px-4 text-xs font-semibold rounded-lg bg-[rgba(34,197,94,0.9)] text-white hover:bg-[#22c55e] inline-flex items-center gap-1.5"
                 >
                   <Check className="size-3.5" aria-hidden />
-                  Submit exam
+                  {t("submit")}
                 </button>
               )}
             </div>

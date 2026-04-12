@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { io, Socket } from "socket.io-client";
 import { Lock, MessageCircle, MessagesSquare, Siren, User } from "lucide-react";
 import { scaleIn } from "@/lib/motion/dashboard";
@@ -27,6 +28,7 @@ function RoomTypeIcon({ type }: { type: string }) {
 }
 
 export default function ConnectPage() {
+  const t = useTranslations("dashboard.connect");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
@@ -84,11 +86,11 @@ export default function ConnectPage() {
       >
         <div className="px-4 py-4 border-b border-[rgba(201,162,39,0.1)]">
           <h2 className="text-[#C9A227] text-sm font-semibold" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-            iFACE Connect
+            {t("title")}
           </h2>
           <p className="text-[10px] text-[#6e7d93] mt-0.5 flex items-center gap-1">
             <Lock className="size-2.5 opacity-70" aria-hidden />
-            Internal — Encrypted
+            {t("badge")}
           </p>
         </div>
         <div className="flex-1 overflow-y-auto py-2">
@@ -110,9 +112,7 @@ export default function ConnectPage() {
             </motion.button>
           ))}
           {rooms.length === 0 && (
-            <p className="text-center text-[#6e7d93] text-xs py-8 px-4">
-              No rooms yet. Rooms will appear when you are added.
-            </p>
+            <p className="text-center text-[#6e7d93] text-xs py-8 px-4">{t("no_rooms")}</p>
           )}
         </div>
       </motion.div>
@@ -147,7 +147,7 @@ export default function ConnectPage() {
                         </span>
                         <span className="inline-flex items-center gap-0.5 text-[10px] text-[#6e7d93] opacity-60">
                           <Lock className="size-2.5" aria-hidden />
-                          encrypted
+                          {t("encrypted")}
                         </span>
                       </p>
                       <div className="bg-[rgba(10,31,61,0.6)] border border-[rgba(201,162,39,0.08)] rounded-lg px-3 py-2 text-sm text-[#A8B5C8] max-w-lg">
@@ -170,7 +170,7 @@ export default function ConnectPage() {
                       sendMessage();
                     }
                   }}
-                  placeholder="Type a message... (Enter to send)"
+                  placeholder={t("placeholder")}
                   className="flex-1 h-10 px-3 rounded-lg bg-[rgba(6,15,30,0.8)] border border-[rgba(201,162,39,0.2)] text-[#A8B5C8] text-sm focus:outline-none focus:border-[rgba(201,162,39,0.4)]"
                 />
                 <button
@@ -178,7 +178,7 @@ export default function ConnectPage() {
                   disabled={!input.trim()}
                   className="h-10 px-4 text-xs font-semibold rounded-lg bg-[rgba(201,162,39,0.9)] text-[#060f1e] hover:bg-[#C9A227] disabled:opacity-40 transition-colors"
                 >
-                  Send
+                  {t("send")}
                 </button>
               </div>
             </motion.div>
@@ -192,7 +192,7 @@ export default function ConnectPage() {
                 <span className="inline-flex size-16 items-center justify-center rounded-2xl bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.2)] mx-auto">
                   <MessagesSquare className="size-8" aria-hidden />
                 </span>
-                <p className="text-[#6e7d93] mt-4 text-sm">Select a room to start chatting</p>
+                <p className="text-[#6e7d93] mt-4 text-sm">{t("select_room")}</p>
               </div>
             </motion.div>
           )}

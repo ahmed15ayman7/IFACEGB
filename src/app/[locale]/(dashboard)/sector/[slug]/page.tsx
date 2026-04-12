@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { SectorDashboardHeaderIcon } from "@/components/dashboard/SectorDashboardHeaderIcon";
 import { SectorKpiCards } from "@/components/dashboard/SectorKpiCards";
 import { SectorQuickActions } from "@/components/dashboard/SectorQuickActions";
 
-async function getSectorData(slug: string) {
+async function getSectorData(slug: string, locale: string) {
   const sector = await prisma.sector.findUnique({
     where: { code: slug },
     include: {
@@ -25,6 +25,7 @@ async function getSectorData(slug: string) {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const monthLocale = locale === "ar" ? "ar-EG" : "en-US";
 
   const [pendingRequests, resolvedToday, openSLA, walletTxns, kpiData] = await Promise.all([
     prisma.serviceRequest.count({
@@ -64,7 +65,7 @@ async function getSectorData(slug: string) {
             _sum: { amountCoins: true },
           })
           .then((r) => ({
-            month: d.toLocaleString("en-US", { month: "short" }),
+            month: d.toLocaleString(monthLocale, { month: "short" }),
             revenue: Number(r._sum.amountCoins ?? 0),
           }));
       })
@@ -95,32 +96,6 @@ const KNOWN_SECTOR_SLUGS = [
   "partnerships",
 ] as const;
 
-const SECTOR_FALLBACK_META: Record<
-  (typeof KNOWN_SECTOR_SLUGS)[number],
-  { nameEn: string; description: string }
-> = {
-  training: {
-    nameEn: "Training & Development",
-    description: "Professional training programs, LMS, virtual classrooms, and certified diplomas.",
-  },
-  accreditation: {
-    nameEn: "International Accreditation",
-    description: "World-recognized institutional and program accreditation.",
-  },
-  consultancy: {
-    nameEn: "Consultancy & Excellence",
-    description: "Strategic institutional consulting and performance excellence.",
-  },
-  tech: {
-    nameEn: "Tech Engine",
-    description: "AI-powered EdTech, Face-ID services, and digital infrastructure.",
-  },
-  partnerships: {
-    nameEn: "Global Partnerships",
-    description: "Master franchise network and international alliances.",
-  },
-};
-
 function emptyRevenueChart(locale: string) {
   return Array.from({ length: 6 }, (_, i) => {
     const d = new Date();
@@ -132,12 +107,18 @@ function emptyRevenueChart(locale: string) {
   });
 }
 
-/** When DB has no Sector row yet, super_admin/admin still need to open these URLs (no redirect to god-view). */
-function buildFallbackSectorDashboard(slug: string, locale: string): SectorDashboardData | null {
+async function buildFallbackSectorDashboard(slug: string, locale: string): Promise<SectorDashboardData | null> {
   if (!KNOWN_SECTOR_SLUGS.includes(slug as (typeof KNOWN_SECTOR_SLUGS)[number])) return null;
-  const meta = SECTOR_FALLBACK_META[slug as keyof typeof SECTOR_FALLBACK_META];
+  const tEn = await getTranslations({ locale: "en", namespace: "dashboard.sectorPortal" });
+  const tAr = await getTranslations({ locale: "ar", namespace: "dashboard.sectorPortal" });
+  const tf = await getTranslations({ locale, namespace: "dashboard.sectorPortal" });
+  const base = `fallback.${slug}` as const;
   return {
-    sector: { nameEn: meta.nameEn, description: meta.description } as SectorDashboardData["sector"],
+    sector: {
+      nameEn: tEn(`${base}.name`),
+      nameAr: tAr(`${base}.name`),
+      description: tf(`${base}.description`),
+    } as SectorDashboardData["sector"],
     metrics: {
       pendingRequests: 0,
       resolvedToday: 0,
@@ -156,14 +137,15 @@ export default async function SectorDashboard({ params }: Props) {
   const { slug } = await params;
   const session = await auth();
   const locale = await getLocale();
+  const t = await getTranslations("dashboard.sectorPortal");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
 
-  let data = await getSectorData(slug);
+  let data = await getSectorData(slug, locale);
   if (!data) {
     const role = session.user.role;
     if (role === "super_admin" || role === "admin") {
-      const fallback = buildFallbackSectorDashboard(slug, locale);
+      const fallback = await buildFallbackSectorDashboard(slug, locale);
       if (!fallback) notFound();
       data = fallback;
     } else {
@@ -172,21 +154,48 @@ export default async function SectorDashboard({ params }: Props) {
   }
 
   const { sector, metrics, revenueChart } = data;
+  const sectorRow = sector as { nameEn: string; nameAr?: string | null; description: string | null };
+  const displayName = locale === "ar" ? sectorRow.nameAr ?? sectorRow.nameEn : sectorRow.nameEn;
 
   const kpiItems = [
-    { label: "Wallet Balance", value: metrics.walletBalance.toLocaleString(), suffix: "coins", color: "#C9A227" },
-    { label: "Monthly Revenue", value: metrics.monthlyRevenue.toLocaleString(), suffix: "coins", color: "#e8c84a" },
-    { label: "Pending Requests", value: metrics.pendingRequests.toString(), suffix: "open", color: "#A8B5C8" },
-    { label: "Resolved Today", value: metrics.resolvedToday.toString(), suffix: "done", color: "#22c55e" },
-    { label: "SLA Breaches", value: metrics.openSLA.toString(), suffix: "overdue", color: metrics.openSLA > 0 ? "#9C2A2A" : "#6e7d93" },
+    {
+      label: t("kpi_wallet"),
+      value: metrics.walletBalance.toLocaleString(),
+      suffix: t("kpi_wallet_suffix"),
+      color: "#C9A227",
+    },
+    {
+      label: t("kpi_revenue"),
+      value: metrics.monthlyRevenue.toLocaleString(),
+      suffix: t("kpi_wallet_suffix"),
+      color: "#e8c84a",
+    },
+    {
+      label: t("kpi_pending"),
+      value: metrics.pendingRequests.toString(),
+      suffix: t("kpi_pending_suffix"),
+      color: "#A8B5C8",
+    },
+    {
+      label: t("kpi_resolved"),
+      value: metrics.resolvedToday.toString(),
+      suffix: t("kpi_resolved_suffix"),
+      color: "#22c55e",
+    },
+    {
+      label: t("kpi_sla"),
+      value: metrics.openSLA.toString(),
+      suffix: t("kpi_sla_suffix"),
+      color: metrics.openSLA > 0 ? "#9C2A2A" : "#6e7d93",
+    },
   ];
 
   const quickActions = [
-    { href: `/${locale}/sector/${slug}/requests/new`, label: "New Service Request", icon: "plus" as const },
-    { href: `/${locale}/sector/${slug}/employees`, label: "View Employees", icon: "users" as const },
-    { href: `/${locale}/sector/${slug}/wallet`, label: "Wallet & Finance", icon: "wallet" as const },
-    { href: `/${locale}/sector/${slug}/certificates`, label: "Certificates", icon: "award" as const },
-    { href: `/${locale}/sector/${slug}/reports`, label: "Reports", icon: "chart" as const },
+    { href: `/${locale}/sector/${slug}/requests/new`, label: t("action_new_request"), icon: "plus" as const },
+    { href: `/${locale}/sector/${slug}/employees`, label: t("action_employees"), icon: "users" as const },
+    { href: `/${locale}/sector/${slug}/wallet`, label: t("action_wallet"), icon: "wallet" as const },
+    { href: `/${locale}/sector/${slug}/certificates`, label: t("action_certificates"), icon: "award" as const },
+    { href: `/${locale}/sector/${slug}/reports`, label: t("action_reports"), icon: "chart" as const },
   ];
 
   return (
@@ -199,23 +208,23 @@ export default async function SectorDashboard({ params }: Props) {
               className="text-2xl font-bold text-[#C9A227]"
               style={{ fontFamily: "var(--font-eb-garamond)" }}
             >
-              {sector.nameEn}
+              {displayName}
             </h1>
           </div>
-          <p className="text-[#6e7d93] text-sm">{sector.description}</p>
+          <p className="text-[#6e7d93] text-sm">{sectorRow.description}</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href={`/${locale}/sector/${slug}/requests`}
             className="h-8 px-4 text-xs font-medium rounded-lg border border-[rgba(201,162,39,0.3)] text-[#C9A227] hover:bg-[rgba(201,162,39,0.08)] flex items-center"
           >
-            ISR Inbox
+            {t("isr_inbox")}
           </Link>
           <Link
             href={`/${locale}/sector/${slug}/inter-ops`}
             className="h-8 px-4 text-xs font-medium rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.2)] hover:bg-[rgba(201,162,39,0.15)] flex items-center"
           >
-            Inter-Ops
+            {t("inter_ops")}
           </Link>
         </div>
       </div>
@@ -228,7 +237,7 @@ export default async function SectorDashboard({ params }: Props) {
             className="text-[#C9A227] font-semibold mb-4"
             style={{ fontFamily: "var(--font-eb-garamond)" }}
           >
-            Revenue Trend (6 months)
+            {t("revenue_trend")}
           </h3>
           <div className="flex items-end gap-2 h-32">
             {revenueChart.map((d, i) => {

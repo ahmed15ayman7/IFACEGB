@@ -2,11 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function AdminFinancePage() {
   const session = await auth();
   const locale = await getLocale();
+  const t = await getTranslations("dashboard.finance");
   if (!session?.user) redirect(`/${locale}/auth/login`);
   if (!["super_admin", "admin"].includes(session.user.role)) {
     redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
@@ -35,51 +36,53 @@ export default async function AdminFinancePage() {
 
   const totalBalance = wallets.reduce((s, w) => s + Number(w.balanceCoins), 0);
 
+  const headers = [t("col_type"), t("col_owner"), t("col_balance"), t("col_reserved"), t("col_status")];
+
   return (
     <div className="p-4 lg:p-6 space-y-6">
       <h1 className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-        Finance Control
+        {t("title")}
       </h1>
 
-      {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4">
           <p className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
             {totalBalance.toLocaleString()}
           </p>
-          <p className="text-[#6e7d93] text-xs mt-1">Total Platform Coins</p>
+          <p className="text-[#6e7d93] text-xs mt-1">{t("total_coins")}</p>
         </div>
         <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4">
           <p className="text-2xl font-bold text-[#A8B5C8]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
             {Number(settings?.vatPercent ?? 14)}%
           </p>
-          <p className="text-[#6e7d93] text-xs mt-1">VAT Rate</p>
+          <p className="text-[#6e7d93] text-xs mt-1">{t("vat_rate")}</p>
         </div>
         <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4">
           <p className="text-2xl font-bold text-[#e8c84a]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
             {Number(settings?.multiSigThreshold ?? 50000).toLocaleString()}
           </p>
-          <p className="text-[#6e7d93] text-xs mt-1">Multi-Sig Threshold</p>
+          <p className="text-[#6e7d93] text-xs mt-1">{t("multisig_threshold")}</p>
         </div>
         <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4">
           <p className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
             {reconciliations.filter((r) => r.status === "completed").length}
           </p>
-          <p className="text-[#6e7d93] text-xs mt-1">Completed Reconciliations</p>
+          <p className="text-[#6e7d93] text-xs mt-1">{t("reconciliations_done")}</p>
         </div>
       </div>
 
-      {/* Wallets Table */}
       <div>
         <h2 className="text-[#C9A227] font-semibold mb-3" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          Wallets
+          {t("wallets")}
         </h2>
         <div className="rounded-xl border border-[rgba(201,162,39,0.12)] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[rgba(10,31,61,0.8)] border-b border-[rgba(201,162,39,0.1)]">
-                {["Type", "Owner / Sector", "Balance (Coins)", "Reserved", "Status"].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6e7d93] uppercase">{h}</th>
+                {headers.map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6e7d93] uppercase">
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -105,7 +108,9 @@ export default async function AdminFinancePage() {
                       className="w-1.5 h-1.5 rounded-full inline-block mr-1"
                       style={{ background: w.isLocked ? "#9C2A2A" : "#22c55e" }}
                     />
-                    <span className="text-xs text-[#6e7d93]">{w.isLocked ? "Locked" : "Active"}</span>
+                    <span className="text-xs text-[#6e7d93]">
+                      {w.isLocked ? t("status_locked") : t("status_active")}
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -114,10 +119,9 @@ export default async function AdminFinancePage() {
         </div>
       </div>
 
-      {/* Recent Transactions */}
       <div>
         <h2 className="text-[#C9A227] font-semibold mb-3" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          Recent Transactions
+          {t("recent_txns")}
         </h2>
         <div className="space-y-2">
           {recentTxns.map((txn) => (
@@ -134,8 +138,11 @@ export default async function AdminFinancePage() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold font-mono" style={{ color: Number(txn.amountCoins) > 0 ? "#C9A227" : "#9C2A2A" }}>
-                  {Number(txn.amountCoins).toLocaleString()} coins
+                <p
+                  className="text-sm font-bold font-mono"
+                  style={{ color: Number(txn.amountCoins) > 0 ? "#C9A227" : "#9C2A2A" }}
+                >
+                  {Number(txn.amountCoins).toLocaleString()} {t("coins")}
                 </p>
                 <span
                   className="text-[10px] px-1.5 py-0.5 rounded-full"

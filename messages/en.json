@@ -357,6 +357,160 @@
       "saving": "Saving…",
       "saved": "Settings saved.",
       "save_error": "Could not save settings. Try again."
+    },
+    "sectorPortal": {
+      "kpi_wallet": "Wallet Balance",
+      "kpi_wallet_suffix": "coins",
+      "kpi_revenue": "Monthly Revenue",
+      "kpi_pending": "Pending Requests",
+      "kpi_pending_suffix": "open",
+      "kpi_resolved": "Resolved Today",
+      "kpi_resolved_suffix": "done",
+      "kpi_sla": "SLA Breaches",
+      "kpi_sla_suffix": "overdue",
+      "revenue_trend": "Revenue Trend (6 months)",
+      "isr_inbox": "ISR Inbox",
+      "inter_ops": "Inter-Ops",
+      "action_new_request": "New Service Request",
+      "action_employees": "View Employees",
+      "action_wallet": "Wallet & Finance",
+      "action_certificates": "Certificates",
+      "action_reports": "Reports",
+      "fallback": {
+        "training": {
+          "name": "Training & Development",
+          "description": "Professional training programs, LMS, virtual classrooms, and certified diplomas."
+        },
+        "accreditation": {
+          "name": "International Accreditation",
+          "description": "World-recognized institutional and program accreditation."
+        },
+        "consultancy": {
+          "name": "Consultancy & Excellence",
+          "description": "Strategic institutional consulting and performance excellence."
+        },
+        "tech": {
+          "name": "Tech Engine",
+          "description": "AI-powered EdTech, Face-ID services, and digital infrastructure."
+        },
+        "partnerships": {
+          "name": "Global Partnerships",
+          "description": "Master franchise network and international alliances."
+        }
+      }
+    },
+    "lms": {
+      "title": "Sovereign LMS",
+      "subtitle": "Courses, VR labs, knowledge encyclopedia, and AI career roadmaps.",
+      "my_progress": "My Learning Progress",
+      "completed": "Completed",
+      "available_courses": "Available Courses",
+      "general": "General",
+      "hours_suffix": "h",
+      "continue_learning": "Continue learning",
+      "enroll_now": "Enroll now",
+      "vr_lab": "VR Lab Scenarios"
+    },
+    "connect": {
+      "title": "iFACE Connect",
+      "badge": "Internal — Encrypted",
+      "no_rooms": "No rooms yet. Rooms will appear when you are added.",
+      "encrypted": "encrypted",
+      "placeholder": "Type a message… (Enter to send)",
+      "send": "Send",
+      "select_room": "Select a room to start chatting"
+    },
+    "franchise": {
+      "title": "Global Franchise Hub",
+      "kpi_franchises": "Franchises",
+      "kpi_licenses": "Active licenses",
+      "kpi_pending_apps": "Pending applications",
+      "kpi_sub": "Sub-franchises",
+      "hierarchy": "Franchise hierarchy",
+      "tier_subline": "{tier} · {country} · {count} sub-franchises",
+      "active_licenses": "{count} active licenses",
+      "empty": "No franchises found.",
+      "pending_apps_title": "Pending agency applications",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "finance": {
+      "title": "Finance control",
+      "total_coins": "Total platform coins",
+      "vat_rate": "VAT rate",
+      "multisig_threshold": "Multi-sig threshold",
+      "reconciliations_done": "Completed reconciliations",
+      "wallets": "Wallets",
+      "col_type": "Type",
+      "col_owner": "Owner / sector",
+      "col_balance": "Balance (coins)",
+      "col_reserved": "Reserved",
+      "col_status": "Status",
+      "status_active": "Active",
+      "status_locked": "Locked",
+      "recent_txns": "Recent transactions",
+      "coins": "coins"
+    },
+    "hrEmployees": {
+      "title": "HR admin — Employees",
+      "add_employee": "Add employee",
+      "col_name": "Name",
+      "col_email": "Email",
+      "col_role": "Role",
+      "col_sector": "Sector",
+      "col_profit": "Profit share",
+      "col_status": "Status",
+      "col_last_login": "Last login",
+      "col_actions": "Actions",
+      "active": "Active",
+      "inactive": "Inactive",
+      "never": "Never",
+      "view": "View",
+      "empty": "No employees found. Add your first employee."
+    },
+    "employee": {
+      "profile_missing": "Employee profile not found. Contact HR admin."
+    },
+    "employeePortal": {
+      "code_label": "Code",
+      "kinetic_label": "Kinetic points",
+      "kpi_wallet": "Wallet balance",
+      "kpi_wallet_sub": "coins",
+      "kpi_rewards": "Pending rewards",
+      "kpi_kinetic": "Kinetic points",
+      "kpi_profit": "Profit share",
+      "attendance_title": "Attendance (last 7 days)",
+      "no_attendance": "No attendance records yet.",
+      "hr_recent": "Recent HR requests",
+      "no_requests": "No requests yet.",
+      "new_leave": "New leave request",
+      "tabs_profile": "My profile",
+      "tabs_wallet": "My wallet",
+      "tabs_rewards": "Rewards",
+      "tabs_attendance": "Attendance",
+      "tabs_leaves": "Leaves & requests",
+      "tabs_contracts": "My contracts",
+      "tabs_calendar": "Calendar & notes",
+      "tabs_connect": "Connect",
+      "tabs_cv": "My CV"
+    },
+    "exam": {
+      "alert_ilock": "Key combination blocked by iLock secure browser",
+      "alert_tab": "Tab switch detected ({current}/3). Exam will be paused after 3 violations.",
+      "alert_proctor_pause": "Exam paused by proctor. Contact your supervisor.",
+      "alert_face_low": "Face verification score low: {score}%. Verify your identity.",
+      "submitted_title": "Exam submitted successfully",
+      "submitted_body": "Your results will be reviewed and published shortly.",
+      "paused_title": "Exam paused",
+      "paused_body": "Your exam has been paused due to security violations. Contact your supervisor to resume.",
+      "loading": "Loading secure exam environment…",
+      "ilock_badge": "iLock secure",
+      "question_progress": "Q {current} / {total}",
+      "face_id": "Face ID",
+      "tab_warnings": "{count} tab warning(s)",
+      "previous": "Previous",
+      "next": "Next",
+      "submit": "Submit exam"
     }
   }
 }

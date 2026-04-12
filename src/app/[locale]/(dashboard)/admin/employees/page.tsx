@@ -2,12 +2,13 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 export default async function AdminEmployeesPage() {
   const session = await auth();
   const locale = await getLocale();
+  const t = await getTranslations("dashboard.hrEmployees");
   if (!session?.user) redirect(`/${locale}/auth/login`);
   if (!["super_admin", "admin"].includes(session.user.role)) {
     redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
@@ -21,17 +22,28 @@ export default async function AdminEmployeesPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const headers = [
+    t("col_name"),
+    t("col_email"),
+    t("col_role"),
+    t("col_sector"),
+    t("col_profit"),
+    t("col_status"),
+    t("col_last_login"),
+    t("col_actions"),
+  ];
+
   return (
     <div className="p-4 lg:p-6 space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          HR Admin — Employees
+          {t("title")}
         </h1>
         <Link
           href={`/${locale}/admin/employees/new`}
           className="h-9 px-4 text-xs font-semibold rounded-lg bg-[rgba(201,162,39,0.9)] text-[#060f1e] hover:bg-[#C9A227] flex items-center gap-2"
         >
-          ➕ Add Employee
+          ➕ {t("add_employee")}
         </Link>
       </div>
 
@@ -39,8 +51,11 @@ export default async function AdminEmployeesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-[rgba(10,31,61,0.8)] border-b border-[rgba(201,162,39,0.1)]">
-              {["Name", "Email", "Role", "Sector", "Profit Share", "Status", "Last Login", "Actions"].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6e7d93] uppercase tracking-wider">
+              {headers.map((h) => (
+                <th
+                  key={h}
+                  className="px-4 py-3 text-left text-xs font-medium text-[#6e7d93] uppercase tracking-wider"
+                >
                   {h}
                 </th>
               ))}
@@ -57,16 +72,20 @@ export default async function AdminEmployeesPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-[#6e7d93] text-xs">{emp.sector?.nameEn ?? "—"}</td>
-                <td className="px-4 py-3 text-[#C9A227] text-xs font-mono">{Number(emp.profitSharePct).toFixed(1)}%</td>
+                <td className="px-4 py-3 text-[#C9A227] text-xs font-mono">
+                  {Number(emp.profitSharePct).toFixed(1)}%
+                </td>
                 <td className="px-4 py-3">
                   <span
                     className="w-2 h-2 rounded-full inline-block mr-1.5"
                     style={{ background: emp.user.isActive ? "#22c55e" : "#9C2A2A" }}
                   />
-                  <span className="text-xs text-[#6e7d93]">{emp.user.isActive ? "Active" : "Inactive"}</span>
+                  <span className="text-xs text-[#6e7d93]">
+                    {emp.user.isActive ? t("active") : t("inactive")}
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-[#6e7d93] text-xs">
-                  {emp.user.lastLoginAt ? new Date(emp.user.lastLoginAt).toLocaleDateString() : "Never"}
+                  {emp.user.lastLoginAt ? new Date(emp.user.lastLoginAt).toLocaleDateString() : t("never")}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
@@ -74,7 +93,7 @@ export default async function AdminEmployeesPage() {
                       href={`/${locale}/admin/employees/${emp.id}`}
                       className="h-7 px-2 text-xs rounded border border-[rgba(201,162,39,0.2)] text-[#C9A227] hover:bg-[rgba(201,162,39,0.08)] flex items-center"
                     >
-                      View
+                      {t("view")}
                     </Link>
                   </div>
                 </td>
@@ -84,7 +103,7 @@ export default async function AdminEmployeesPage() {
         </table>
         {employees.length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-[#6e7d93]">No employees found. Add your first employee.</p>
+            <p className="text-[#6e7d93]">{t("empty")}</p>
           </div>
         )}
       </div>

@@ -1,13 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { redirect } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Headset } from "lucide-react";
 
 export default async function LMSPage() {
   const session = await auth();
   const locale = await getLocale();
+  const t = await getTranslations("dashboard.lms");
   if (!session?.user) redirect(`/${locale}/auth/login`);
 
   const isAr = locale === "ar";
@@ -33,18 +34,15 @@ export default async function LMSPage() {
     <div className="p-4 lg:p-6 space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          {isAr ? "منصة التعلم السيادية" : "Sovereign LMS"}
+          {t("title")}
         </h1>
-        <p className="text-[#6e7d93] text-sm mt-1">
-          {isAr ? "دورات تدريبية، مختبرات VR، موسوعة المعرفة، وخارطة المسار المهني." : "Courses, VR labs, knowledge encyclopedia, and AI career roadmaps."}
-        </p>
+        <p className="text-[#6e7d93] text-sm mt-1">{t("subtitle")}</p>
       </div>
 
-      {/* My Progress */}
       {enrollments.length > 0 && (
         <section>
           <h2 className="text-[#C9A227] font-semibold mb-3" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-            {isAr ? "مساراتي التعليمية" : "My Learning Progress"}
+            {t("my_progress")}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {enrollments.map((enr) => (
@@ -65,7 +63,7 @@ export default async function LMSPage() {
                   <span className="text-xs text-[#6e7d93]">{enr.progress}%</span>
                 </div>
                 {enr.isCompleted && (
-                  <span className="text-xs text-[#22c55e] mt-1 block">✓ Completed</span>
+                  <span className="text-xs text-[#22c55e] mt-1 block">✓ {t("completed")}</span>
                 )}
               </div>
             ))}
@@ -73,10 +71,9 @@ export default async function LMSPage() {
         </section>
       )}
 
-      {/* Available Courses */}
       <section>
         <h2 className="text-[#C9A227] font-semibold mb-3" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          {isAr ? "الدورات المتاحة" : "Available Courses"}
+          {t("available_courses")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((course) => (
@@ -87,7 +84,7 @@ export default async function LMSPage() {
               <div className="p-5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.2)]">
-                    {course.sector?.nameEn ?? "General"}
+                    {course.sector?.nameEn ?? t("general")}
                   </span>
                   <span className="text-xs text-[#6e7d93]">{course.level}</span>
                 </div>
@@ -98,7 +95,10 @@ export default async function LMSPage() {
                   {isAr ? course.descriptionAr ?? course.descriptionEn : course.descriptionEn}
                 </p>
                 {course.durationHours && (
-                  <p className="text-[#6e7d93] text-xs mt-2">⏱ {course.durationHours}h</p>
+                  <p className="text-[#6e7d93] text-xs mt-2">
+                    ⏱ {course.durationHours}
+                    {t("hours_suffix")}
+                  </p>
                 )}
               </div>
               <div className="px-5 pb-4">
@@ -107,14 +107,14 @@ export default async function LMSPage() {
                     href={`/${locale}/lms/course/${course.id}`}
                     className="w-full h-8 flex items-center justify-center text-xs rounded-lg bg-[rgba(34,197,94,0.1)] text-[#22c55e] border border-[rgba(34,197,94,0.2)]"
                   >
-                    Continue Learning →
+                    {t("continue_learning")} →
                   </Link>
                 ) : (
                   <Link
                     href={`/${locale}/lms/course/${course.id}`}
                     className="w-full h-8 flex items-center justify-center text-xs rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.2)] hover:bg-[rgba(201,162,39,0.15)] transition-colors"
                   >
-                    {isAr ? "ابدأ الآن" : "Enroll Now"}
+                    {t("enroll_now")}
                   </Link>
                 )}
               </div>
@@ -123,10 +123,9 @@ export default async function LMSPage() {
         </div>
       </section>
 
-      {/* VR Lab */}
       <section>
         <h2 className="text-[#C9A227] font-semibold mb-3" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          {isAr ? "المختبر الافتراضي (VR)" : "VR Lab Scenarios"}
+          {t("vr_lab")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {vrScenarios.map((scenario) => (
