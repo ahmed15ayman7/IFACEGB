@@ -43,8 +43,8 @@ export function Header() {
 
   const navLinks: { href: string; label: string; icon: typeof Home }[] = [
     { href: `/${locale}`, label: t("home"), icon: Home },
-    { href: `/${locale}#sectors`, label: t("sectors"), icon: Building2 },
-    { href: `/${locale}#features`, label: t("features"), icon: Layers },
+    // { href: `/${locale}#sectors`, label: t("sectors"), icon: Building2 },
+    // { href: `/${locale}#features`, label: t("features"), icon: Layers },
     { href: `/${locale}/about`, label: t("about"), icon: BookOpen },
     { href: `/${locale}/news`, label: t("news"), icon: Newspaper },
     { href: `/${locale}/events`, label: t("events"), icon: CalendarDays },
