@@ -1,0 +1,290 @@
+{
+  "meta": {
+    "title": "iFACE Global — International Accreditation & Training",
+    "description": "iFACE International Board empowering professionals worldwide with accreditation, training, and certification."
+  },
+  "common": {
+    "brand": "iFACE Global",
+    "loading": "Loading…",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "back_home": "Back to home",
+    "read_more": "Read more",
+    "learn_more": "Learn more",
+    "get_started": "Get started",
+    "menu": "Menu",
+    "language_switch": "Switch language",
+    "optional": "optional"
+  },
+  "nav": {
+    "home": "Home",
+    "sectors": "Sectors",
+    "about": "About iFACE",
+    "verify": "Verify Certificate",
+    "news": "News",
+    "events": "Events",
+    "apply_agency": "Become an agent",
+    "login": "Sign In",
+    "register": "Register",
+    "portal": "My Portal"
+  },
+  "landing": {
+    "badge": "International Accreditation Board",
+    "headline": "Empowering Excellence.",
+    "headline_accent": "Globally Certified.",
+    "subheadline": "iFACE International Board provides world-class accreditation, training, and certification services across 5 strategic sectors — shaping professionals and institutions for a sovereign future.",
+    "cta_primary": "Get Certified",
+    "cta_secondary": "Explore Sectors",
+    "cta_bottom_title": "Ready to join the network of excellence?",
+    "cta_bottom_sub": "Partner with iFACE Global and unlock world-class accreditation and training for your institution.",
+    "cta_bottom_button": "Get Started Today",
+    "stats": {
+      "countries": "Countries",
+      "certificates": "Certificates Issued",
+      "centers": "Accredited Centers",
+      "professionals": "Trained Professionals"
+    }
+  },
+  "sectors": {
+    "title": "Five Strategic Sectors",
+    "subtitle": "Integrated operations powering a unified ecosystem of excellence",
+    "view_sector": "View sector",
+    "training": {
+      "name": "Training & Development",
+      "description": "Comprehensive professional training programs, LMS, and virtual classrooms across all disciplines."
+    },
+    "accreditation": {
+      "name": "International Accreditation",
+      "description": "World-recognized institutional and program accreditation with blockchain-verified credentials."
+    },
+    "consultancy": {
+      "name": "Consultancy & Excellence",
+      "description": "Strategic institutional consulting, ISO compliance, and performance excellence frameworks."
+    },
+    "tech": {
+      "name": "Tech Engine",
+      "description": "Cutting-edge EdTech, AI-powered learning, and digital infrastructure for the knowledge economy."
+    },
+    "partnerships": {
+      "name": "Global Partnerships",
+      "description": "Master franchise network, international alliances, and cross-border operational expansion."
+    }
+  },
+  "auth": {
+    "login_title": "Sign In to Your Portal",
+    "login_subtitle": "Access your personalized iFACE dashboard",
+    "register_title": "Create an account",
+    "register_subtitle": "Register to access programs, certificates, and partner services",
+    "forgot_title": "Reset your password",
+    "forgot_subtitle": "Enter your email and we will send reset instructions if your account exists.",
+    "error_title": "Authentication error",
+    "error_default": "Something went wrong during sign-in. Please try again.",
+    "error_access_denied": "Access denied. You may not have permission for this account.",
+    "error_configuration": "Server configuration error. Contact support.",
+    "error_verification": "The verification link expired or is invalid.",
+    "email": "Email address",
+    "password": "Password",
+    "password_confirm": "Confirm password",
+    "full_name": "Full name",
+    "submit": "Sign In",
+    "submit_register": "Create account",
+    "submit_forgot": "Send reset link",
+    "forgot": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "register_link": "Register",
+    "login_link": "Sign in",
+    "or": "Or continue with",
+    "placeholder_email": "you@example.com",
+    "placeholder_password": "••••••••",
+    "register_success": "Account created. You can sign in now.",
+    "register_error": "Registration failed. Check your details or try another email.",
+    "forgot_sent": "If an account exists for this email, you will receive instructions shortly.",
+    "password_mismatch": "Passwords do not match.",
+    "password_min": "Password must be at least 8 characters."
+  },
+  "public": {
+    "about": {
+      "title": "About iFACE International Board",
+      "lead": "We are a sovereign digital headquarters for accreditation, training, and institutional excellence — unifying five strategic sectors under one governance model.",
+      "p1": "iFACE combines rigorous standards, blockchain-verifiable credentials, and multilingual operations (English & Arabic) to serve professionals, institutions, and partners worldwide.",
+      "p2": "Our platform covers training, international accreditation, consultancy, technology services, and global partnerships — with transparent finance, audit trails, and role-based access for every stakeholder.",
+      "pillars_title": "What we stand for",
+      "pillar_1_title": "Sovereign quality",
+      "pillar_1_text": "Standards aligned with international frameworks and regional regulatory context.",
+      "pillar_2_title": "Verifiable trust",
+      "pillar_2_text": "Certificates and credentials designed for public verification and long-term integrity.",
+      "pillar_3_title": "Operational clarity",
+      "pillar_3_text": "Dashboards, SLAs, and structured workflows across sectors and partners."
+    },
+    "contact": {
+      "title": "Contact us",
+      "subtitle": "Reach the iFACE team for partnerships, accreditation, or general inquiries.",
+      "name": "Your name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send message",
+      "success": "Thank you. Your message has been received. We will respond as soon as possible.",
+      "error": "Could not send your message. Please try again later."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "updated": "Last updated",
+      "intro": "iFACE Global respects your privacy. This policy describes how we collect, use, and protect personal data when you use our websites and portals.",
+      "s1_title": "Data we collect",
+      "s1_text": "We may collect account details (name, email, role), usage logs, and data required for accreditation, training, and verification — always in line with applicable law.",
+      "s2_title": "How we use data",
+      "s2_text": "Data is used to operate the platform, issue and verify credentials, communicate with users, and improve security and service quality.",
+      "s3_title": "Your rights",
+      "s3_text": "You may request access, correction, or deletion of your personal data where applicable. Contact us using the details on the Contact page."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "updated": "Last updated",
+      "intro": "By accessing iFACE Global services you agree to these terms. Specific programs may have additional agreements.",
+      "s1_title": "Use of the platform",
+      "s1_text": "You must provide accurate information, keep credentials secure, and use the platform only for lawful purposes.",
+      "s2_title": "Intellectual property",
+      "s2_text": "Content, trademarks, and materials remain the property of iFACE or its licensors unless otherwise stated.",
+      "s3_title": "Limitation of liability",
+      "s3_text": "To the extent permitted by law, iFACE is not liable for indirect damages arising from use of the platform."
+    },
+    "verify": {
+      "title": "Verify a certificate",
+      "subtitle": "Enter the unique verification code (UVC) printed on the certificate or provided by the candidate.",
+      "label": "Verification code",
+      "placeholder": "Paste or type the UVC",
+      "cta": "Verify now",
+      "hint": "You will be redirected to the public verification result for that credential.",
+      "required": "Please enter a verification code."
+    },
+    "events": {
+      "title": "Events & conferences",
+      "subtitle": "Discover upcoming iFACE events, mega conferences, and professional development workshops.",
+      "empty": "No upcoming events at the moment.",
+      "mega": "Mega event"
+    },
+    "news": {
+      "title": "News & announcements",
+      "subtitle": "Latest updates from the iFACE International Board.",
+      "empty": "No news available."
+    },
+    "applyAgency": {
+      "title": "Apply for iFACE agency",
+      "subtitle": "Become an authorized iFACE agent or master franchisee. Complete the form below and we will review your application.",
+      "applicantName": "Full name",
+      "email": "Email address",
+      "phone": "Phone",
+      "country": "Country code",
+      "country_placeholder": "e.g. EG, SA, AE",
+      "businessName": "Business name",
+      "motivation": "Why do you want to be an iFACE agent?",
+      "motivation_hint": "Minimum 50 characters",
+      "submit": "Submit application",
+      "submitting": "Submitting…",
+      "success_title": "Application received",
+      "success_body": "Thank you for applying. Our partnerships team will review your application and contact you within 14 business days.",
+      "error": "Something went wrong. Please try again."
+    },
+    "sector_public": {
+      "services_title": "Key services",
+      "cta_title": "Ready to get started?",
+      "cta_primary": "Get started",
+      "cta_agency": "Apply for agency"
+    },
+    "sector_features": {
+      "training": [
+        "Professional training packages",
+        "Franchise licensing",
+        "Micro-learning capsules",
+        "Mega events & conferences",
+        "Secret of the Trade diplomas"
+      ],
+      "accreditation": [
+        "Institutional program accreditation",
+        "Blockchain-verified certificates",
+        "ISO 21001 compliance",
+        "Master franchise pipeline",
+        "DataFlow / employer API"
+      ],
+      "consultancy": [
+        "Sovereign restructuring projects",
+        "ISO 21001 & 7-star excellence",
+        "Smart School Clinic configurator",
+        "Retainer contract management",
+        "Consultancy report signing"
+      ],
+      "tech": [
+        "Face-ID as a Service",
+        "White-label LMS configurator",
+        "Public verification portal",
+        "Cybersecurity audits",
+        "App & website development"
+      ],
+      "partnerships": [
+        "Master franchise hub",
+        "Ministry & cultural partnerships",
+        "Global expansion simulator",
+        "External brand marketing",
+        "Digital marketing services"
+      ]
+    },
+    "verifyResult": {
+      "page_title": "Certificate verification",
+      "subtitle": "Instant blockchain verification via Polygon PoS",
+      "uvc_label": "Unique verification code",
+      "valid_title": "Valid & authenticated certificate",
+      "valid_subtitle": "Verified on Polygon blockchain",
+      "holder": "Holder name",
+      "program": "Program",
+      "grade": "Grade",
+      "issue_date": "Issue date",
+      "cert_no": "Certificate no.",
+      "tx": "Blockchain TX",
+      "tx_na": "N/A",
+      "invalid_title": "Invalid certificate",
+      "back_home": "Back to iFACE home"
+    }
+  },
+  "footer": {
+    "explore": "Explore",
+    "legal_section": "Legal & contact",
+    "tagline": "Sovereign excellence in global accreditation.",
+    "rights": "All rights reserved.",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "verify": "Verify Certificate",
+      "contact": "Contact Us",
+      "about": "About",
+      "news": "News",
+      "events": "Events",
+      "agency": "Become an agent"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "god_view": "God View",
+      "hr": "HR Admin",
+      "finance": "Finance",
+      "training": "Training",
+      "accreditation": "Accreditation",
+      "consultancy": "Consultancy",
+      "tech": "Tech Engine",
+      "partnerships": "Partnerships",
+      "lms": "LMS",
+      "connect": "Connect",
+      "my_sector": "My sector",
+      "isr": "ISR inbox",
+      "inter_ops": "Inter-ops",
+      "wallet": "Wallet",
+      "portal": "My portal",
+      "rewards": "Rewards",
+      "attendance": "Attendance",
+      "franchise": "Franchise hub",
+      "sign_out": "Sign out"
+    }
+  }
+}

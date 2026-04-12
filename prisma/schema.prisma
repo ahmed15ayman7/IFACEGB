@@ -1,0 +1,1632 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  super_admin
+  admin
+  sector_manager
+  employee
+  agent
+  trainer
+  center
+  client
+  user
+}
+
+enum WalletType {
+  CentralTreasury
+  SectorWallet
+  EmployeeWallet
+}
+
+enum TransactionType {
+  external_income
+  internal_transfer
+  withdrawal
+  bonus
+  profit_share
+  fee
+  refund
+  tax
+}
+
+enum TransactionStatus {
+  pending
+  completed
+  failed
+  reversed
+  frozen
+}
+
+enum CertificateStatus {
+  draft
+  issued
+  revoked
+  expired
+}
+
+enum DirectiveStatus {
+  active
+  expired
+  cancelled
+}
+
+enum SLAPriority {
+  low
+  normal
+  high
+  urgent
+}
+
+enum SLAStatus {
+  pending
+  acknowledged
+  in_progress
+  completed
+  escalated
+  closed
+}
+
+enum ReconciliationStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum AttendanceStatus {
+  present
+  absent
+  late
+  on_leave
+  work_from_home
+}
+
+enum FranchiseTier {
+  master
+  regional
+  local
+}
+
+enum AgentLicenseStatus {
+  active
+  suspended
+  frozen
+  expired
+  revoked
+}
+
+enum PackageStatus {
+  new
+  updated
+  archived
+}
+
+enum ContractType {
+  retainer
+  project
+  performance
+}
+
+enum HrRequestType {
+  annual_leave
+  casual_leave
+  sick_leave
+  unpaid_leave
+  absence_justification
+  grievance
+  remote_work
+  other
+}
+
+enum AuditSeverity {
+  info
+  warning
+  critical
+}
+
+enum TicketPriority {
+  low
+  normal
+  high
+  critical
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  resolved
+  closed
+}
+
+// ============================================================
+// CORE USERS & AUTH
+// ============================================================
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  emailVerified     DateTime?
+  passwordHash      String?
+  name              String?
+  nameAr            String?
+  avatarUrl         String?
+  role              UserRole  @default(user)
+  sectorId          String?
+  isActive          Boolean   @default(true)
+  isSuspended       Boolean   @default(false)
+  suspendedReason   String?
+  lastLoginAt       DateTime?
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
+  locale            String    @default("en")
+  timezone          String    @default("UTC")
+  profitSharePct    Decimal   @db.Decimal(5, 2) @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  sector              Sector?              @relation(fields: [sectorId], references: [id])
+  employee            Employee?
+  wallets             Wallet[]
+  coinTransactions    CoinTransaction[]
+  certificatesHeld    Certificate[]        @relation("CertificateHolder")
+  certificatesIssued  Certificate[]        @relation("CertificateIssuer")
+  auditLogs           AuditTrail[]
+  notifications       Notification[]
+  eDirectivesAuthored EDirective[]
+  directiveAcks       EDirectiveAcknowledgment[]
+  serviceRequests     ServiceRequest[]
+  hrRequests          HrRequest[]
+  permissions         UserPermission[]
+  presence            UserPresence?
+  sessions            Session[]
+  accounts            Account[]
+  supportTickets      SupportTicket[]
+  connectMessages     ConnectMessage[]
+
+  @@index([email])
+  @@index([role])
+  @@index([sectorId])
+  @@map("users")
+}
+
+model UserPermission {
+  id         String   @id @default(cuid())
+  userId     String
+  permission String
+  granted    Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
+  @@map("user_permissions")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================
+// SECTORS
+// ============================================================
+
+model Sector {
+  id           String  @id @default(cuid())
+  code         String  @unique
+  nameEn       String
+  nameAr       String
+  description  String? @db.Text
+  isActive     Boolean @default(true)
+  color        String  @default("#C9A227")
+  iconUrl      String?
+  sortOrder    Int     @default(0)
+  targetRevPct Decimal @db.Decimal(5, 2) @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users              User[]
+  employees          Employee[]
+  wallets            Wallet[]
+  serviceRequests    ServiceRequest[]
+  eDirectives        EDirective[]
+  sectorPublicPage   SectorPublicPage?
+  agencyApplications AgencyApplication[]
+  courses            Course[]
+  analyticsSnapshots AnalyticsSnapshot[]
+
+  @@map("sectors")
+}
+
+// ============================================================
+// FINANCIAL SETTINGS
+// ============================================================
+
+model FinancialSettings {
+  id                   String   @id @default(cuid())
+  baseCurrency         String   @default("EGP")
+  coinToFiatRate       Decimal  @db.Decimal(10, 4) @default(1.0)
+  vatPercent           Decimal  @db.Decimal(5, 2) @default(14.0)
+  withholdingTaxPct    Decimal  @db.Decimal(5, 2) @default(20.0)
+  multiSigThreshold    Decimal  @db.Decimal(20, 2) @default(50000)
+  ifaceCommissionPct   Decimal  @db.Decimal(5, 2) @default(40.0)
+  agentCommissionPct   Decimal  @db.Decimal(5, 2) @default(35.0)
+  lecturerCommissionPct Decimal @db.Decimal(5, 2) @default(25.0)
+  updatedAt            DateTime @updatedAt
+  updatedBy            String?
+
+  @@map("financial_settings")
+}
+
+// ============================================================
+// WALLETS & COIN SYSTEM
+// ============================================================
+
+model Wallet {
+  id            String     @id @default(cuid())
+  ownerId       String
+  sectorId      String?
+  walletType    WalletType @default(EmployeeWallet)
+  balanceCoins  Decimal    @db.Decimal(20, 4) @default(0)
+  reservedCoins Decimal    @db.Decimal(20, 4) @default(0)
+  isLocked      Boolean    @default(false)
+  lockedReason  String?
+  isHardLocked  Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  owner            User              @relation(fields: [ownerId], references: [id])
+  sector           Sector?           @relation(fields: [sectorId], references: [id])
+  sentTxns         CoinTransaction[] @relation("SenderWallet")
+  receivedTxns     CoinTransaction[] @relation("ReceiverWallet")
+  liquidityEntries LiquidityVault[]
+
+  @@index([ownerId])
+  @@index([walletType])
+  @@map("wallets")
+}
+
+model CoinTransaction {
+  id               String            @id @default(cuid())
+  senderWalletId   String?
+  receiverWalletId String?
+  initiatedBy      String
+  type             TransactionType
+  status           TransactionStatus @default(pending)
+  amountCoins      Decimal           @db.Decimal(20, 4)
+  feeCoins         Decimal           @db.Decimal(20, 4) @default(0)
+  vatAmount        Decimal           @db.Decimal(20, 4) @default(0)
+  withholdingTax   Decimal           @db.Decimal(20, 4) @default(0)
+  referenceId      String?
+  reason           String?           @db.Text
+  metaJson         Json?
+  encryptedPayload String?           @db.Text
+  requiresMultiSig Boolean           @default(false)
+  multiSigSigners  Json?
+  multiSigComplete Boolean           @default(false)
+  processedAt      DateTime?
+  createdAt        DateTime          @default(now())
+
+  senderWallet   Wallet? @relation("SenderWallet", fields: [senderWalletId], references: [id])
+  receiverWallet Wallet? @relation("ReceiverWallet", fields: [receiverWalletId], references: [id])
+  initiator      User    @relation(fields: [initiatedBy], references: [id])
+
+  @@index([senderWalletId])
+  @@index([receiverWalletId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("coin_transactions")
+}
+
+model InternalInvoice {
+  id              String   @id @default(cuid())
+  fromSectorId    String
+  toSectorId      String
+  serviceRequestId String?
+  amountCoins     Decimal  @db.Decimal(20, 4)
+  description     String   @db.Text
+  isPaid          Boolean  @default(false)
+  paidAt          DateTime?
+  createdAt       DateTime @default(now())
+
+  @@map("internal_invoices")
+}
+
+model LiquidityVault {
+  id            String   @id @default(cuid())
+  walletId      String
+  transactionId String
+  opsAmount     Decimal  @db.Decimal(20, 4)
+  agentAmount   Decimal  @db.Decimal(20, 4)
+  reserveAmount Decimal  @db.Decimal(20, 4)
+  createdAt     DateTime @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  @@map("liquidity_vault")
+}
+
+model SovereignReserveSubAccount {
+  id           String   @id @default(cuid())
+  totalLocked  Decimal  @db.Decimal(20, 4) @default(0)
+  lastUpdated  DateTime @default(now())
+  isHardLocked Boolean  @default(true)
+
+  deposits ReserveDepositLedger[]
+
+  @@map("sovereign_reserve_sub_account")
+}
+
+model ReserveDepositLedger {
+  id            String   @id @default(cuid())
+  reserveId     String
+  amountCoins   Decimal  @db.Decimal(20, 4)
+  transactionId String
+  createdAt     DateTime @default(now())
+
+  reserve SovereignReserveSubAccount @relation(fields: [reserveId], references: [id])
+
+  @@map("reserve_deposit_ledger")
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  sectorId    String
+  amount      Decimal  @db.Decimal(15, 2)
+  description String   @db.Text
+  category    String?
+  date        DateTime @db.Date
+  approvedBy  String?
+  createdAt   DateTime @default(now())
+
+  @@map("expenses")
+}
+
+model MonthlyReconciliation {
+  id                  String               @id @default(cuid())
+  periodYear          Int
+  periodMonth         Int
+  status              ReconciliationStatus @default(pending)
+  totalRevenue        Decimal              @db.Decimal(20, 2) @default(0)
+  totalExpenses       Decimal              @db.Decimal(20, 2) @default(0)
+  netProfit           Decimal              @db.Decimal(20, 2) @default(0)
+  employeeShareTotal  Decimal              @db.Decimal(20, 2) @default(0)
+  treasuryTransfer    Decimal              @db.Decimal(20, 2) @default(0)
+  reportPdfUrl        String?
+  reportExcelUrl      String?
+  reportSnapshotJson  Json?
+  runBy               String?
+  completedAt         DateTime?
+  errorMessage        String?              @db.Text
+  createdAt           DateTime             @default(now())
+
+  @@unique([periodYear, periodMonth])
+  @@map("monthly_reconciliations")
+}
+
+model FinancialSimulationScenario {
+  id            String   @id @default(cuid())
+  title         String
+  assumptions   Json
+  projectedData Json
+  createdBy     String
+  createdAt     DateTime @default(now())
+
+  @@map("financial_simulation_scenarios")
+}
+
+// ============================================================
+// HR / EMPLOYEES
+// ============================================================
+
+model Employee {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  sectorId         String?
+  employeeCode     String   @unique
+  jobTitleEn       String?
+  jobTitleAr       String?
+  departmentEn     String?
+  departmentAr     String?
+  contractType     String   @default("full_time")
+  salaryBase       Decimal  @db.Decimal(15, 2) @default(0)
+  salaryCurrency   String   @default("EGP")
+  profitSharePct   Decimal  @db.Decimal(5, 2) @default(0)
+  kineticPoints    Int      @default(0)
+  kineticBonus     Decimal  @db.Decimal(5, 2) @default(0)
+  hireDate         DateTime @db.Date
+  terminationDate  DateTime? @db.Date
+  isActive         Boolean  @default(true)
+  nationalId       String?
+  passportNo       String?
+  phone            String?
+  address          String?  @db.Text
+  emergencyContact String?  @db.Text
+  biometricHash    String?
+  lastFaceCheck    DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sector           Sector?            @relation(fields: [sectorId], references: [id])
+  attendance       Attendance[]
+  bonuses          Bonus[]
+  hrRequests       HrRequest[]
+  performanceTargets PerformanceTarget[]
+  workSchedules    WorkSchedule[]
+  electronicContracts ElectronicContract[]
+
+  @@index([sectorId])
+  @@map("employees")
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  employeeId   String
+  date         DateTime         @db.Date
+  checkIn      DateTime?
+  checkOut     DateTime?
+  status       AttendanceStatus @default(present)
+  lateMinutes  Int              @default(0)
+  locationLat  Decimal?         @db.Decimal(10, 7)
+  locationLng  Decimal?         @db.Decimal(10, 7)
+  faceMatchScore Decimal?       @db.Decimal(5, 2)
+  isGeofenced  Boolean          @default(false)
+  notes        String?
+  createdAt    DateTime         @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@unique([employeeId, date])
+  @@map("attendance")
+}
+
+model Bonus {
+  id          String   @id @default(cuid())
+  employeeId  String
+  type        String
+  amountCoins Decimal  @db.Decimal(20, 4)
+  reason      String?  @db.Text
+  status      String   @default("pending")
+  issuedAt    DateTime @default(now())
+  paidAt      DateTime?
+  approvedBy  String?
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("bonuses")
+}
+
+model PerformanceTarget {
+  id             String   @id @default(cuid())
+  employeeId     String
+  period         String
+  targetValue    Decimal  @db.Decimal(15, 2)
+  achievedValue  Decimal  @db.Decimal(15, 2) @default(0)
+  bonusPerUnit   Decimal  @db.Decimal(10, 2) @default(0)
+  isAchieved     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("performance_targets")
+}
+
+model WorkSchedule {
+  id          String   @id @default(cuid())
+  employeeId  String
+  dayOfWeek   Int
+  startTime   String
+  endTime     String
+  isOffDay    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("work_schedules")
+}
+
+model HrRequest {
+  id          String        @id @default(cuid())
+  employeeId  String
+  requestedBy String
+  type        HrRequestType
+  details     String?       @db.Text
+  status      String        @default("pending")
+  approvedBy  String?
+  approvedAt  DateTime?
+  startDate   DateTime?     @db.Date
+  endDate     DateTime?     @db.Date
+  createdAt   DateTime      @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+  requester User     @relation(fields: [requestedBy], references: [id])
+
+  @@map("hr_requests")
+}
+
+model ElectronicContract {
+  id           String   @id @default(cuid())
+  employeeId   String
+  templateType String
+  content      String   @db.Text
+  status       String   @default("pending")
+  signedAt     DateTime?
+  signatureHash String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  employee           Employee             @relation(fields: [employeeId], references: [id])
+  electronicSignatures ElectronicSignature[]
+
+  @@map("electronic_contracts")
+}
+
+model ElectronicSignature {
+  id           String   @id @default(cuid())
+  contractId   String
+  signerId     String
+  signatureB64 String   @db.Text
+  ipAddress    String?
+  geolocation  Json?
+  signedAt     DateTime @default(now())
+
+  contract ElectronicContract @relation(fields: [contractId], references: [id])
+
+  @@map("electronic_signatures")
+}
+
+model BiometricSession {
+  id               String   @id @default(cuid())
+  userId           String
+  sessionType      String
+  faceMatchScore   Decimal  @db.Decimal(5, 2) @default(0)
+  livenessScore    Decimal  @db.Decimal(5, 2) @default(0)
+  multiPersonFlag  Boolean  @default(false)
+  passed           Boolean  @default(false)
+  deviceInfo       Json?
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@map("biometric_sessions")
+}
+
+model BiometricAuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  scoreData   Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@map("biometric_audit_logs")
+}
+
+// ============================================================
+// OPERATIONS — SERVICE REQUESTS + ACCREDITATION
+// ============================================================
+
+model ServiceRequest {
+  id             String      @id @default(cuid())
+  requesterId    String
+  fromSectorId   String?
+  toSectorId     String?
+  type           String
+  titleEn        String
+  titleAr        String?
+  descriptionEn  String      @db.Text
+  descriptionAr  String?     @db.Text
+  priority       SLAPriority @default(normal)
+  status         SLAStatus   @default(pending)
+  slaDeadline    DateTime?
+  assignedTo     String?
+  internalInvId  String?
+  feedbackScore  Int?
+  resolvedAt     DateTime?
+  resolution     String?     @db.Text
+  metadata       Json?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  requester    User    @relation(fields: [requesterId], references: [id])
+  sector       Sector? @relation(fields: [toSectorId], references: [id])
+
+  @@index([status])
+  @@index([requesterId])
+  @@index([toSectorId])
+  @@map("service_requests")
+}
+
+model PublicServiceRequest {
+  id           String   @id @default(cuid())
+  sectorId     String?
+  name         String
+  email        String
+  phone        String?
+  serviceType  String
+  details      String   @db.Text
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+
+  @@map("public_service_requests")
+}
+
+model AccreditationRequest {
+  id              String   @id @default(cuid())
+  applicantId     String
+  sectorId        String
+  institutionName String
+  programName     String
+  documentUrls    Json?
+  status          String   @default("pending")
+  reviewNote      String?  @db.Text
+  approvedAt      DateTime?
+  processingDays  Int?
+  npsScore        Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("accreditation_requests")
+}
+
+model SectorPublicPage {
+  id          String   @id @default(cuid())
+  sectorId    String   @unique
+  heroEn      String?  @db.Text
+  heroAr      String?  @db.Text
+  contentEn   String?  @db.Text
+  contentAr   String?  @db.Text
+  metaTitleEn String?
+  metaTitleAr String?
+  isPublished Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  sector Sector @relation(fields: [sectorId], references: [id])
+
+  @@map("sector_public_pages")
+}
+
+// ============================================================
+// CERTIFICATES & BLOCKCHAIN
+// ============================================================
+
+model Certificate {
+  id               String            @id @default(cuid())
+  holderId         String
+  issuerId         String
+  sectorId         String?
+  programEn        String
+  programAr        String?
+  grade            String?
+  score            Decimal?          @db.Decimal(5, 2)
+  skillScore       Decimal?          @db.Decimal(5, 2)
+  issueDate        DateTime          @default(now())
+  expiryDate       DateTime?
+  status           CertificateStatus @default(draft)
+  certificateNo    String            @unique
+  uniqueVC         String            @unique @default(cuid())
+  qrCodeUrl        String?
+  pdfUrl           String?
+  ipfsHash         String?
+  arweaveId        String?
+  blockchainTxHash String?
+  contractAddress  String?
+  tokenId          Int?
+  vcJsonLd         Json?
+  metaJson         Json?
+  prerequisitesMet Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  holder User @relation("CertificateHolder", fields: [holderId], references: [id])
+  issuer User @relation("CertificateIssuer", fields: [issuerId], references: [id])
+
+  @@index([holderId])
+  @@index([certificateNo])
+  @@index([uniqueVC])
+  @@map("certificates")
+}
+
+model DecentralizedId {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  did        String   @unique
+  didDocument Json
+  privateKeyEncrypted String? @db.Text
+  createdAt  DateTime @default(now())
+
+  @@map("decentralized_ids")
+}
+
+model PortfolioBlockchainBadge {
+  id            String   @id @default(cuid())
+  userId        String
+  certificateId String
+  badgeJson     Json
+  issuedAt      DateTime @default(now())
+
+  @@map("portfolio_blockchain_badges")
+}
+
+// ============================================================
+// EXAM SYSTEM
+// ============================================================
+
+model ExamSession {
+  id              String   @id @default(cuid())
+  userId          String
+  courseId        String?
+  sessionToken    String   @unique
+  status          String   @default("pending")
+  score           Decimal? @db.Decimal(5, 2)
+  startedAt       DateTime?
+  completedAt     DateTime?
+  proctorScore    Decimal  @db.Decimal(5, 2) @default(0)
+  tabSwitchCount  Int      @default(0)
+  flagCount       Int      @default(0)
+  questionSetJson Json?
+  durationMinutes Int      @default(60)
+  createdAt       DateTime @default(now())
+
+  answers ExamAnswer[]
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("exam_sessions")
+}
+
+model ExamQuestion {
+  id            String   @id @default(cuid())
+  courseId      String?
+  topic         String
+  difficulty    String   @default("medium")
+  weight        Int      @default(1)
+  questionEn    String   @db.Text
+  questionAr    String?  @db.Text
+  optionsJson   Json
+  correctAnswer String
+  explanationEn String?  @db.Text
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([courseId, topic])
+  @@map("exam_questions")
+}
+
+model ExamAnswer {
+  id             String   @id @default(cuid())
+  examSessionId  String
+  questionId     String
+  selectedAnswer String
+  isCorrect      Boolean  @default(false)
+  answeredAt     DateTime @default(now())
+
+  session ExamSession @relation(fields: [examSessionId], references: [id])
+
+  @@map("exam_answers")
+}
+
+// ============================================================
+// FRANCHISE & AGENTS
+// ============================================================
+
+model Franchise {
+  id                String        @id @default(cuid())
+  nameEn            String
+  nameAr            String?
+  tier              FranchiseTier @default(local)
+  parentFranchiseId String?
+  ownerUserId       String?
+  countryCode       String
+  region            String?
+  city              String?
+  geofenceRadius    Int?
+  contractStart     DateTime      @db.Date
+  contractEnd       DateTime?     @db.Date
+  isActive          Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  parent           Franchise?       @relation("FranchiseHierarchy", fields: [parentFranchiseId], references: [id])
+  children         Franchise[]      @relation("FranchiseHierarchy")
+  agentLicenses    AgentLicense[]
+  accreditedCenters AccreditedCenter[]
+
+  @@map("franchises")
+}
+
+model AccreditedCenter {
+  id            String   @id @default(cuid())
+  franchiseId   String?
+  nameEn        String
+  nameAr        String?
+  ownerUserId   String?
+  countryCode   String
+  city          String?
+  address       String?  @db.Text
+  geofenceLat   Decimal? @db.Decimal(10, 7)
+  geofenceLng   Decimal? @db.Decimal(10, 7)
+  geofenceRadius Int?
+  isActive      Boolean  @default(true)
+  accreditedAt  DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  franchise Franchise? @relation(fields: [franchiseId], references: [id])
+
+  @@map("accredited_centers")
+}
+
+model AgentLicense {
+  id            String             @id @default(cuid())
+  franchiseId   String
+  agentUserId   String
+  licenseNo     String             @unique
+  status        AgentLicenseStatus @default(active)
+  issuedAt      DateTime           @default(now())
+  expiresAt     DateTime?
+  countryCode   String
+  suspendedAt   DateTime?
+  suspendedReason String?          @db.Text
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  franchise    Franchise          @relation(fields: [franchiseId], references: [id])
+  actionsLog   LicenseActionsLog[]
+
+  @@map("agent_licenses")
+}
+
+model LicenseActionsLog {
+  id          String   @id @default(cuid())
+  licenseId   String
+  action      String
+  performedBy String
+  reason      String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  license AgentLicense @relation(fields: [licenseId], references: [id])
+
+  @@map("license_actions_log")
+}
+
+model AgencyApplication {
+  id            String   @id @default(cuid())
+  sectorId      String?
+  applicantName String
+  email         String
+  phone         String?
+  countryCode   String
+  businessName  String?
+  motivation    String?  @db.Text
+  status        String   @default("pending")
+  reviewedBy    String?
+  approvedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  sector Sector? @relation(fields: [sectorId], references: [id])
+
+  @@map("agency_applications")
+}
+
+model AgencyContract {
+  id            String   @id @default(cuid())
+  applicationId String?
+  agentUserId   String
+  contractTerms Json
+  signedAt      DateTime?
+  expiresAt     DateTime?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@map("agency_contracts")
+}
+
+model GeoSpoofingAttempt {
+  id            String   @id @default(cuid())
+  userId        String
+  expectedLat   Decimal? @db.Decimal(10, 7)
+  expectedLng   Decimal? @db.Decimal(10, 7)
+  detectedLat   Decimal? @db.Decimal(10, 7)
+  detectedLng   Decimal? @db.Decimal(10, 7)
+  discrepancyKm Decimal? @db.Decimal(8, 2)
+  isConfirmed   Boolean  @default(false)
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  @@map("geo_spoofing_attempts")
+}
+
+model TrainingSite {
+  id          String   @id @default(cuid())
+  franchiseId String?
+  nameEn      String
+  nameAr      String?
+  address     String?  @db.Text
+  capacity    Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("training_sites")
+}
+
+// ============================================================
+// TRAINING PACKAGES
+// ============================================================
+
+model TrainingPackage {
+  id            String        @id @default(cuid())
+  titleEn       String
+  titleAr       String?
+  descriptionEn String?       @db.Text
+  descriptionAr String?       @db.Text
+  price         Decimal       @db.Decimal(15, 2) @default(0)
+  franchiseFee  Decimal       @db.Decimal(15, 2) @default(0)
+  status        PackageStatus @default(new)
+  category      String?
+  fileUrl       String?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("training_packages")
+}
+
+model ConsultancyContract {
+  id           String       @id @default(cuid())
+  clientId     String
+  sectorId     String?
+  type         ContractType @default(retainer)
+  titleEn      String
+  monthlyValue Decimal      @db.Decimal(15, 2) @default(0)
+  startDate    DateTime     @db.Date
+  endDate      DateTime?    @db.Date
+  status       String       @default("active")
+  description  String?      @db.Text
+  createdAt    DateTime     @default(now())
+
+  @@map("consultancy_contracts")
+}
+
+// ============================================================
+// GOD VIEW — E-DIRECTIVES, KILL SWITCH, AUDIT
+// ============================================================
+
+model EDirective {
+  id          String          @id @default(cuid())
+  authorId    String
+  sectorId    String?
+  titleEn     String
+  titleAr     String?
+  bodyEn      String          @db.Text
+  bodyAr      String?         @db.Text
+  priority    SLAPriority     @default(normal)
+  status      DirectiveStatus @default(active)
+  targetType  String          @default("all")
+  targetIds   Json?
+  expiresAt   DateTime?
+  createdAt   DateTime        @default(now())
+
+  author User                      @relation(fields: [authorId], references: [id])
+  sector Sector?                   @relation(fields: [sectorId], references: [id])
+  acks   EDirectiveAcknowledgment[]
+
+  @@index([status])
+  @@map("e_directives")
+}
+
+model EDirectiveAcknowledgment {
+  id          String   @id @default(cuid())
+  directiveId String
+  userId      String
+  ipAddress   String?
+  geolocation Json?
+  ackedAt     DateTime @default(now())
+
+  directive EDirective @relation(fields: [directiveId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+
+  @@unique([directiveId, userId])
+  @@map("e_directive_acknowledgments")
+}
+
+model KillSwitchLog {
+  id            String   @id @default(cuid())
+  activatedBy   String
+  coSignedBy    String?
+  reason        String   @db.Text
+  targetType    String   @default("platform")
+  targetId      String?
+  isActive      Boolean  @default(true)
+  signatures    Json
+  activatedAt   DateTime @default(now())
+  deactivatedAt DateTime?
+  deactivatedBy String?
+
+  @@map("kill_switch_logs")
+}
+
+model AuditTrail {
+  id           String        @id @default(cuid())
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String?
+  severity     AuditSeverity @default(info)
+  beforeJson   Json?
+  afterJson    Json?
+  ipAddress    String?
+  userAgent    String?
+  encryptedSig String?       @db.Text
+  metadata     Json?
+  createdAt    DateTime      @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([severity])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_trail")
+}
+
+model OffHoursAccessLog {
+  id          String   @id @default(cuid())
+  userId      String
+  route       String
+  ipAddress   String?
+  isFlagged   Boolean  @default(true)
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@map("off_hours_access_log")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  titleEn   String
+  titleAr   String?
+  bodyEn    String   @db.Text
+  bodyAr    String?  @db.Text
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  metaJson  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ============================================================
+// STRATEGIC KPIs
+// ============================================================
+
+model StrategicKpi {
+  id          String   @id @default(cuid())
+  sectorId    String?
+  nameEn      String
+  nameAr      String?
+  targetValue Decimal  @db.Decimal(20, 2)
+  actualValue Decimal  @db.Decimal(20, 2) @default(0)
+  unit        String?
+  period      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("strategic_kpis")
+}
+
+model StrategicPillar {
+  id          String   @id @default(cuid())
+  nameEn      String
+  nameAr      String?
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+
+  milestones StrategicMilestone[]
+
+  @@map("strategic_pillars")
+}
+
+model StrategicMilestone {
+  id          String   @id @default(cuid())
+  pillarId    String
+  titleEn     String
+  titleAr     String?
+  dueDate     DateTime @db.Date
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  pillar StrategicPillar @relation(fields: [pillarId], references: [id])
+
+  @@map("strategic_milestones")
+}
+
+model AnalyticsSnapshot {
+  id        String   @id @default(cuid())
+  sectorId  String?
+  periodKey String
+  data      Json
+  createdAt DateTime @default(now())
+
+  sector Sector? @relation(fields: [sectorId], references: [id])
+
+  @@index([sectorId, periodKey])
+  @@map("analytics_snapshots")
+}
+
+// ============================================================
+// LMS
+// ============================================================
+
+model Course {
+  id            String   @id @default(cuid())
+  sectorId      String?
+  titleEn       String
+  titleAr       String?
+  descriptionEn String?  @db.Text
+  descriptionAr String?  @db.Text
+  category      String?
+  level         String   @default("beginner")
+  durationHours Int?
+  coverUrl      String?
+  isPublished   Boolean  @default(false)
+  isScorm       Boolean  @default(false)
+  scormUrl      String?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sector      Sector?      @relation(fields: [sectorId], references: [id])
+  enrollments Enrollment[]
+
+  @@map("courses")
+}
+
+model Enrollment {
+  id           String   @id @default(cuid())
+  courseId     String
+  userId       String
+  isNew        Boolean  @default(true)
+  progress     Int      @default(0)
+  isCompleted  Boolean  @default(false)
+  completedAt  DateTime?
+  npsScore     Int?
+  enrolledAt   DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id])
+
+  @@unique([courseId, userId])
+  @@map("enrollments")
+}
+
+model VrSession {
+  id           String   @id @default(cuid())
+  userId       String
+  scenarioId   String
+  score        Decimal? @db.Decimal(5, 2)
+  durationSec  Int?
+  completedAt  DateTime?
+  sessionData  Json?
+  createdAt    DateTime @default(now())
+
+  scenario VrScenario @relation(fields: [scenarioId], references: [id])
+
+  @@map("vr_sessions")
+}
+
+model VrScenario {
+  id           String   @id @default(cuid())
+  titleEn      String
+  titleAr      String?
+  category     String
+  difficulty   String   @default("medium")
+  modelUrls    Json?
+  description  String?  @db.Text
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  sessions VrSession[]
+
+  @@map("vr_scenarios")
+}
+
+model AiSimulation {
+  id            String   @id @default(cuid())
+  userId        String
+  simulationType String
+  score         Decimal? @db.Decimal(5, 2)
+  sessionData   Json?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+
+  @@map("ai_simulations")
+}
+
+model AiSimulatorLeaderboard {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  score     Decimal  @db.Decimal(8, 2)
+  rank      Int?
+  period    String?
+  createdAt DateTime @default(now())
+
+  @@map("ai_simulator_leaderboard")
+}
+
+model EncyclopediaChapter {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleAr     String?
+  contentEn   String   @db.Text
+  contentAr   String?  @db.Text
+  keywords    Json?
+  category    String?
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("encyclopedia_chapters")
+}
+
+model DailyClinicalTrick {
+  id        String   @id @default(cuid())
+  titleEn   String
+  titleAr   String?
+  bodyEn    String   @db.Text
+  bodyAr    String?  @db.Text
+  category  String?
+  publishAt DateTime @db.Date
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("daily_clinical_tricks")
+}
+
+model ContentAccessLog {
+  id          String   @id @default(cuid())
+  userId      String
+  contentType String
+  contentId   String
+  accessedAt  DateTime @default(now())
+
+  @@map("content_access_logs")
+}
+
+model CareerRoadmap {
+  id          String   @id @default(cuid())
+  userId      String
+  titleEn     String
+  titleAr     String?
+  isAiGen     Boolean  @default(true)
+  roadmapJson Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  milestones RoadmapMilestone[]
+
+  @@map("career_roadmaps")
+}
+
+model RoadmapMilestone {
+  id          String   @id @default(cuid())
+  roadmapId   String
+  titleEn     String
+  titleAr     String?
+  dueDate     DateTime? @db.Date
+  isCompleted Boolean  @default(false)
+  sortOrder   Int      @default(0)
+
+  roadmap CareerRoadmap @relation(fields: [roadmapId], references: [id])
+
+  @@map("roadmap_milestones")
+}
+
+model WebrtcSession {
+  id          String   @id @default(cuid())
+  roomId      String
+  initiatorId String
+  type        String
+  status      String   @default("active")
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  recordingUrl String?
+
+  @@map("webrtc_sessions")
+}
+
+model KnowledgeMilestone {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  value       String
+  awardedAt   DateTime @default(now())
+
+  @@map("knowledge_milestones")
+}
+
+model AiChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  context   String?
+  createdAt DateTime @default(now())
+
+  messages AiChatMessage[]
+
+  @@map("ai_chat_sessions")
+}
+
+model AiChatMessage {
+  id        String   @id @default(cuid())
+  sessionId String
+  role      String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  session AiChatSession @relation(fields: [sessionId], references: [id])
+
+  @@map("ai_chat_messages")
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleAr     String?
+  bodyEn      String   @db.Text
+  bodyAr      String?  @db.Text
+  category    String?
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  authorId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("articles")
+}
+
+// ============================================================
+// CONNECT (INTERNAL COMMS)
+// ============================================================
+
+model ConnectRoom {
+  id          String   @id @default(cuid())
+  name        String?
+  type        String   @default("direct")
+  sectorId    String?
+  isEncrypted Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  participants ConnectParticipant[]
+  messages     ConnectMessage[]
+
+  @@map("connect_rooms")
+}
+
+model ConnectMessage {
+  id          String   @id @default(cuid())
+  roomId      String
+  senderId    String
+  content     String   @db.Text
+  isEncrypted Boolean  @default(true)
+  encKey      String?  @db.Text
+  readBy      Json?
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  room   ConnectRoom @relation(fields: [roomId], references: [id])
+  sender User        @relation(fields: [senderId], references: [id])
+
+  @@index([roomId])
+  @@map("connect_messages")
+}
+
+model ConnectParticipant {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  room ConnectRoom @relation(fields: [roomId], references: [id])
+
+  @@unique([roomId, userId])
+  @@map("connect_participants")
+}
+
+model UserPresence {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  status      String   @default("offline")
+  lastSeen    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_presence")
+}
+
+// ============================================================
+// PUBLIC CONTENT
+// ============================================================
+
+model IfaceNews {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleAr     String?
+  bodyEn      String   @db.Text
+  bodyAr      String?  @db.Text
+  imageUrl    String?
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@map("iface_news")
+}
+
+model IfaceEvent {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleAr     String?
+  descriptionEn String? @db.Text
+  descriptionAr String? @db.Text
+  sectorId    String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  coverUrl    String?
+  isMega      Boolean  @default(false)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("iface_events")
+}
+
+model SuccessStory {
+  id          String   @id @default(cuid())
+  nameEn      String
+  nameAr      String?
+  quoteEn     String   @db.Text
+  quoteAr     String?  @db.Text
+  role        String?
+  avatarUrl   String?
+  sectorId    String?
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("success_stories")
+}
+
+model SuccessPartner {
+  id          String   @id @default(cuid())
+  nameEn      String
+  nameAr      String?
+  logoUrl     String?
+  websiteUrl  String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("success_partners")
+}
+
+// ============================================================
+// SUPPORT TICKETS
+// ============================================================
+
+model SupportTicket {
+  id            String         @id @default(cuid())
+  requesterId   String
+  targetUserId  String?
+  priority      TicketPriority @default(normal)
+  status        TicketStatus   @default(open)
+  subject       String
+  description   String         @db.Text
+  isHierarchyBypass Boolean   @default(false)
+  resolvedAt    DateTime?
+  resolution    String?        @db.Text
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  requester User @relation(fields: [requesterId], references: [id])
+
+  @@index([status, priority])
+  @@map("support_tickets")
+}
+
+// ============================================================
+// NEW METRICS TABLES (from desc.txt KPIs)
+// ============================================================
+
+model Feedback {
+  id          String   @id @default(cuid())
+  userId      String
+  sectorId    String?
+  courseId    String?
+  requestId   String?
+  npsScore    Int
+  comment     String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@map("feedback")
+}
+
+model NewTechSolution {
+  id          String   @id @default(cuid())
+  titleEn     String
+  titleAr     String?
+  description String?  @db.Text
+  launchedAt  DateTime @db.Date
+  createdAt   DateTime @default(now())
+
+  @@map("new_tech_solutions")
+}
+
+model FranchiseCountry {
+  id          String   @id @default(cuid())
+  countryCode String   @unique
+  countryEn   String
+  countryAr   String?
+  addedAt     DateTime @default(now())
+  isNew       Boolean  @default(true)
+
+  @@map("franchise_countries")
+}
