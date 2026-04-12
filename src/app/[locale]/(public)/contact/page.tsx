@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { generateSEOMetadata } from "@/lib/seo/metadata";
 import { ContactForm } from "@/components/public/ContactForm";
 import { Mail } from "lucide-react";
+import { PublicShell, PublicPageHeader, PublicFadeIn } from "@/components/public/motion";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -15,20 +16,15 @@ export default async function ContactPage() {
   const t = await getTranslations("public.contact");
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-16">
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center justify-center size-12 rounded-full bg-[rgba(201,162,39,0.12)] border border-[rgba(201,162,39,0.25)] text-[#C9A227] mb-4">
-          <Mail className="size-6" aria-hidden />
-        </div>
-        <h1
-          className="text-3xl font-bold text-[#C9A227]"
-          style={{ fontFamily: "var(--font-eb-garamond)" }}
-        >
-          {t("title")}
-        </h1>
-        <p className="text-[#6e7d93] text-sm mt-2 max-w-md mx-auto">{t("subtitle")}</p>
+    <PublicShell className="py-16 sm:py-24">
+      <div className="container mx-auto max-w-2xl px-4">
+        <PublicPageHeader title={t("title")} subtitle={t("subtitle")}>
+          <Mail className="size-7 sm:size-8" strokeWidth={1.25} aria-hidden />
+        </PublicPageHeader>
+        <PublicFadeIn delay={0.1}>
+          <ContactForm />
+        </PublicFadeIn>
       </div>
-      <ContactForm />
-    </div>
+    </PublicShell>
   );
 }

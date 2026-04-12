@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { generateSEOMetadata } from "@/lib/seo/metadata";
 import { VerifyUvcForm } from "@/components/public/VerifyUvcForm";
 import { ShieldCheck } from "lucide-react";
+import { PublicShell, PublicPageHeader, PublicFadeIn } from "@/components/public/motion";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -15,18 +16,15 @@ export default async function VerifyLandingPage() {
   const t = await getTranslations("public.verify");
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-      <div className="inline-flex items-center justify-center size-14 rounded-full bg-[rgba(201,162,39,0.12)] border border-[rgba(201,162,39,0.25)] text-[#C9A227] mb-6">
-        <ShieldCheck className="size-7" aria-hidden />
+    <PublicShell ambient="dense" className="py-16 sm:py-24">
+      <div className="container mx-auto max-w-2xl px-4">
+        <PublicPageHeader title={t("title")} subtitle={t("subtitle")}>
+          <ShieldCheck className="size-7 sm:size-8" strokeWidth={1.25} aria-hidden />
+        </PublicPageHeader>
+        <PublicFadeIn delay={0.12}>
+          <VerifyUvcForm />
+        </PublicFadeIn>
       </div>
-      <h1
-        className="text-3xl font-bold text-[#C9A227] mb-3"
-        style={{ fontFamily: "var(--font-eb-garamond)" }}
-      >
-        {t("title")}
-      </h1>
-      <p className="text-[#6e7d93] text-sm mb-10 max-w-lg mx-auto leading-relaxed">{t("subtitle")}</p>
-      <VerifyUvcForm />
-    </div>
+    </PublicShell>
   );
 }

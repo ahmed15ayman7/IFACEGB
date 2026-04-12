@@ -12,6 +12,7 @@ import {
   Scale,
   Sparkle,
 } from "lucide-react";
+import { PublicShell, PublicPageHeader, PublicFadeIn, PublicGlowCard } from "@/components/public/motion";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -110,79 +111,74 @@ export default async function SectorPublicPage({ params }: Props) {
 
   const Icon = sectorIcon(slug);
 
+  const heroDescription =
+    pg && (locale === "ar" ? pg.heroAr ?? pg.heroEn : pg.heroEn)
+      ? (locale === "ar" ? pg.heroAr ?? pg.heroEn : pg.heroEn) ?? undefined
+      : (sectorData.description ?? undefined);
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-16 space-y-12">
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="inline-flex items-center justify-center size-20 rounded-2xl bg-[rgba(201,162,39,0.1)] border border-[rgba(201,162,39,0.2)] text-[#C9A227]">
-            <Icon className="size-10" aria-hidden />
-          </div>
-        </div>
-        <h1
-          className="text-4xl font-bold text-[#C9A227]"
-          style={{ fontFamily: "var(--font-eb-garamond)" }}
+    <PublicShell className="py-16 sm:py-24">
+      <div className="container mx-auto max-w-5xl px-4">
+        <PublicPageHeader
+          title={displayName}
+          subtitle={heroDescription}
+          iconFrameClassName="!size-[5.5rem] sm:!size-28 rounded-3xl shadow-[0_20px_50px_rgba(201,162,39,0.15)]"
         >
-          {displayName}
-        </h1>
-        {pg && (
-          <p className="text-[#6e7d93] max-w-2xl mx-auto text-lg leading-relaxed">
-            {locale === "ar" ? pg.heroAr ?? pg.heroEn : pg.heroEn}
-          </p>
-        )}
-        {!pg && sectorData.description && (
-          <p className="text-[#6e7d93] max-w-2xl mx-auto text-lg">{sectorData.description}</p>
-        )}
-      </div>
+          <Icon className="size-12 sm:size-14" strokeWidth={1.2} aria-hidden />
+        </PublicPageHeader>
 
-      {pg?.contentEn && (
-        <div className="bg-[rgba(10,31,61,0.4)] rounded-2xl border border-[rgba(201,162,39,0.12)] p-8">
-          <div className="prose prose-invert text-[#A8B5C8] max-w-none">
-            {locale === "ar" ? pg.contentAr ?? pg.contentEn : pg.contentEn}
-          </div>
-        </div>
-      )}
+        {pg?.contentEn && (
+          <PublicFadeIn delay={0.08} className="mb-14">
+            <div className="rounded-2xl border border-[rgba(201,162,39,0.14)] bg-[rgba(10,31,61,0.5)] p-8 backdrop-blur-sm">
+              <div className="prose prose-invert max-w-none text-[#A8B5C8]">
+                {locale === "ar" ? pg.contentAr ?? pg.contentEn : pg.contentEn}
+              </div>
+            </div>
+          </PublicFadeIn>
+        )}
 
-      {features.length > 0 && (
-        <div>
-          <h2
-            className="text-2xl font-bold text-[#C9A227] mb-6 text-center"
+        {features.length > 0 && (
+          <PublicFadeIn delay={0.06} className="mb-16">
+            <h2
+              className="mb-8 text-center text-2xl font-bold text-[#C9A227] sm:text-3xl"
+              style={{ fontFamily: "var(--font-eb-garamond)" }}
+            >
+              {t("services_title")}
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature, i) => (
+                <PublicGlowCard key={`${feature}-${i}`} delay={i * 0.05} className="flex items-start gap-3 p-5">
+                  <Sparkle className="mt-0.5 size-5 shrink-0 text-[#C9A227]" aria-hidden />
+                  <p className="text-sm leading-relaxed text-[#A8B5C8]">{feature}</p>
+                </PublicGlowCard>
+              ))}
+            </div>
+          </PublicFadeIn>
+        )}
+
+        <PublicFadeIn delay={0.1} className="text-center">
+          <h3
+            className="mb-6 text-xl font-bold text-[#C9A227] sm:text-2xl"
             style={{ fontFamily: "var(--font-eb-garamond)" }}
           >
-            {t("services_title")}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map((feature, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3 p-5 rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(10,31,61,0.4)]"
-              >
-                <Sparkle className="text-[#C9A227] size-5 shrink-0 mt-0.5" aria-hidden />
-                <p className="text-[#A8B5C8] text-sm">{feature}</p>
-              </div>
-            ))}
+            {t("cta_title")}
+          </h3>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href={`/${locale}/auth/login`}
+              className="inline-flex h-12 items-center rounded-xl bg-[rgba(201,162,39,0.92)] px-8 text-sm font-semibold text-[#060f1e] shadow-[0_8px_28px_rgba(201,162,39,0.25)] transition-all hover:bg-[#C9A227]"
+            >
+              {t("cta_primary")}
+            </Link>
+            <Link
+              href={`/${locale}/apply-agency`}
+              className="inline-flex h-12 items-center rounded-xl border border-[rgba(201,162,39,0.35)] px-8 text-sm font-semibold text-[#C9A227] transition-all hover:bg-[rgba(201,162,39,0.08)]"
+            >
+              {t("cta_agency")}
+            </Link>
           </div>
-        </div>
-      )}
-
-      <div className="text-center space-y-4">
-        <h3 className="text-xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          {t("cta_title")}
-        </h3>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link
-            href={`/${locale}/auth/login`}
-            className="h-11 px-6 rounded-xl bg-[rgba(201,162,39,0.9)] text-[#060f1e] font-semibold hover:bg-[#C9A227] transition-colors flex items-center"
-          >
-            {t("cta_primary")}
-          </Link>
-          <Link
-            href={`/${locale}/apply-agency`}
-            className="h-11 px-6 rounded-xl border border-[rgba(201,162,39,0.3)] text-[#C9A227] hover:bg-[rgba(201,162,39,0.08)] transition-colors flex items-center"
-          >
-            {t("cta_agency")}
-          </Link>
-        </div>
+        </PublicFadeIn>
       </div>
-    </div>
+    </PublicShell>
   );
 }

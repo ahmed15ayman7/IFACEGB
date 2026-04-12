@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { generateSEOMetadata } from "@/lib/seo/metadata";
 import { Scale } from "lucide-react";
+import { PublicShell, PublicPageHeader, PublicFadeIn } from "@/components/public/motion";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -21,30 +22,33 @@ export default async function TermsPage() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16">
-      <div className="flex items-center gap-3 mb-8">
-        <Scale className="size-8 text-[#C9A227] shrink-0" aria-hidden />
-        <div>
-          <h1
-            className="text-3xl font-bold text-[#C9A227]"
-            style={{ fontFamily: "var(--font-eb-garamond)" }}
-          >
-            {t("title")}
-          </h1>
-          <p className="text-[#6e7d93] text-xs mt-1">
-            {t("updated")}: {year}
-          </p>
+    <PublicShell ambient="minimal" className="py-16 sm:py-24">
+      <div className="container mx-auto max-w-3xl px-4">
+        <PublicPageHeader
+          align="start"
+          eyebrow={`${t("updated")}: ${year}`}
+          title={t("title")}
+        >
+          <Scale className="size-7 sm:size-8" strokeWidth={1.25} aria-hidden />
+        </PublicPageHeader>
+
+        <PublicFadeIn delay={0.06} className="mb-12 text-sm leading-relaxed text-[#A8B5C8]">
+          {t("intro")}
+        </PublicFadeIn>
+
+        <div className="relative ms-1 border-s-2 border-[rgba(201,162,39,0.18)] ps-8 sm:ps-10">
+          {sections.map((s, i) => (
+            <PublicFadeIn key={s.title} delay={i * 0.06} className="relative pb-12 last:pb-0">
+              <span
+                className="absolute -start-[25px] top-2 size-2.5 rounded-full border-2 border-[#060f1e] bg-[#C9A227] sm:-start-[29px]"
+                aria-hidden
+              />
+              <h2 className="mb-2 text-sm font-semibold tracking-wide text-[#e8c84a]">{s.title}</h2>
+              <p className="text-sm leading-relaxed text-[#6e7d93]">{s.body}</p>
+            </PublicFadeIn>
+          ))}
         </div>
       </div>
-      <p className="text-[#A8B5C8] text-sm leading-relaxed mb-10">{t("intro")}</p>
-      <div className="space-y-8">
-        {sections.map((s) => (
-          <section key={s.title}>
-            <h2 className="text-[#C9A227] font-semibold text-sm mb-2">{s.title}</h2>
-            <p className="text-[#6e7d93] text-sm leading-relaxed">{s.body}</p>
-          </section>
-        ))}
-      </div>
-    </div>
+    </PublicShell>
   );
 }

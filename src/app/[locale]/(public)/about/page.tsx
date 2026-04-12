@@ -1,7 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { generateSEOMetadata } from "@/lib/seo/metadata";
-import { Target, Shield, BarChart3 } from "lucide-react";
+import { Target, Shield, BarChart3, BookOpen } from "lucide-react";
+import { PublicShell, PublicPageHeader, PublicFadeIn, PublicGlowCard } from "@/components/public/motion";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -20,42 +21,35 @@ export default async function AboutPage() {
   ] as const;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16 space-y-12">
-      <header className="text-center space-y-4">
-        <h1
-          className="text-4xl font-bold text-[#C9A227]"
-          style={{ fontFamily: "var(--font-eb-garamond)" }}
-        >
-          {t("title")}
-        </h1>
-        <p className="text-[#A8B5C8] text-lg leading-relaxed">{t("lead")}</p>
-      </header>
+    <PublicShell className="py-16 sm:py-24">
+      <div className="container mx-auto max-w-3xl px-4">
+        <PublicPageHeader title={t("title")} subtitle={t("lead")}>
+          <BookOpen className="size-7 sm:size-8" strokeWidth={1.25} aria-hidden />
+        </PublicPageHeader>
 
-      <div className="space-y-6 text-[#A8B5C8] text-sm leading-relaxed">
-        <p>{t("p1")}</p>
-        <p>{t("p2")}</p>
+        <PublicFadeIn delay={0.06} className="space-y-6 text-sm leading-relaxed text-[#A8B5C8] sm:text-[15px]">
+          <p>{t("p1")}</p>
+          <p>{t("p2")}</p>
+        </PublicFadeIn>
+
+        <PublicFadeIn delay={0.12} className="mt-16">
+          <h2
+            className="mb-8 text-center text-xl font-semibold text-[#C9A227] sm:text-2xl"
+            style={{ fontFamily: "var(--font-eb-garamond)" }}
+          >
+            {t("pillars_title")}
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {pillars.map(({ title, text, icon: Icon }, i) => (
+              <PublicGlowCard key={title} delay={i * 0.07} className="p-5 text-start">
+                <Icon className="mb-3 size-8 text-[#C9A227] opacity-95" strokeWidth={1.35} aria-hidden />
+                <h3 className="mb-2 text-sm font-semibold text-[#e8c84a]">{title}</h3>
+                <p className="text-xs leading-relaxed text-[#6e7d93]">{text}</p>
+              </PublicGlowCard>
+            ))}
+          </div>
+        </PublicFadeIn>
       </div>
-
-      <section>
-        <h2
-          className="text-xl font-semibold text-[#C9A227] mb-6 text-center"
-          style={{ fontFamily: "var(--font-eb-garamond)" }}
-        >
-          {t("pillars_title")}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {pillars.map(({ title, text, icon: Icon }) => (
-            <div
-              key={title}
-              className="rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(10,31,61,0.35)] p-5 text-start"
-            >
-              <Icon className="size-8 text-[#C9A227] mb-3 opacity-90" strokeWidth={1.5} aria-hidden />
-              <h3 className="text-[#C9A227] font-medium text-sm mb-2">{title}</h3>
-              <p className="text-[#6e7d93] text-xs leading-relaxed">{text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
+    </PublicShell>
   );
 }

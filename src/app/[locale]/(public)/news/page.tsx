@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Newspaper } from "lucide-react";
+import { PublicShell, PublicPageHeader, PublicFadeIn, PublicGlowCard } from "@/components/public/motion";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -39,59 +40,55 @@ export default async function NewsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-16 space-y-8">
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center size-12 rounded-full bg-[rgba(201,162,39,0.1)] border border-[rgba(201,162,39,0.2)] text-[#C9A227] mb-4">
-          <Newspaper className="size-6" aria-hidden />
-        </div>
-        <h1 className="text-4xl font-bold text-[#C9A227] mb-3" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-          {t("title")}
-        </h1>
-        <p className="text-[#6e7d93] max-w-xl mx-auto text-sm">{t("subtitle")}</p>
-      </div>
+    <PublicShell className="py-16 sm:py-24">
+      <div className="container mx-auto max-w-6xl px-4">
+        <PublicPageHeader title={t("title")} subtitle={t("subtitle")}>
+          <Newspaper className="size-7 sm:size-8" strokeWidth={1.25} aria-hidden />
+        </PublicPageHeader>
 
-      <div className="space-y-4">
-        {news.length === 0 ? (
-          <p className="text-center text-[#6e7d93] py-16">{t("empty")}</p>
-        ) : (
-          news.map((item) => {
-            const title = locale === "ar" ? (item.titleAr ?? item.titleEn) : item.titleEn;
-            const bodyRaw =
-              locale === "ar"
-                ? (item.bodyAr ?? item.bodyEn)
-                : item.bodyEn;
-            const excerpt = stripHtml(bodyRaw).slice(0, 200);
-            return (
-              <article
-                key={item.id}
-                className="rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(10,31,61,0.4)] p-6 hover:border-[rgba(201,162,39,0.25)] transition-all"
-              >
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="flex-1 min-w-0">
-                    <h2
-                      className="text-[#C9A227] font-semibold text-lg mb-2"
-                      style={{ fontFamily: "var(--font-eb-garamond)" }}
+        <div className="space-y-4">
+          {news.length === 0 ? (
+            <PublicFadeIn>
+              <p className="py-16 text-center text-sm text-[#6e7d93]">{t("empty")}</p>
+            </PublicFadeIn>
+          ) : (
+            news.map((item, i) => {
+              const title = locale === "ar" ? (item.titleAr ?? item.titleEn) : item.titleEn;
+              const bodyRaw = locale === "ar" ? (item.bodyAr ?? item.bodyEn) : item.bodyEn;
+              const excerpt = stripHtml(bodyRaw).slice(0, 220);
+              return (
+                <PublicGlowCard key={item.id} delay={i * 0.04} className="group border-s-2 border-s-[rgba(201,162,39,0.35)] p-0">
+                  <article className="flex flex-col gap-4 p-6 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+                    <div className="min-w-0 flex-1">
+                      <h2
+                        className="mb-2 text-lg font-semibold text-[#C9A227] transition-colors group-hover:text-[#e8c84a] sm:text-xl"
+                        style={{ fontFamily: "var(--font-eb-garamond)" }}
+                      >
+                        {title}
+                      </h2>
+                      <p className="line-clamp-3 text-sm leading-relaxed text-[#6e7d93]">
+                        {excerpt}
+                        {excerpt.length >= 220 ? "…" : ""}
+                      </p>
+                    </div>
+                    <time
+                      dateTime={item.publishedAt?.toISOString()}
+                      className="shrink-0 text-xs text-[#6e7d93] sm:pt-1 sm:text-end"
                     >
-                      {title}
-                    </h2>
-                    <p className="text-[#6e7d93] text-sm line-clamp-2">
-                      {excerpt}
-                      {excerpt.length >= 200 ? "…" : ""}
-                    </p>
-                  </div>
-                  <span className="text-[#6e7d93] text-xs whitespace-nowrap">
-                    {item.publishedAt
-                      ? new Date(item.publishedAt).toLocaleDateString(
-                          locale === "ar" ? "ar-EG" : "en-GB",
-                        )
-                      : "—"}
-                  </span>
-                </div>
-              </article>
-            );
-          })
-        )}
+                      {item.publishedAt
+                        ? new Date(item.publishedAt).toLocaleDateString(
+                            locale === "ar" ? "ar-EG" : "en-GB",
+                            { day: "numeric", month: "short", year: "numeric" }
+                          )
+                        : "—"}
+                    </time>
+                  </article>
+                </PublicGlowCard>
+              );
+            })
+          )}
+        </div>
       </div>
-    </div>
+    </PublicShell>
   );
 }
