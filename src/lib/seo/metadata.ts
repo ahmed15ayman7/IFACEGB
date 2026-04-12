@@ -163,7 +163,7 @@ const SEO_MESSAGES: Record<
       description: "Sign in to your iFACE portal and access your personalized dashboard.",
     },
     ar: {
-      title: "تسجيل الدخول | بوابة iFACE",
+      title: "دخول | بوابة iFACE",
       description: "سجل دخولك إلى بوابة iFACE وادخل إلى لوحة التحكم الخاصة بك.",
     },
   },

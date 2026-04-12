@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Sparkles,
   Shield,
+  ShieldCheck,
   GraduationCap,
   LayoutGrid,
   Users,
@@ -19,6 +20,19 @@ import {
   Globe2,
   Landmark,
   Scale,
+  Target,
+  Eye,
+  Boxes,
+  Compass,
+  UserCheck,
+  ClipboardList,
+  BadgeCheck,
+  BookOpen,
+  Newspaper,
+  CalendarDays,
+  Mail,
+  UserPlus,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -48,6 +62,8 @@ const AGENTS_IMAGE =
   "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=960&q=80";
 const CENTERS_IMAGE =
   "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=960&q=80";
+const STORY_IMAGE =
+  "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=960&q=80";
 
 const viewAnim = {
   initial: { opacity: 0, y: 28 },
@@ -88,6 +104,46 @@ export function PublicLanding() {
         { q: "testimonial_3_quote", n: "testimonial_3_name", r: "testimonial_3_role" },
       ] as const,
     []
+  );
+
+  const journeySteps = useMemo(
+    () =>
+      [
+        { icon: Compass, titleKey: "journey_step1_title", descKey: "journey_step1_desc" },
+        { icon: UserCheck, titleKey: "journey_step2_title", descKey: "journey_step2_desc" },
+        { icon: ClipboardList, titleKey: "journey_step3_title", descKey: "journey_step3_desc" },
+        { icon: BadgeCheck, titleKey: "journey_step4_title", descKey: "journey_step4_desc" },
+      ] as const,
+    []
+  );
+
+  const trustItems = useMemo(
+    () =>
+      [
+        { icon: BookOpen, titleKey: "trust_1_title", descKey: "trust_1_desc" },
+        { icon: ShieldCheck, titleKey: "trust_2_title", descKey: "trust_2_desc" },
+        { icon: Languages, titleKey: "trust_3_title", descKey: "trust_3_desc" },
+        { icon: BarChart3, titleKey: "trust_4_title", descKey: "trust_4_desc" },
+      ] as const,
+    []
+  );
+
+  const hubLinks = useMemo(
+    () =>
+      [
+        { href: `/${locale}/about`, title: tNav("about"), descKey: "hub_about_desc" as const, icon: BookOpen },
+        { href: `/${locale}/news`, title: tNav("news"), descKey: "hub_news_desc" as const, icon: Newspaper },
+        { href: `/${locale}/events`, title: tNav("events"), descKey: "hub_events_desc" as const, icon: CalendarDays },
+        { href: `/${locale}/verify`, title: tNav("verify"), descKey: "hub_verify_desc" as const, icon: ShieldCheck },
+        { href: `/${locale}/contact`, title: t("hub_contact_title"), descKey: "hub_contact_desc" as const, icon: Mail },
+        {
+          href: `/${locale}/apply-agency`,
+          title: tNav("apply_agency"),
+          descKey: "hub_apply_desc" as const,
+          icon: UserPlus,
+        },
+      ] as const,
+    [locale, t, tNav]
   );
 
   return (
@@ -201,6 +257,21 @@ export function PublicLanding() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              transition={{ delay: 0.22, duration: 0.45 }}
+              className="mt-4 flex justify-center lg:justify-start"
+            >
+              <a
+                href="#story"
+                className="group inline-flex items-center gap-2 text-xs font-medium text-[#6e7d93] transition-colors hover:text-[#C9A227]"
+              >
+                <span className="border-b border-dashed border-current pb-px">{t("cta_story")}</span>
+                <ArrowRight className="size-3.5 opacity-70 transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" aria-hidden />
+              </a>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ delay: 0.28, duration: 0.5 }}
               className="mx-auto mt-10 grid max-w-xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-[rgba(201,162,39,0.15)] bg-[rgba(201,162,39,0.15)] sm:mx-0 sm:max-w-lg sm:grid-cols-4"
             >
@@ -263,6 +334,97 @@ export function PublicLanding() {
       </section>
 
       <section
+        id="story"
+        className="scroll-mt-24 border-t border-[rgba(201,162,39,0.08)] px-4 py-20 sm:py-24"
+        style={{
+          background:
+            "linear-gradient(165deg, rgba(10,31,61,0.55) 0%, rgba(6,15,30,0.92) 45%, rgba(6,15,30,1) 100%)",
+        }}
+      >
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-14">
+            <motion.div
+              {...viewAnim}
+              className="lg:col-span-7"
+            >
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#C9A227]">
+                {t("story_kicker")}
+              </p>
+              <h2
+                className="mb-6 text-3xl font-bold leading-tight text-[#e8c84a] sm:text-4xl lg:text-[2.35rem]"
+                style={{ fontFamily: "var(--font-eb-garamond)" }}
+              >
+                {t("story_title")}
+              </h2>
+              <p className="mb-5 text-lg leading-relaxed text-[#A8B5C8] sm:text-xl">{t("story_lead")}</p>
+              <p className="mb-4 text-sm leading-relaxed text-[#6e7d93] sm:text-base">{t("story_p1")}</p>
+              <p className="text-sm leading-relaxed text-[#6e7d93] sm:text-base">{t("story_p2")}</p>
+            </motion.div>
+
+            <div className="flex flex-col gap-5 lg:col-span-5">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="relative overflow-hidden rounded-2xl border border-[rgba(201,162,39,0.18)] shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+              >
+                <div className="relative aspect-[5/4] w-full sm:aspect-[16/11]">
+                  <Image
+                    src={STORY_IMAGE}
+                    alt={t("story_image_alt")}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 40vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#060f1e] via-[#060f1e]/40 to-transparent" />
+                </div>
+              </motion.div>
+
+              {(
+                [
+                  { icon: Target, titleKey: "mv_mission_title", bodyKey: "mv_mission_text" },
+                  { icon: Eye, titleKey: "mv_vision_title", bodyKey: "mv_vision_text" },
+                  { icon: Boxes, titleKey: "mv_model_title", bodyKey: "mv_model_text" },
+                ] as const
+              ).map((card, i) => {
+                const CardIcon = card.icon;
+                return (
+                  <motion.div
+                    key={card.titleKey}
+                    initial={{ opacity: 0, x: isRtl ? 24 : -24 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-30px" }}
+                    transition={{ delay: 0.06 + i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    className="group relative overflow-hidden rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.65)] p-5 backdrop-blur-sm transition-colors hover:border-[rgba(201,162,39,0.28)]"
+                  >
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(201,162,39,0.07)] to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                    />
+                    <div className="relative flex gap-4">
+                      <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[rgba(201,162,39,0.2)] bg-[rgba(201,162,39,0.06)] text-[#C9A227]">
+                        <CardIcon className="size-5" strokeWidth={1.4} aria-hidden />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3
+                          className="mb-1.5 text-base font-semibold text-[#C9A227]"
+                          style={{ fontFamily: "var(--font-eb-garamond)" }}
+                        >
+                          {t(card.titleKey)}
+                        </h3>
+                        <p className="text-sm leading-relaxed text-[#6e7d93]">{t(card.bodyKey)}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
         id="features"
         className="scroll-mt-24 border-t border-[rgba(201,162,39,0.08)] bg-[rgba(6,15,30,0.35)] px-4 py-20"
       >
@@ -308,6 +470,66 @@ export function PublicLanding() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      <section id="journey" className="scroll-mt-24 px-4 py-20 sm:py-24">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div {...viewAnim} className="mx-auto mb-14 max-w-2xl text-center">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#C9A227]">
+              {t("journey_kicker")}
+            </p>
+            <h2
+              className="mb-3 text-3xl font-bold text-[#C9A227] sm:text-4xl"
+              style={{ fontFamily: "var(--font-eb-garamond)" }}
+            >
+              {t("journey_title")}
+            </h2>
+            <p className="text-sm leading-relaxed text-[#6e7d93] sm:text-base">{t("journey_subtitle")}</p>
+            <div className="mx-auto mt-4 h-px w-28 bg-gradient-to-r from-transparent via-[rgba(201,162,39,0.5)] to-transparent" />
+          </motion.div>
+
+          <ol className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+            {journeySteps.map((step, i) => {
+              const StepIcon = step.icon;
+              return (
+                <motion.li
+                  key={step.titleKey}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative"
+                >
+                  <div className="group relative h-full overflow-hidden rounded-2xl border border-[rgba(201,162,39,0.14)] bg-[rgba(6,15,30,0.55)] p-5 shadow-[0_14px_44px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-all duration-300 hover:border-[rgba(201,162,39,0.32)] hover:shadow-[0_18px_50px_rgba(201,162,39,0.08)]">
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(201,162,39,0.06)] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    />
+                    <div className="relative mb-4 flex items-center gap-3">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[rgba(201,162,39,0.25)] bg-[rgba(201,162,39,0.1)] text-[11px] font-bold tabular-nums text-[#e8c84a]">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <motion.div
+                        className="flex size-12 items-center justify-center rounded-xl border border-[rgba(201,162,39,0.22)] bg-[rgba(6,15,30,0.85)] text-[#C9A227]"
+                        whileHover={{ scale: 1.06 }}
+                        transition={{ type: "spring", stiffness: 420, damping: 20 }}
+                      >
+                        <StepIcon className="size-5" strokeWidth={1.35} aria-hidden />
+                      </motion.div>
+                    </div>
+                    <h3
+                      className="relative mb-2 text-lg font-semibold text-[#e8c84a]"
+                      style={{ fontFamily: "var(--font-eb-garamond)" }}
+                    >
+                      {t(step.titleKey)}
+                    </h3>
+                    <p className="relative text-sm leading-relaxed text-[#6e7d93]">{t(step.descKey)}</p>
+                  </div>
+                </motion.li>
+              );
+            })}
+          </ol>
         </div>
       </section>
 
@@ -376,6 +598,55 @@ export function PublicLanding() {
                       </div>
                     </Link>
                   </TiltCard>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="trust"
+        className="scroll-mt-24 border-t border-[rgba(201,162,39,0.08)] px-4 py-20 sm:py-24"
+        style={{
+          background: "linear-gradient(180deg, rgba(6,15,30,0.2) 0%, rgba(10,31,61,0.35) 50%, rgba(6,15,30,0.5) 100%)",
+        }}
+      >
+        <div className="container mx-auto max-w-6xl">
+          <motion.div {...viewAnim} className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#C9A227]">
+              {t("trust_kicker")}
+            </p>
+            <h2
+              className="mb-3 text-3xl font-bold text-[#C9A227] sm:text-4xl"
+              style={{ fontFamily: "var(--font-eb-garamond)" }}
+            >
+              {t("trust_title")}
+            </h2>
+            <p className="text-sm leading-relaxed text-[#6e7d93] sm:text-base">{t("trust_subtitle")}</p>
+            <div className="mx-auto mt-4 h-px w-28 bg-gradient-to-r from-transparent via-[rgba(201,162,39,0.5)] to-transparent" />
+          </motion.div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {trustItems.map((item, i) => {
+              const TrustIcon = item.icon;
+              return (
+                <motion.div
+                  key={item.titleKey}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ delay: i * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex flex-col rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.5)] p-5 transition-transform duration-300 hover:-translate-y-0.5 hover:border-[rgba(201,162,39,0.28)]"
+                >
+                  <TrustIcon className="mb-3 size-8 text-[#C9A227]" strokeWidth={1.35} aria-hidden />
+                  <h3
+                    className="mb-2 text-base font-semibold text-[#e8c84a]"
+                    style={{ fontFamily: "var(--font-eb-garamond)" }}
+                  >
+                    {t(item.titleKey)}
+                  </h3>
+                  <p className="flex-1 text-sm leading-relaxed text-[#6e7d93]">{t(item.descKey)}</p>
                 </motion.div>
               );
             })}
@@ -496,6 +767,64 @@ export function PublicLanding() {
               </motion.blockquote>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section
+        id="explore"
+        className="scroll-mt-24 border-t border-[rgba(201,162,39,0.08)] bg-[rgba(6,15,30,0.25)] px-4 py-20 sm:py-24"
+      >
+        <div className="container mx-auto max-w-6xl">
+          <motion.div {...viewAnim} className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#C9A227]">
+              {t("hub_kicker")}
+            </p>
+            <h2
+              className="mb-3 text-3xl font-bold text-[#C9A227] sm:text-4xl"
+              style={{ fontFamily: "var(--font-eb-garamond)" }}
+            >
+              {t("hub_title")}
+            </h2>
+            <p className="text-sm leading-relaxed text-[#6e7d93] sm:text-base">{t("hub_subtitle")}</p>
+            <div className="mx-auto mt-4 h-px w-28 bg-gradient-to-r from-transparent via-[rgba(201,162,39,0.5)] to-transparent" />
+          </motion.div>
+
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {hubLinks.map((item, i) => {
+              const HubIcon = item.icon;
+              return (
+                <motion.li
+                  key={item.href}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ delay: i * 0.05, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Link
+                    href={item.href}
+                    className="group flex h-full flex-col rounded-xl border border-[rgba(201,162,39,0.14)] bg-[rgba(10,31,61,0.35)] p-5 text-start transition-all duration-300 hover:border-[rgba(201,162,39,0.4)] hover:bg-[rgba(10,31,61,0.55)]"
+                  >
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-[rgba(201,162,39,0.2)] bg-[rgba(201,162,39,0.07)] text-[#C9A227] transition-colors group-hover:border-[rgba(201,162,39,0.35)]">
+                        <HubIcon className="size-5" strokeWidth={1.35} aria-hidden />
+                      </span>
+                      <ArrowRight
+                        className="size-4 shrink-0 text-[rgba(201,162,39,0.45)] transition-transform group-hover:translate-x-0.5 group-hover:text-[#C9A227] rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                        aria-hidden
+                      />
+                    </div>
+                    <h3
+                      className="mb-2 text-lg font-semibold text-[#e8c84a]"
+                      style={{ fontFamily: "var(--font-eb-garamond)" }}
+                    >
+                      {item.title}
+                    </h3>
+                    <p className="flex-1 text-sm leading-relaxed text-[#6e7d93]">{t(item.descKey)}</p>
+                  </Link>
+                </motion.li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 
