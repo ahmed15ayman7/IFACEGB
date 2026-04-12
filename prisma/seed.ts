@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding iFACE OS database...");
+  console.log("🌱 Seeding IFACE GB database...");
 
   // ── Sectors ──────────────────────────────────────────────
   const sectors = await Promise.all([
