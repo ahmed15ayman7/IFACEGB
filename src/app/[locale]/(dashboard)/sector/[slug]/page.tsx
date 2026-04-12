@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { getLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { SectorDashboardHeaderIcon } from "@/components/dashboard/SectorDashboardHeaderIcon";
 import { SectorKpiCards } from "@/components/dashboard/SectorKpiCards";
@@ -85,6 +85,71 @@ async function getSectorData(slug: string) {
   };
 }
 
+type SectorDashboardData = NonNullable<Awaited<ReturnType<typeof getSectorData>>>;
+
+const KNOWN_SECTOR_SLUGS = [
+  "training",
+  "accreditation",
+  "consultancy",
+  "tech",
+  "partnerships",
+] as const;
+
+const SECTOR_FALLBACK_META: Record<
+  (typeof KNOWN_SECTOR_SLUGS)[number],
+  { nameEn: string; description: string }
+> = {
+  training: {
+    nameEn: "Training & Development",
+    description: "Professional training programs, LMS, virtual classrooms, and certified diplomas.",
+  },
+  accreditation: {
+    nameEn: "International Accreditation",
+    description: "World-recognized institutional and program accreditation.",
+  },
+  consultancy: {
+    nameEn: "Consultancy & Excellence",
+    description: "Strategic institutional consulting and performance excellence.",
+  },
+  tech: {
+    nameEn: "Tech Engine",
+    description: "AI-powered EdTech, Face-ID services, and digital infrastructure.",
+  },
+  partnerships: {
+    nameEn: "Global Partnerships",
+    description: "Master franchise network and international alliances.",
+  },
+};
+
+function emptyRevenueChart(locale: string) {
+  return Array.from({ length: 6 }, (_, i) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - (5 - i));
+    return {
+      month: d.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { month: "short" }),
+      revenue: 0,
+    };
+  });
+}
+
+/** When DB has no Sector row yet, super_admin/admin still need to open these URLs (no redirect to god-view). */
+function buildFallbackSectorDashboard(slug: string, locale: string): SectorDashboardData | null {
+  if (!KNOWN_SECTOR_SLUGS.includes(slug as (typeof KNOWN_SECTOR_SLUGS)[number])) return null;
+  const meta = SECTOR_FALLBACK_META[slug as keyof typeof SECTOR_FALLBACK_META];
+  return {
+    sector: { nameEn: meta.nameEn, description: meta.description } as SectorDashboardData["sector"],
+    metrics: {
+      pendingRequests: 0,
+      resolvedToday: 0,
+      openSLA: 0,
+      monthlyRevenue: 0,
+      walletBalance: 0,
+      employeeCount: 0,
+    },
+    revenueChart: emptyRevenueChart(locale),
+  };
+}
+
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
 export default async function SectorDashboard({ params }: Props) {
@@ -94,9 +159,16 @@ export default async function SectorDashboard({ params }: Props) {
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
 
-  const data = await getSectorData(slug);
+  let data = await getSectorData(slug);
   if (!data) {
-    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
+    const role = session.user.role;
+    if (role === "super_admin" || role === "admin") {
+      const fallback = buildFallbackSectorDashboard(slug, locale);
+      if (!fallback) notFound();
+      data = fallback;
+    } else {
+      redirect(getRoleHomePath(locale, role, session.user.sectorId ?? null));
+    }
   }
 
   const { sector, metrics, revenueChart } = data;
