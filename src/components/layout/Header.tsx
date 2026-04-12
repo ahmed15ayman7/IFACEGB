@@ -69,8 +69,8 @@ export function Header() {
             <Image
               src="/logo-dark.png"
               alt="iFACE Global"
-              width={40}
-              height={40}
+              width={70}
+              height={70}
               className="h-8 w-auto shrink-0 object-contain sm:h-9"
               priority
             />
