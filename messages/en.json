@@ -285,6 +285,7 @@
       "rewards": "Rewards",
       "attendance": "Attendance",
       "franchise": "Franchise hub",
+      "settings": "Settings",
       "sign_out": "Sign out"
     },
     "godView": {
@@ -332,6 +333,30 @@
       "directiveSend": "Broadcast directive",
       "directiveSending": "Sending…",
       "directiveSent": "Directive sent"
+    },
+    "settings": {
+      "title": "Account settings",
+      "subtitle": "Update your profile, language, and security preferences.",
+      "section_profile": "Profile",
+      "section_language": "Language & region",
+      "section_security": "Security",
+      "email": "Email",
+      "email_hint": "Email is managed by an administrator. Contact support to change it.",
+      "name_en": "Display name (English)",
+      "name_ar": "Display name (Arabic)",
+      "interface_language": "Interface language",
+      "language_hint": "Saves to your account. You will be switched to the matching locale URL after save.",
+      "timezone": "Timezone",
+      "current_password": "Current password",
+      "new_password": "New password",
+      "confirm_password": "Confirm new password",
+      "password_optional": "Leave password fields empty to keep your current password.",
+      "password_mismatch": "New passwords do not match.",
+      "wrong_password": "Current password is incorrect.",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Settings saved.",
+      "save_error": "Could not save settings. Try again."
     }
   }
 }

@@ -24,6 +24,7 @@ import {
   MessageCircle,
   Network,
   Scale,
+  Settings,
   UserCircle,
   Users,
   Wallet,
@@ -48,7 +49,8 @@ type NavKey =
   | "portal"
   | "rewards"
   | "attendance"
-  | "franchise";
+  | "franchise"
+  | "settings";
 
 type NavItem = { href: string; navKey: NavKey };
 
@@ -72,10 +74,12 @@ const NAV_ICONS: Record<NavKey, LucideIcon> = {
   rewards: Award,
   attendance: CalendarDays,
   franchise: Network,
+  settings: Settings,
 };
 
 function getNavItems(role: UserRole, sectorId: string | null, locale: string): NavItem[] {
   const base = `/${locale}`;
+  const settingsItem: NavItem = { href: `${base}/settings`, navKey: "settings" };
 
   const commonItems: NavItem[] = [{ href: `${base}/dashboard`, navKey: "dashboard" }];
 
@@ -91,6 +95,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/sector/partnerships`, navKey: "partnerships" },
       { href: `${base}/lms`, navKey: "lms" },
       { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
     ];
   }
 
@@ -100,6 +105,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/admin/employees`, navKey: "hr" },
       { href: `${base}/admin/finance`, navKey: "finance" },
       { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
     ];
   }
 
@@ -112,6 +118,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/sector/${sectorId}/wallet`, navKey: "wallet" },
       { href: `${base}/lms`, navKey: "lms" },
       { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
     ];
   }
 
@@ -123,6 +130,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/employee/rewards`, navKey: "rewards" },
       { href: `${base}/lms`, navKey: "lms" },
       { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
     ];
   }
 
@@ -131,10 +139,11 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       ...commonItems,
       { href: `${base}/franchise`, navKey: "franchise" },
       { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
     ];
   }
 
-  return commonItems;
+  return [...commonItems, settingsItem];
 }
 
 export function DashboardNav({

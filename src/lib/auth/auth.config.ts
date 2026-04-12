@@ -69,13 +69,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id ?? "";
         token.role = (user as { role: UserRole }).role;
         token.sectorId = (user as { sectorId: string | null }).sectorId;
+        token.name = user.name ?? token.name;
         token.nameAr = (user as { nameAr: string | null }).nameAr;
         token.locale = (user as { locale: string | null }).locale ?? "en";
+      }
+      if (trigger === "update" && session) {
+        const s = session as {
+          name?: string | null;
+          nameAr?: string | null;
+          locale?: string;
+        };
+        if (s.name !== undefined) token.name = s.name;
+        if (s.nameAr !== undefined) token.nameAr = s.nameAr;
+        if (s.locale !== undefined) token.locale = s.locale;
       }
       return token;
     },
@@ -84,6 +95,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.role = token.role as UserRole;
         session.user.sectorId = token.sectorId as string | null;
+        session.user.name = (token.name as string | null | undefined) ?? session.user.name;
         session.user.nameAr = token.nameAr as string | null;
         session.user.locale = (token.locale as string | undefined) ?? "en";
       }

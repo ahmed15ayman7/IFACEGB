@@ -24,6 +24,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: UserRole;
     sectorId: string | null;
+    name?: string | null;
     nameAr: string | null;
     locale: string;
   }
