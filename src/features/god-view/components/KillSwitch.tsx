@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { Circle } from "lucide-react";
 
 type KillSwitchStatus = "idle" | "confirming" | "loading" | "active";
 
@@ -34,10 +36,17 @@ export function GodViewKillSwitch({ adminId }: { adminId: string }) {
   }
 
   return (
-    <div className="rounded-xl border border-[rgba(156,42,42,0.3)] bg-[rgba(156,42,42,0.05)] p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-xl border border-[rgba(156,42,42,0.3)] bg-[rgba(156,42,42,0.05)] p-4"
+    >
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🔴</span>
+          <span className="flex size-10 items-center justify-center shrink-0" aria-hidden>
+            <Circle className="size-7 fill-[#9C2A2A] text-[#9C2A2A]" strokeWidth={1.5} />
+          </span>
           <div>
             <h3 className="text-[#C9A227] font-semibold text-sm">Global Kill Switch</h3>
             <p className="text-[#6e7d93] text-xs">
@@ -112,6 +121,6 @@ export function GodViewKillSwitch({ adminId }: { adminId: string }) {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

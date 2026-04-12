@@ -1,6 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  AlertTriangle,
+  Check,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Lock,
+  Shield,
+  Timer,
+} from "lucide-react";
 import { io, Socket } from "socket.io-client";
 
 type Question = {
@@ -45,7 +56,7 @@ export default function ExamPage({ params }: Props) {
       ];
       if (blocked.some(Boolean)) {
         e.preventDefault();
-        showAlert("⚠️ Key combination blocked by iLock secure browser");
+        showAlert("Key combination blocked by iLock secure browser");
       }
     }
     function blockContext(e: MouseEvent) { e.preventDefault(); }
@@ -63,7 +74,7 @@ export default function ExamPage({ params }: Props) {
       if (document.hidden && status === "active") {
         setTabWarnings((prev) => {
           const next = prev + 1;
-          showAlert(`⚠️ Tab switch detected (${next}/3). Exam will be paused after 3 violations.`);
+          showAlert(`Tab switch detected (${next}/3). Exam will be paused after 3 violations.`);
           if (next >= 3) {
             setStatus("paused");
             socketRef.current?.emit("proctor:alert", {
@@ -88,13 +99,13 @@ export default function ExamPage({ params }: Props) {
 
     s.on("proctor:pause", () => {
       setStatus("paused");
-      showAlert("🚨 Exam paused by proctor. Contact your supervisor.");
+      showAlert("Exam paused by proctor. Contact your supervisor.");
     });
 
     s.on("face:score-update", ({ score }: { score: number }) => {
       setProctorScore(score);
       if (score < 95) {
-        showAlert(`⚠️ Face verification score low: ${score}%. Verify your identity.`);
+        showAlert(`Face verification score low: ${score}%. Verify your identity.`);
       }
     });
 
@@ -140,26 +151,42 @@ export default function ExamPage({ params }: Props) {
 
   if (status === "completed") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <span className="text-5xl">✅</span>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center space-y-4 max-w-md"
+        >
+          <span className="inline-flex size-16 items-center justify-center rounded-full bg-[rgba(34,197,94,0.12)] text-[#22c55e] border border-[rgba(34,197,94,0.35)] mx-auto">
+            <CheckCircle2 className="size-9" aria-hidden />
+          </span>
           <h2 className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
             {isAr ? "تم إرسال الامتحان بنجاح" : "Exam Submitted Successfully"}
           </h2>
-          <p className="text-[#6e7d93]">Your results will be reviewed and published shortly.</p>
-        </div>
+          <p className="text-[#6e7d93] text-sm">Your results will be reviewed and published shortly.</p>
+        </motion.div>
       </div>
     );
   }
 
   if (status === "paused") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[rgba(156,42,42,0.05)]">
-        <div className="text-center space-y-4 max-w-md px-4">
-          <span className="text-5xl">🔒</span>
+      <div className="min-h-screen flex items-center justify-center bg-[rgba(156,42,42,0.05)] px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center space-y-4 max-w-md"
+        >
+          <span className="inline-flex size-16 items-center justify-center rounded-full bg-[rgba(156,42,42,0.12)] text-[#9C2A2A] border border-[rgba(156,42,42,0.35)] mx-auto">
+            <Lock className="size-8" aria-hidden />
+          </span>
           <h2 className="text-2xl font-bold text-[#9C2A2A]">Exam Paused</h2>
-          <p className="text-[#6e7d93]">Your exam has been paused due to security violations. Contact your supervisor to resume.</p>
-        </div>
+          <p className="text-[#6e7d93] text-sm">
+            Your exam has been paused due to security violations. Contact your supervisor to resume.
+          </p>
+        </motion.div>
       </div>
     );
   }
@@ -180,19 +207,30 @@ export default function ExamPage({ params }: Props) {
   return (
     <div className="min-h-screen flex flex-col select-none" style={{ userSelect: "none" }}>
       {/* Alert Banner */}
-      {alert && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4">
-          <div className="rounded-xl bg-[rgba(156,42,42,0.9)] backdrop-blur border border-[rgba(156,42,42,0.5)] px-4 py-3 text-sm text-white">
-            {alert}
-          </div>
-        </div>
-      )}
+      <AnimatePresence mode="popLayout">
+        {alert && (
+          <motion.div
+            key={alert}
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-lg w-full px-4"
+          >
+            <div className="rounded-xl bg-[rgba(156,42,42,0.92)] backdrop-blur border border-[rgba(156,42,42,0.5)] px-4 py-3 text-sm text-white flex items-start gap-2 shadow-lg">
+              <AlertTriangle className="size-4 shrink-0 mt-0.5" aria-hidden />
+              <span>{alert}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header Bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between px-6 py-3 bg-[rgba(6,15,30,0.98)] border-b border-[rgba(201,162,39,0.12)] backdrop-blur">
         <div className="flex items-center gap-4">
-          <span className="text-xs px-2 py-1 rounded-full bg-[rgba(156,42,42,0.15)] text-[#9C2A2A] border border-[rgba(156,42,42,0.3)] font-medium">
-            🔒 iLock Secure
+          <span className="text-xs px-2 py-1 rounded-full bg-[rgba(156,42,42,0.15)] text-[#9C2A2A] border border-[rgba(156,42,42,0.3)] font-medium inline-flex items-center gap-1">
+            <Shield className="size-3.5 shrink-0" aria-hidden />
+            iLock Secure
           </span>
           <span className="text-xs text-[#6e7d93]">
             Q {currentQ + 1} / {questions.length}
@@ -206,14 +244,16 @@ export default function ExamPage({ params }: Props) {
             </span>
           </div>
           <div
-            className="text-sm font-mono font-bold"
+            className="text-sm font-mono font-bold inline-flex items-center gap-1"
             style={{ color: timeLeft < 300 ? "#9C2A2A" : "#C9A227" }}
           >
-            ⏱ {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+            <Timer className="size-3.5 shrink-0 opacity-80" aria-hidden />
+            {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
           </div>
           {tabWarnings > 0 && (
-            <span className="text-xs text-[#9C2A2A] font-medium">
-              ⚠️ {tabWarnings} tab warning{tabWarnings > 1 ? "s" : ""}
+            <span className="text-xs text-[#9C2A2A] font-medium inline-flex items-center gap-1">
+              <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+              {tabWarnings} tab warning{tabWarnings > 1 ? "s" : ""}
             </span>
           )}
         </div>
@@ -229,7 +269,13 @@ export default function ExamPage({ params }: Props) {
 
       {/* Question */}
       <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-2xl">
+        <motion.div
+          key={currentQ}
+          initial={{ opacity: 0, x: 16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full max-w-2xl"
+        >
           <div className="bg-sovereign-card rounded-2xl border border-[rgba(201,162,39,0.15)] p-8 space-y-6">
             <div>
               <span className="text-xs text-[#6e7d93] mb-3 block">{q.topic}</span>
@@ -273,29 +319,32 @@ export default function ExamPage({ params }: Props) {
               <button
                 onClick={() => setCurrentQ((q) => Math.max(0, q - 1))}
                 disabled={currentQ === 0}
-                className="h-9 px-4 text-xs rounded-lg border border-[rgba(201,162,39,0.2)] text-[#6e7d93] hover:text-[#A8B5C8] disabled:opacity-30"
+                className="h-9 px-4 text-xs rounded-lg border border-[rgba(201,162,39,0.2)] text-[#6e7d93] hover:text-[#A8B5C8] disabled:opacity-30 inline-flex items-center gap-1"
               >
-                ← Previous
+                <ChevronLeft className="size-3.5 rtl:rotate-180" aria-hidden />
+                Previous
               </button>
 
               {currentQ < questions.length - 1 ? (
                 <button
                   onClick={() => setCurrentQ((q) => q + 1)}
-                  className="h-9 px-4 text-xs font-semibold rounded-lg bg-[rgba(201,162,39,0.9)] text-[#060f1e] hover:bg-[#C9A227]"
+                  className="h-9 px-4 text-xs font-semibold rounded-lg bg-[rgba(201,162,39,0.9)] text-[#060f1e] hover:bg-[#C9A227] inline-flex items-center gap-1"
                 >
-                  Next →
+                  Next
+                  <ChevronRight className="size-3.5 rtl:rotate-180" aria-hidden />
                 </button>
               ) : (
                 <button
                   onClick={submitExam}
-                  className="h-9 px-4 text-xs font-semibold rounded-lg bg-[rgba(34,197,94,0.9)] text-white hover:bg-[#22c55e]"
+                  className="h-9 px-4 text-xs font-semibold rounded-lg bg-[rgba(34,197,94,0.9)] text-white hover:bg-[#22c55e] inline-flex items-center gap-1.5"
                 >
-                  Submit Exam ✓
+                  <Check className="size-3.5" aria-hidden />
+                  Submit exam
                 </button>
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

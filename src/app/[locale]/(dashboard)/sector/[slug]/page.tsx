@@ -1,17 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
-import { getTranslations, getLocale } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-
-const SECTOR_ICONS: Record<string, string> = {
-  training: "🎓",
-  accreditation: "🏛",
-  consultancy: "⚖️",
-  tech: "⚙️",
-  partnerships: "🌐",
-};
+import { SectorDashboardHeaderIcon } from "@/components/dashboard/SectorDashboardHeaderIcon";
+import { SectorKpiCards } from "@/components/dashboard/SectorKpiCards";
+import { SectorQuickActions } from "@/components/dashboard/SectorQuickActions";
 
 async function getSectorData(slug: string) {
   const sector = await prisma.sector.findUnique({
@@ -53,7 +48,6 @@ async function getSectorData(slug: string) {
       },
       _sum: { amountCoins: true },
     }),
-    // Last 6 months revenue
     Promise.all(
       Array.from({ length: 6 }, (_, i) => {
         const d = new Date();
@@ -106,15 +100,29 @@ export default async function SectorDashboard({ params }: Props) {
   }
 
   const { sector, metrics, revenueChart } = data;
-  const icon = SECTOR_ICONS[slug] ?? "🏢";
+
+  const kpiItems = [
+    { label: "Wallet Balance", value: metrics.walletBalance.toLocaleString(), suffix: "coins", color: "#C9A227" },
+    { label: "Monthly Revenue", value: metrics.monthlyRevenue.toLocaleString(), suffix: "coins", color: "#e8c84a" },
+    { label: "Pending Requests", value: metrics.pendingRequests.toString(), suffix: "open", color: "#A8B5C8" },
+    { label: "Resolved Today", value: metrics.resolvedToday.toString(), suffix: "done", color: "#22c55e" },
+    { label: "SLA Breaches", value: metrics.openSLA.toString(), suffix: "overdue", color: metrics.openSLA > 0 ? "#9C2A2A" : "#6e7d93" },
+  ];
+
+  const quickActions = [
+    { href: `/${locale}/sector/${slug}/requests/new`, label: "New Service Request", icon: "plus" as const },
+    { href: `/${locale}/sector/${slug}/employees`, label: "View Employees", icon: "users" as const },
+    { href: `/${locale}/sector/${slug}/wallet`, label: "Wallet & Finance", icon: "wallet" as const },
+    { href: `/${locale}/sector/${slug}/certificates`, label: "Certificates", icon: "award" as const },
+    { href: `/${locale}/sector/${slug}/reports`, label: "Reports", icon: "chart" as const },
+  ];
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <span className="text-3xl">{icon}</span>
+            <SectorDashboardHeaderIcon slug={slug} />
             <h1
               className="text-2xl font-bold text-[#C9A227]"
               style={{ fontFamily: "var(--font-eb-garamond)" }}
@@ -140,29 +148,8 @@ export default async function SectorDashboard({ params }: Props) {
         </div>
       </div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        {[
-          { label: "Wallet Balance", value: metrics.walletBalance.toLocaleString(), suffix: "coins", color: "#C9A227" },
-          { label: "Monthly Revenue", value: metrics.monthlyRevenue.toLocaleString(), suffix: "coins", color: "#e8c84a" },
-          { label: "Pending Requests", value: metrics.pendingRequests.toString(), suffix: "open", color: "#A8B5C8" },
-          { label: "Resolved Today", value: metrics.resolvedToday.toString(), suffix: "done", color: "#22c55e" },
-          { label: "SLA Breaches", value: metrics.openSLA.toString(), suffix: "overdue", color: metrics.openSLA > 0 ? "#9C2A2A" : "#6e7d93" },
-        ].map((kpi) => (
-          <div
-            key={kpi.label}
-            className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4"
-          >
-            <p className="text-2xl font-bold" style={{ color: kpi.color, fontFamily: "var(--font-eb-garamond)" }}>
-              {kpi.value}
-            </p>
-            <p className="text-[#6e7d93] text-xs mt-0.5">{kpi.label}</p>
-            <p className="text-[10px] text-[#6e7d93] opacity-60">{kpi.suffix}</p>
-          </div>
-        ))}
-      </div>
+      <SectorKpiCards items={kpiItems} />
 
-      {/* Revenue Chart + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-5">
           <h3
@@ -191,32 +178,7 @@ export default async function SectorDashboard({ params }: Props) {
           </div>
         </div>
 
-        <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-5 space-y-3">
-          <h3
-            className="text-[#C9A227] font-semibold"
-            style={{ fontFamily: "var(--font-eb-garamond)" }}
-          >
-            Quick Actions
-          </h3>
-          {[
-            { href: `/${locale}/sector/${slug}/requests/new`, label: "New Service Request", icon: "➕" },
-            { href: `/${locale}/sector/${slug}/employees`, label: "View Employees", icon: "👥" },
-            { href: `/${locale}/sector/${slug}/wallet`, label: "Wallet & Finance", icon: "💰" },
-            { href: `/${locale}/sector/${slug}/certificates`, label: "Certificates", icon: "🏆" },
-            { href: `/${locale}/sector/${slug}/reports`, label: "Reports", icon: "📊" },
-          ].map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[rgba(201,162,39,0.06)] transition-colors group"
-            >
-              <span className="text-lg">{action.icon}</span>
-              <span className="text-sm text-[#A8B5C8] group-hover:text-[#C9A227] transition-colors">
-                {action.label}
-              </span>
-            </Link>
-          ))}
-        </div>
+        <SectorQuickActions actions={quickActions} />
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth/auth.config";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
+import { Headset } from "lucide-react";
 
 export default async function LMSPage() {
   const session = await auth();
@@ -134,7 +135,9 @@ export default async function LMSPage() {
               href={`/${locale}/lms/vr/${scenario.id}`}
               className="p-4 rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(10,31,61,0.4)] hover:border-[rgba(201,162,39,0.3)] transition-all"
             >
-              <p className="text-2xl mb-2">🥽</p>
+              <span className="flex size-10 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)] mb-2">
+                <Headset className="size-5" aria-hidden />
+              </span>
               <h3 className="text-[#A8B5C8] text-sm font-medium">
                 {isAr ? scenario.titleAr ?? scenario.titleEn : scenario.titleEn}
               </h3>

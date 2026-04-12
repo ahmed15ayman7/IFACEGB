@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { Check, Megaphone } from "lucide-react";
 
 const TARGET_OPTIONS = [
   { value: "all", label: "All Users" },
@@ -39,12 +41,20 @@ export function EDirectiveComposer({ authorId }: { authorId: string }) {
   }
 
   return (
-    <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4 h-full">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4 h-full"
+    >
       <h3
         className="text-[#C9A227] font-semibold mb-4 flex items-center gap-2"
         style={{ fontFamily: "var(--font-eb-garamond)" }}
       >
-        <span>📢</span> E-Directive Composer
+        <span className="flex size-8 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)]">
+          <Megaphone className="size-4" aria-hidden />
+        </span>
+        E-Directive Composer
       </h3>
 
       <div className="space-y-3">
@@ -103,9 +113,18 @@ export function EDirectiveComposer({ authorId }: { authorId: string }) {
             color: "#060f1e",
           }}
         >
-          {sent ? "✓ Directive Sent!" : sending ? "Sending..." : "Broadcast Directive"}
+          {sent ? (
+            <span className="inline-flex items-center justify-center gap-1">
+              <Check className="size-3.5" aria-hidden />
+              Directive sent
+            </span>
+          ) : sending ? (
+            "Sending..."
+          ) : (
+            "Broadcast Directive"
+          )}
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

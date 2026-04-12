@@ -1,4 +1,9 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Search } from "lucide-react";
 import type { AuditSeverity } from "@prisma/client";
+import { staggerContainer, staggerItem } from "@/lib/motion/dashboard";
 
 type Entry = {
   id: string;
@@ -23,18 +28,22 @@ export function AuditTrailFeed({ entries }: { entries: Entry[] }) {
         className="text-[#C9A227] font-semibold mb-4 flex items-center gap-2"
         style={{ fontFamily: "var(--font-eb-garamond)" }}
       >
-        <span>🔍</span> Audit Trail
+        <span className="flex size-8 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)]">
+          <Search className="size-4" aria-hidden />
+        </span>
+        Audit Trail
       </h3>
 
-      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+      <motion.div {...staggerContainer} className="space-y-2 max-h-64 overflow-y-auto pr-1">
         {entries.length === 0 ? (
           <p className="text-[#6e7d93] text-sm">No audit entries yet.</p>
         ) : (
           entries.map((entry) => {
             const style = SEVERITY_STYLE[entry.severity];
             return (
-              <div
+              <motion.div
                 key={entry.id}
+                {...staggerItem}
                 className="flex items-start gap-3 py-2 border-b border-[rgba(201,162,39,0.06)] last:border-0"
               >
                 <span
@@ -44,20 +53,18 @@ export function AuditTrailFeed({ entries }: { entries: Entry[] }) {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate" style={{ color: style.color }}>
                     {entry.action}
-                    <span className="text-[#6e7d93] font-normal ml-2">
-                      · {entry.entityType}
-                    </span>
+                    <span className="text-[#6e7d93] font-normal ml-2">· {entry.entityType}</span>
                   </p>
                   <p className="text-[#6e7d93] text-xs mt-0.5">
                     {entry.user?.name ?? entry.user?.email ?? "System"} ·{" "}
                     {new Date(entry.createdAt).toLocaleTimeString()}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

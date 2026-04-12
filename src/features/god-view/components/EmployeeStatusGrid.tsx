@@ -1,3 +1,9 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Users } from "lucide-react";
+import { staggerContainer, staggerItem } from "@/lib/motion/dashboard";
+
 type Employee = {
   id: string;
   user: {
@@ -25,19 +31,23 @@ export function EmployeeStatusGrid({ employees }: { employees: Employee[] }) {
         style={{ fontFamily: "var(--font-eb-garamond)" }}
       >
         <span className="flex items-center gap-2">
-          <span>👥</span> Employee Status
+          <span className="flex size-8 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)]">
+            <Users className="size-4" aria-hidden />
+          </span>
+          Employee Status
         </span>
         <span className="text-xs text-[#6e7d93] font-normal">
           {online} / {employees.length} online
         </span>
       </h3>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+      <motion.div {...staggerContainer} className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
         {employees.map((emp) => {
           const status = emp.user.presence?.status ?? "offline";
           return (
-            <div
+            <motion.div
               key={emp.id}
+              {...staggerItem}
               className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-[rgba(201,162,39,0.04)] transition-colors"
             >
               <span
@@ -52,10 +62,10 @@ export function EmployeeStatusGrid({ employees }: { employees: Employee[] }) {
                   {emp.sector?.nameEn ?? emp.user.role}
                 </p>
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
+import { Building2, Globe, Map } from "lucide-react";
 
 export default async function FranchisePage() {
   const session = await auth();
@@ -79,8 +80,14 @@ export default async function FranchisePage() {
               className="flex items-center justify-between p-4 rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.4)] hover:bg-[rgba(6,15,30,0.6)] transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="text-lg">
-                  {franchise.tier === "master" ? "🌍" : franchise.tier === "regional" ? "🗺" : "🏢"}
+                <span className="flex size-10 items-center justify-center rounded-lg bg-[rgba(201,162,39,0.1)] text-[#C9A227] border border-[rgba(201,162,39,0.15)] shrink-0">
+                  {franchise.tier === "master" ? (
+                    <Globe className="size-5" aria-hidden />
+                  ) : franchise.tier === "regional" ? (
+                    <Map className="size-5" aria-hidden />
+                  ) : (
+                    <Building2 className="size-5" aria-hidden />
+                  )}
                 </span>
                 <div>
                   <p className="text-[#A8B5C8] font-medium text-sm">{franchise.nameEn}</p>
