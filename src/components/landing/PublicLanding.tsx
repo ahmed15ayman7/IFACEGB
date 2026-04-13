@@ -41,6 +41,30 @@ import { TiltCard } from "./TiltCard";
 type SectorKey = "training" | "accreditation" | "consultancy" | "tech" | "partnerships";
 type StatKey = "countries" | "certificates" | "centers" | "professionals";
 
+export type LandingSuccessStory = {
+  id: string;
+  quoteEn: string;
+  quoteAr: string | null;
+  nameEn: string;
+  nameAr: string | null;
+  role: string;
+  avatarUrl: string | null;
+};
+
+export type LandingPartner = {
+  id: string;
+  nameEn: string;
+  nameAr: string | null;
+  logoUrl: string | null;
+  websiteUrl: string | null;
+};
+
+export type LandingProps = {
+  statsOverride?: Partial<Record<StatKey, string>>;
+  successStories?: LandingSuccessStory[];
+  partners?: LandingPartner[];
+};
+
 const SECTORS: { key: SectorKey; icon: LucideIcon; color: string }[] = [
   { key: "training", icon: GraduationCap, color: "from-[rgba(201,162,39,0.12)] to-[rgba(201,162,39,0.04)]" },
   { key: "accreditation", icon: Landmark, color: "from-[rgba(168,181,200,0.1)] to-[rgba(168,181,200,0.03)]" },
@@ -72,7 +96,7 @@ const viewAnim = {
   transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
 };
 
-export function PublicLanding() {
+export function PublicLanding({ statsOverride, successStories, partners }: LandingProps = {}) {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const t = useTranslations("landing");
@@ -82,6 +106,14 @@ export function PublicLanding() {
 
   const { scrollYProgress } = useScroll();
   const scrollSpring = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.15 });
+
+  const resolvedStats = useMemo(
+    () =>
+      STATS.map((s) =>
+        statsOverride?.[s.key] ? { ...s, value: statsOverride[s.key]! } : s
+      ),
+    [statsOverride]
+  );
 
   const featureItems = useMemo(
     () =>
@@ -275,7 +307,7 @@ export function PublicLanding() {
               transition={{ delay: 0.28, duration: 0.5 }}
               className="mx-auto mt-10 grid max-w-xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-[rgba(201,162,39,0.15)] bg-[rgba(201,162,39,0.15)] sm:mx-0 sm:max-w-lg sm:grid-cols-4"
             >
-              {STATS.map((stat, i) => (
+              {resolvedStats.map((stat, i) => (
                 <motion.div
                   key={stat.key}
                   initial={{ opacity: 0, y: 8 }}
@@ -747,28 +779,137 @@ export function PublicLanding() {
           </motion.div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {testimonials.map((item, i) => (
-              <motion.blockquote
-                key={item.q}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.45 }}
-                className="flex flex-col rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.55)] p-5"
-              >
-                <Quote className="mb-3 size-8 text-[rgba(201,162,39,0.35)]" aria-hidden />
-                <p className="mb-4 flex-1 text-sm leading-relaxed text-[#A8B5C8]">{t(item.q)}</p>
-                <footer>
-                  <cite className="not-italic">
-                    <span className="block text-sm font-semibold text-[#C9A227]">{t(item.n)}</span>
-                    <span className="text-xs text-[#6e7d93]">{t(item.r)}</span>
-                  </cite>
-                </footer>
-              </motion.blockquote>
-            ))}
+            {successStories && successStories.length > 0
+              ? successStories.map((story, i) => (
+                  <motion.blockquote
+                    key={story.id}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08, duration: 0.45 }}
+                    className="flex flex-col rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.55)] p-5"
+                  >
+                    <Quote className="mb-3 size-8 text-[rgba(201,162,39,0.35)]" aria-hidden />
+                    <p className="mb-4 flex-1 text-sm leading-relaxed text-[#A8B5C8]">
+                      {isRtl ? (story.quoteAr ?? story.quoteEn) : story.quoteEn}
+                    </p>
+                    <footer className="flex items-center gap-3">
+                      {story.avatarUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={story.avatarUrl}
+                          alt=""
+                          className="size-9 shrink-0 rounded-full object-cover opacity-90"
+                          aria-hidden
+                        />
+                      )}
+                      <cite className="not-italic">
+                        <span className="block text-sm font-semibold text-[#C9A227]">
+                          {isRtl ? (story.nameAr ?? story.nameEn) : story.nameEn}
+                        </span>
+                        <span className="text-xs text-[#6e7d93]">{story.role}</span>
+                      </cite>
+                    </footer>
+                  </motion.blockquote>
+                ))
+              : testimonials.map((item, i) => (
+                  <motion.blockquote
+                    key={item.q}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08, duration: 0.45 }}
+                    className="flex flex-col rounded-xl border border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.55)] p-5"
+                  >
+                    <Quote className="mb-3 size-8 text-[rgba(201,162,39,0.35)]" aria-hidden />
+                    <p className="mb-4 flex-1 text-sm leading-relaxed text-[#A8B5C8]">{t(item.q)}</p>
+                    <footer>
+                      <cite className="not-italic">
+                        <span className="block text-sm font-semibold text-[#C9A227]">{t(item.n)}</span>
+                        <span className="text-xs text-[#6e7d93]">{t(item.r)}</span>
+                      </cite>
+                    </footer>
+                  </motion.blockquote>
+                ))}
           </div>
         </div>
       </section>
+
+      {partners && partners.length > 0 && (
+        <section className="border-t border-[rgba(201,162,39,0.08)] px-4 py-16">
+          <div className="container mx-auto max-w-6xl">
+            <motion.div {...viewAnim} className="mx-auto mb-10 max-w-xl text-center">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[#C9A227]">
+                {t("partners_kicker")}
+              </p>
+              <h2
+                className="text-2xl font-bold text-[#C9A227] sm:text-3xl"
+                style={{ fontFamily: "var(--font-eb-garamond)" }}
+              >
+                {t("partners_title")}
+              </h2>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.6 }}
+              className="flex flex-wrap items-center justify-center gap-6 sm:gap-8"
+            >
+              {partners.map((p, i) => (
+                <motion.div
+                  key={p.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04, duration: 0.35 }}
+                >
+                  {p.websiteUrl ? (
+                    <a
+                      href={p.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={isRtl ? (p.nameAr ?? p.nameEn) : p.nameEn}
+                      className="flex h-14 items-center justify-center rounded-lg border border-[rgba(201,162,39,0.1)] bg-[rgba(6,15,30,0.4)] px-4 transition-all hover:border-[rgba(201,162,39,0.3)]"
+                    >
+                      {p.logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.logoUrl}
+                          alt={isRtl ? (p.nameAr ?? p.nameEn) : p.nameEn}
+                          className="h-8 max-w-[110px] object-contain opacity-75 transition-opacity hover:opacity-100"
+                        />
+                      ) : (
+                        <span className="text-sm font-medium text-[#A8B5C8]">
+                          {isRtl ? (p.nameAr ?? p.nameEn) : p.nameEn}
+                        </span>
+                      )}
+                    </a>
+                  ) : (
+                    <div
+                      className="flex h-14 items-center justify-center rounded-lg border border-[rgba(201,162,39,0.1)] bg-[rgba(6,15,30,0.4)] px-4"
+                      title={isRtl ? (p.nameAr ?? p.nameEn) : p.nameEn}
+                    >
+                      {p.logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={p.logoUrl}
+                          alt={isRtl ? (p.nameAr ?? p.nameEn) : p.nameEn}
+                          className="h-8 max-w-[110px] object-contain opacity-75"
+                        />
+                      ) : (
+                        <span className="text-sm font-medium text-[#A8B5C8]">
+                          {isRtl ? (p.nameAr ?? p.nameEn) : p.nameEn}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       <section
         id="explore"

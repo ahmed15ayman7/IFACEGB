@@ -2,8 +2,9 @@ import { generateSEOMetadata } from "@/lib/seo/metadata";
 import { prisma } from "@/lib/prisma";
 import { getLocale, getTranslations } from "next-intl/server";
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
-import { CalendarDays, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Sparkles } from "lucide-react";
 import { PublicShell, PublicPageHeader, PublicFadeIn, PublicGlowCard } from "@/components/public/motion";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -53,6 +54,7 @@ export default async function EventsPage() {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event, i) => (
               <PublicGlowCard key={event.id} delay={i * 0.05} className="group overflow-hidden p-0">
+                <Link href={`/${locale}/events/${event.id}`} className="block">
                 {event.coverUrl ? (
                   <div className="relative h-44 overflow-hidden">
                     <Image
@@ -97,7 +99,12 @@ export default async function EventsPage() {
                       </span>
                     )}
                   </p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#C9A227] opacity-70 transition-opacity group-hover:opacity-100">
+                    {t("read_more")}
+                    <ArrowRight className="size-3 rtl:rotate-180" aria-hidden />
+                  </span>
                 </div>
+                </Link>
               </PublicGlowCard>
             ))}
           </div>

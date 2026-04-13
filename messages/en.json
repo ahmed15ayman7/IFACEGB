@@ -126,7 +126,10 @@
     "hub_events_desc": "Summits, launches, and partner gatherings you can join or follow.",
     "hub_verify_desc": "Instant UVC checks for certificates — fast answers for HR and candidates.",
     "hub_contact_desc": "Partnerships, media, and institutional inquiries routed to the right team.",
-    "hub_apply_desc": "Apply to represent iFACE as an authorized agent in your territory."
+    "hub_apply_desc": "Apply to represent iFACE as an authorized agent in your territory.",
+    "partners_kicker": "Our partners",
+    "partners_title": "Trusted by leading organizations worldwide",
+    "partners_subtitle": "Institutions, ministries, and organizations that partner with iFACE to deliver excellence across regions."
   },
   "sectors": {
     "title": "Five Strategic Sectors",
@@ -198,7 +201,13 @@
       "pillar_2_title": "Verifiable trust",
       "pillar_2_text": "Certificates and credentials designed for public verification and long-term integrity.",
       "pillar_3_title": "Operational clarity",
-      "pillar_3_text": "Dashboards, SLAs, and structured workflows across sectors and partners."
+      "pillar_3_text": "Dashboards, SLAs, and structured workflows across sectors and partners.",
+      "milestones_title": "Key milestones",
+      "milestones_subtitle": "A timeline of the achievements that define iFACE's trajectory.",
+      "partners_title": "Trusted by leading organizations",
+      "partners_subtitle": "Institutions and organizations that partner with iFACE to deliver excellence.",
+      "cta_title": "Ready to join the iFACE network?",
+      "cta_button": "Get started"
     },
     "contact": {
       "title": "Contact us",
@@ -246,16 +255,42 @@
       "title": "Events & conferences",
       "subtitle": "Discover upcoming iFACE events, mega conferences, and professional development workshops.",
       "empty": "No upcoming events at the moment.",
-      "mega": "Mega event"
+      "mega": "Mega event",
+      "read_more": "View event details",
+      "back": "Back to all events",
+      "date_label": "Date",
+      "date_to": "to",
+      "location_label": "Location",
+      "contact_cta": "Register or inquire",
+      "share": "Share this event"
     },
     "news": {
       "title": "News & announcements",
       "subtitle": "Latest updates from the iFACE International Board.",
-      "empty": "No news available."
+      "empty": "No news available.",
+      "read_article": "Read full article",
+      "back": "Back to news",
+      "published": "Published",
+      "share": "Share"
     },
     "applyAgency": {
       "title": "Apply for iFACE agency",
       "subtitle": "Become an authorized iFACE agent or master franchisee. Complete the form below and we will review your application.",
+      "process_title": "How it works",
+      "process_step1_title": "Submit your application",
+      "process_step1_desc": "Fill in the form with your details, country, and motivation. Our team receives it instantly.",
+      "process_step2_title": "Review & interview",
+      "process_step2_desc": "Our partnerships team reviews your profile within 14 business days and schedules a discovery call.",
+      "process_step3_title": "Agreement & onboarding",
+      "process_step3_desc": "Sign the agency contract digitally and get access to your franchise dashboard and training resources.",
+      "requirements_title": "Requirements",
+      "req_1": "Legal business entity in your territory",
+      "req_2": "Relevant experience in education, training, or business development",
+      "req_3": "Dedicated team or capacity to grow a network",
+      "req_4": "Financial capability to meet the franchise investment",
+      "countries_title": "Open territories",
+      "countries_subtitle": "We are actively expanding in the following countries and regions.",
+      "form_title": "Start your application",
       "applicantName": "Full name",
       "email": "Email address",
       "phone": "Phone",
@@ -274,7 +309,9 @@
       "services_title": "Key services",
       "cta_title": "Ready to get started?",
       "cta_primary": "Get started",
-      "cta_agency": "Apply for agency"
+      "cta_agency": "Apply for agency",
+      "stats_certs": "Issued certificates",
+      "stats_no_data": ""
     },
     "sector_features": {
       "training": [

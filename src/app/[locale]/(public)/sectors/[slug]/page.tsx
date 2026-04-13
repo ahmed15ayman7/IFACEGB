@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import {
+  Award,
   Building2,
   Cpu,
   Globe,
@@ -66,6 +67,12 @@ export default async function SectorPublicPage({ params }: Props) {
     })
     .catch(() => null);
 
+  const certCount = sector
+    ? await prisma.certificate
+        .count({ where: { status: "issued", sectorId: sector.id } })
+        .catch(() => 0)
+    : 0;
+
   const SECTOR_DEFAULTS = {
     training: {
       nameEn: "Training & Development",
@@ -126,6 +133,23 @@ export default async function SectorPublicPage({ params }: Props) {
         >
           <Icon className="size-12 sm:size-14" strokeWidth={1.2} aria-hidden />
         </PublicPageHeader>
+
+        {certCount > 0 && (
+          <PublicFadeIn delay={0.04} className="mb-12">
+            <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex min-w-[160px] flex-col items-center gap-1 rounded-xl border border-[rgba(201,162,39,0.2)] bg-[rgba(10,31,61,0.45)] p-5 text-center backdrop-blur-sm">
+                <Award className="size-7 text-[#C9A227]" strokeWidth={1.3} aria-hidden />
+                <span
+                  className="text-2xl font-bold text-[#C9A227]"
+                  style={{ fontFamily: "var(--font-eb-garamond)" }}
+                >
+                  {certCount >= 1000 ? `${Math.floor(certCount / 1000)}K+` : `${certCount}+`}
+                </span>
+                <span className="text-xs text-[#6e7d93]">{t("stats_certs")}</span>
+              </div>
+            </div>
+          </PublicFadeIn>
+        )}
 
         {pg?.contentEn && (
           <PublicFadeIn delay={0.08} className="mb-14">

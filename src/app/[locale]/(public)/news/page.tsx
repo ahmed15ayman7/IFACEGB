@@ -1,8 +1,9 @@
 import { generateSEOMetadata } from "@/lib/seo/metadata";
 import { prisma } from "@/lib/prisma";
 import { getLocale, getTranslations } from "next-intl/server";
+import Link from "next/link";
 import type { Metadata } from "next";
-import { Newspaper } from "lucide-react";
+import { ArrowRight, Newspaper } from "lucide-react";
 import { PublicShell, PublicPageHeader, PublicFadeIn, PublicGlowCard } from "@/components/public/motion";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -58,31 +59,37 @@ export default async function NewsPage() {
               const excerpt = stripHtml(bodyRaw).slice(0, 220);
               return (
                 <PublicGlowCard key={item.id} delay={i * 0.04} className="group border-s-2 border-s-[rgba(201,162,39,0.35)] p-0">
-                  <article className="flex flex-col gap-4 p-6 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-                    <div className="min-w-0 flex-1">
-                      <h2
-                        className="mb-2 text-lg font-semibold text-[#C9A227] transition-colors group-hover:text-[#e8c84a] sm:text-xl"
-                        style={{ fontFamily: "var(--font-eb-garamond)" }}
+                  <Link href={`/${locale}/news/${item.id}`} className="block">
+                    <article className="flex flex-col gap-4 p-6 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+                      <div className="min-w-0 flex-1">
+                        <h2
+                          className="mb-2 text-lg font-semibold text-[#C9A227] transition-colors group-hover:text-[#e8c84a] sm:text-xl"
+                          style={{ fontFamily: "var(--font-eb-garamond)" }}
+                        >
+                          {title}
+                        </h2>
+                        <p className="mb-3 line-clamp-3 text-sm leading-relaxed text-[#6e7d93]">
+                          {excerpt}
+                          {excerpt.length >= 220 ? "…" : ""}
+                        </p>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#C9A227] opacity-70 transition-opacity group-hover:opacity-100">
+                          {t("read_article")}
+                          <ArrowRight className="size-3.5 rtl:rotate-180" aria-hidden />
+                        </span>
+                      </div>
+                      <time
+                        dateTime={item.publishedAt?.toISOString()}
+                        className="shrink-0 text-xs text-[#6e7d93] sm:pt-1 sm:text-end"
                       >
-                        {title}
-                      </h2>
-                      <p className="line-clamp-3 text-sm leading-relaxed text-[#6e7d93]">
-                        {excerpt}
-                        {excerpt.length >= 220 ? "…" : ""}
-                      </p>
-                    </div>
-                    <time
-                      dateTime={item.publishedAt?.toISOString()}
-                      className="shrink-0 text-xs text-[#6e7d93] sm:pt-1 sm:text-end"
-                    >
-                      {item.publishedAt
-                        ? new Date(item.publishedAt).toLocaleDateString(
-                            locale === "ar" ? "ar-EG" : "en-GB",
-                            { day: "numeric", month: "short", year: "numeric" }
-                          )
-                        : "—"}
-                    </time>
-                  </article>
+                        {item.publishedAt
+                          ? new Date(item.publishedAt).toLocaleDateString(
+                              locale === "ar" ? "ar-EG" : "en-GB",
+                              { day: "numeric", month: "short", year: "numeric" }
+                            )
+                          : "—"}
+                      </time>
+                    </article>
+                  </Link>
                 </PublicGlowCard>
               );
             })
