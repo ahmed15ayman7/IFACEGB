@@ -15,6 +15,7 @@ import {
   Timer,
 } from "lucide-react";
 import { io, Socket } from "socket.io-client";
+import { ProctoringCamera } from "@/components/dashboard/ProctoringCamera";
 
 type Question = {
   id: string;
@@ -213,6 +214,12 @@ export default function ExamPage() {
 
   return (
     <div className="min-h-screen flex flex-col select-none" style={{ userSelect: "none" }}>
+      <ProctoringCamera
+        sessionToken={sessionToken}
+        socket={socketRef.current}
+        proctorScore={proctorScore}
+      />
+
       <AnimatePresence mode="popLayout">
         {alert && (
           <motion.div

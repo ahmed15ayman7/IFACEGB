@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
+import { MultiSigApprovalPanel } from "@/components/dashboard/MultiSigApprovalPanel";
+import { ReconciliationButton } from "@/components/dashboard/ReconciliationButton";
 
 export default async function AdminFinancePage() {
   const session = await auth();
@@ -13,7 +15,7 @@ export default async function AdminFinancePage() {
     redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
   }
 
-  const [wallets, recentTxns, reconciliations, settings] = await Promise.all([
+  const [wallets, recentTxns, reconciliations, settings, pendingMultiSig] = await Promise.all([
     prisma.wallet.findMany({
       include: { owner: { select: { name: true } }, sector: { select: { nameEn: true } } },
       orderBy: { walletType: "asc" },
@@ -32,6 +34,11 @@ export default async function AdminFinancePage() {
       take: 12,
     }),
     prisma.financialSettings.findFirst(),
+    prisma.coinTransaction.findMany({
+      where: { requiresMultiSig: true, multiSigComplete: false },
+      orderBy: { createdAt: "desc" },
+      include: { initiator: { select: { name: true } } },
+    }),
   ]);
 
   const totalBalance = wallets.reduce((s, w) => s + Number(w.balanceCoins), 0);
@@ -40,9 +47,12 @@ export default async function AdminFinancePage() {
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
-        {t("title")}
-      </h1>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h1 className="text-2xl font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-eb-garamond)" }}>
+          {t("title")}
+        </h1>
+        <ReconciliationButton />
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-sovereign-card rounded-xl border border-[rgba(201,162,39,0.12)] p-4">
@@ -70,6 +80,15 @@ export default async function AdminFinancePage() {
           <p className="text-[#6e7d93] text-xs mt-1">{t("reconciliations_done")}</p>
         </div>
       </div>
+
+      <MultiSigApprovalPanel
+        transactions={pendingMultiSig.map((txn) => ({
+          ...txn,
+          amountCoins: String(txn.amountCoins),
+          createdAt: txn.createdAt.toISOString(),
+          multiSigSigners: Array.isArray(txn.multiSigSigners) ? (txn.multiSigSigners as string[]) : null,
+        }))}
+      />
 
       <div>
         <h2 className="text-[#C9A227] font-semibold mb-3" style={{ fontFamily: "var(--font-eb-garamond)" }}>

@@ -9,8 +9,10 @@ import { SectorKpiCards } from "@/components/dashboard/SectorKpiCards";
 import { SectorQuickActions } from "@/components/dashboard/SectorQuickActions";
 
 async function getSectorData(slug: string, locale: string) {
-  const sector = await prisma.sector.findUnique({
-    where: { code: slug },
+  // slug can be either a sector `code` (for super_admin links like /sector/training)
+  // or a sector `id` (cuid, for sector_manager whose nav uses sectorId from session).
+  const sector = await prisma.sector.findFirst({
+    where: { OR: [{ code: slug }, { id: slug }] },
     include: {
       wallets: { where: { walletType: "SectorWallet" } },
       _count: {

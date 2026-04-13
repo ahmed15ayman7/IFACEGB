@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { UserRole } from "@prisma/client";
 import type { LucideIcon } from "lucide-react";
+import { NotificationBell } from "@/components/dashboard/NotificationBell";
 import {
   Award,
   BookOpen,
@@ -162,14 +163,17 @@ export function DashboardNav({
 
   return (
     <aside className="w-56 shrink-0 hidden md:flex flex-col border-r border-[rgba(201,162,39,0.12)] bg-[rgba(6,15,30,0.95)] min-h-screen sticky top-0">
-      <div className="flex items-center gap-2.5 px-4 py-5 border-b border-[rgba(201,162,39,0.1)]">
-        <Image src="/logo-dark.png" alt="iFACE" width={32} height={32} className="w-8 h-8" />
-        <span
-          className="text-[#C9A227] text-sm font-semibold"
-          style={{ fontFamily: "var(--font-eb-garamond)" }}
-        >
-          {tDash("brand_os")}
-        </span>
+      <div className="flex items-center justify-between gap-2 px-4 py-5 border-b border-[rgba(201,162,39,0.1)]">
+        <div className="flex items-center gap-2.5">
+          <Image src="/logo-dark.png" alt="iFACE" width={32} height={32} className="w-8 h-8" />
+          <span
+            className="text-[#C9A227] text-sm font-semibold"
+            style={{ fontFamily: "var(--font-eb-garamond)" }}
+          >
+            {tDash("brand_os")}
+          </span>
+        </div>
+        <NotificationBell />
       </div>
 
       <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto">
