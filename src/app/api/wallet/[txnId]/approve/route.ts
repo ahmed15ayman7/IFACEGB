@@ -24,7 +24,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
   const newSigners = [...signers, session.user.id];
   const settings = await prisma.financialSettings.findFirst();
-  const required = Number(settings?.multiSigMinSigners ?? 2);
+  const required = Number(settings?.multiSigThreshold ?? 50000);
   const isComplete = newSigners.length >= required;
 
   await prisma.coinTransaction.update({
