@@ -60,7 +60,7 @@ export default async function SectorReportsPage({ params }: Props) {
       .findMany({
         where: {
           toSectorId: sector.id,
-          status: { in: ["resolved", "completed"] },
+          status: { in: ["completed","escalated"] },
           resolvedAt: { not: null },
         },
         select: { resolvedAt: true, slaDeadline: true },
