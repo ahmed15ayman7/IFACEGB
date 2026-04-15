@@ -623,6 +623,28 @@
       "reconciliation_confirm": "This will close the current period. Continue?",
       "reconciliation_success": "Reconciliation triggered successfully."
     },
+    "sectors": {
+      "title": "Sectors",
+      "add_sector": "Add sector",
+      "new_title": "Add new sector",
+      "new_subtitle": "Create a new operational sector and its wallet.",
+      "field_code": "Sector code",
+      "field_code_hint": "Lowercase, no spaces — used in URLs (e.g. training, accreditation)",
+      "field_name_en": "Name (English)",
+      "field_name_ar": "Name (Arabic)",
+      "field_description": "Description",
+      "field_color": "Brand color (hex)",
+      "field_sort": "Sort order",
+      "field_target_rev": "Target revenue %",
+      "field_active": "Active",
+      "field_wallet": "Create sector wallet automatically",
+      "save": "Create sector",
+      "saving": "Creating…",
+      "success": "Sector created successfully.",
+      "error_code": "Sector code already exists.",
+      "error_generic": "Could not create sector. Please check all fields.",
+      "empty": "No sectors yet."
+    },
     "hrEmployees": {
       "title": "HR admin — Employees",
       "add_employee": "Add employee",

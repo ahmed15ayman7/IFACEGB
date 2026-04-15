@@ -623,6 +623,28 @@
       "reconciliation_confirm": "سيؤدي هذا إلى إغلاق الفترة الحالية. متابعة؟",
       "reconciliation_success": "تم تفعيل التسوية بنجاح."
     },
+    "sectors": {
+      "title": "القطاعات",
+      "add_sector": "إضافة قطاع",
+      "new_title": "إضافة قطاع جديد",
+      "new_subtitle": "أنشئ قطاعاً تشغيلياً جديداً مع محفظته.",
+      "field_code": "كود القطاع",
+      "field_code_hint": "أحرف صغيرة إنجليزية بدون مسافات — يُستخدم في الروابط (مثل: training، accreditation)",
+      "field_name_en": "الاسم (إنجليزي)",
+      "field_name_ar": "الاسم (عربي)",
+      "field_description": "الوصف",
+      "field_color": "اللون التعريفي (Hex)",
+      "field_sort": "ترتيب العرض",
+      "field_target_rev": "نسبة الإيراد المستهدف %",
+      "field_active": "نشط",
+      "field_wallet": "إنشاء محفظة للقطاع تلقائياً",
+      "save": "إنشاء القطاع",
+      "saving": "جارٍ الإنشاء…",
+      "success": "تم إنشاء القطاع بنجاح.",
+      "error_code": "كود القطاع مستخدم بالفعل.",
+      "error_generic": "تعذّر إنشاء القطاع. يرجى التحقق من جميع الحقول.",
+      "empty": "لا توجد قطاعات بعد."
+    },
     "hrEmployees": {
       "title": "الموارد البشرية — الموظفون",
       "add_employee": "إضافة موظف",
