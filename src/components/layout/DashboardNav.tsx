@@ -34,6 +34,7 @@ import {
 type NavKey =
   | "dashboard"
   | "god_view"
+  | "sectors"
   | "hr"
   | "finance"
   | "training"
@@ -58,6 +59,7 @@ type NavItem = { href: string; navKey: NavKey };
 const NAV_ICONS: Record<NavKey, LucideIcon> = {
   dashboard: LayoutDashboard,
   god_view: Eye,
+  sectors: Building2,
   hr: Users,
   finance: Landmark,
   training: GraduationCap,
@@ -87,6 +89,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
   if (role === "super_admin") {
     return [
       { href: `${base}/god-view`, navKey: "god_view" },
+      { href: `${base}/admin/sectors`, navKey: "sectors" },
       { href: `${base}/admin/employees`, navKey: "hr" },
       { href: `${base}/admin/finance`, navKey: "finance" },
       { href: `${base}/sector/training`, navKey: "training" },
@@ -103,6 +106,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
   if (role === "admin") {
     return [
       ...commonItems,
+      { href: `${base}/admin/sectors`, navKey: "sectors" },
       { href: `${base}/admin/employees`, navKey: "hr" },
       { href: `${base}/admin/finance`, navKey: "finance" },
       { href: `${base}/connect`, navKey: "connect" },

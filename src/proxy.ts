@@ -42,16 +42,28 @@ const KILL_SWITCH_EXEMPT = [
 export default async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // Allow static files and Next.js internals
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.match(/\.(png|jpg|svg|ico|woff2?)$/)
-  ) {
+  // Allow static files and Next.js internals immediately
+  if (pathname.startsWith("/_next") || pathname.match(/\.(png|jpg|svg|ico|woff2?)$/)) {
     return NextResponse.next();
   }
 
-  // Kill switch check via Redis flag header (set by API route)
+  // Handle API routes: apply Kill Switch + off-hours header, then pass through (no locale prefix)
+  if (pathname.startsWith("/api/")) {
+    const killSwitchActive = req.headers.get("x-kill-switch") === "1";
+    if (killSwitchActive && !KILL_SWITCH_EXEMPT.some((p) => pathname.startsWith(p))) {
+      return new NextResponse("Service temporarily suspended. Contact admin.", {
+        status: 503,
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
+    const hour = new Date().getHours();
+    if ((hour < 7 || hour >= 22) && !KILL_SWITCH_EXEMPT.some((p) => pathname.startsWith(p))) {
+      req.headers.set("x-off-hours", "1");
+    }
+    return NextResponse.next();
+  }
+
+  // Kill switch check for non-API routes
   const killSwitchActive = req.headers.get("x-kill-switch") === "1";
   if (killSwitchActive && !KILL_SWITCH_EXEMPT.some((p) => pathname.startsWith(p))) {
     return new NextResponse("Service temporarily suspended. Contact admin.", {
@@ -82,16 +94,6 @@ export default async function proxy(req: NextRequest) {
       }
       const home = getRoleHomePath(locale, role, sectorId);
       return NextResponse.redirect(new URL(home, req.url));
-    }
-  }
-
-  // Off-hours access logging for API routes
-  if (pathname.startsWith("/api/") && !KILL_SWITCH_EXEMPT.some((p) => pathname.startsWith(p))) {
-    const hour = new Date().getHours();
-    const isOffHours = hour < 7 || hour >= 22;
-    if (isOffHours) {
-      // Log will be handled by API route itself
-      req.headers.set("x-off-hours", "1");
     }
   }
 
