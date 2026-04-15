@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 
 export async function generateMetadata({
   params,
@@ -57,7 +58,7 @@ export default async function AdminSectorsPage({
       </div>
 
       {sectors.length === 0 ? (
-        <p className="text-white/40 text-center py-20">{t("empty")}</p>
+        <EmptyState variant="no_records" title={t("empty")} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {sectors.map((s) => {

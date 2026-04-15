@@ -16,6 +16,36 @@
     "language_switch": "Switch language",
     "optional": "optional"
   },
+  "not_found": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "back_home": "Back to home",
+    "go_dashboard": "Go to dashboard",
+    "contact_support": "Contact support"
+  },
+  "error": {
+    "code": "500",
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Our team has been notified.",
+    "try_again": "Try again",
+    "back_home": "Back to home",
+    "error_id": "Error reference"
+  },
+  "empty_state": {
+    "default_title": "No data available",
+    "default_description": "There is nothing to display here yet.",
+    "no_results": "No results found",
+    "no_results_description": "Try adjusting your search or filters.",
+    "no_records": "No records yet",
+    "no_records_description": "Once data is added, it will appear here.",
+    "no_activity": "No recent activity",
+    "no_activity_description": "Activity will be shown here once it begins.",
+    "no_notifications": "No notifications",
+    "no_notifications_description": "You are all caught up.",
+    "try_refresh": "Refresh",
+    "add_first": "Add your first entry"
+  },
   "nav": {
     "home": "Home",
     "sectors": "Sectors",

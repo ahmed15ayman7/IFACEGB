@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { staggerContainer } from "@/lib/motion/dashboard";
 import { IsrCard } from "./IsrCard";
+import EmptyState from "@/components/ui/EmptyState";
+import { InboxIcon, SendHorizonal } from "lucide-react";
 
 type IsrItem = {
   id: string;
@@ -64,13 +66,11 @@ export function IsrInboxClient({ inbox: initialInbox, sent: initialSent }: Props
       </div>
 
       {items.length === 0 ? (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="py-16 text-center text-sm text-[#6e7d93]"
-        >
-          {t(activeTab === "inbox" ? "empty_inbox" : "empty_sent")}
-        </motion.p>
+        <EmptyState
+          variant="no_records"
+          icon={activeTab === "inbox" ? InboxIcon : SendHorizonal}
+          title={t(activeTab === "inbox" ? "empty_inbox" : "empty_sent")}
+        />
       ) : (
         <motion.div {...staggerContainer} className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           {items.map((item) => (

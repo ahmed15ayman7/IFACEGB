@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 
 type Notif = {
   id: string;
@@ -117,7 +118,7 @@ export function NotificationBell() {
 
             <div className="max-h-80 overflow-y-auto divide-y divide-[rgba(201,162,39,0.06)]">
               {notifications.length === 0 ? (
-                <p className="py-8 text-center text-xs text-[#6e7d93]">{t("empty")}</p>
+                <EmptyState variant="no_notifications" compact />
               ) : (
                 notifications.map((n) => (
                   <button

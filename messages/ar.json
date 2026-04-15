@@ -16,6 +16,36 @@
     "language_switch": "تغيير اللغة",
     "optional": "اختياري"
   },
+  "not_found": {
+    "code": "404",
+    "title": "الصفحة غير موجودة",
+    "description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "back_home": "العودة للرئيسية",
+    "go_dashboard": "الذهاب للوحة التحكم",
+    "contact_support": "تواصل مع الدعم"
+  },
+  "error": {
+    "code": "500",
+    "title": "حدث خطأ غير متوقع",
+    "description": "نعتذر، حدث خطأ غير متوقع. تم إبلاغ فريقنا.",
+    "try_again": "حاول مرة أخرى",
+    "back_home": "العودة للرئيسية",
+    "error_id": "رقم الخطأ المرجعي"
+  },
+  "empty_state": {
+    "default_title": "لا توجد بيانات",
+    "default_description": "لا يوجد شيء لعرضه هنا بعد.",
+    "no_results": "لا توجد نتائج",
+    "no_results_description": "جرّب تعديل البحث أو الفلاتر.",
+    "no_records": "لا توجد سجلات بعد",
+    "no_records_description": "ستظهر البيانات هنا بمجرد إضافتها.",
+    "no_activity": "لا يوجد نشاط حديث",
+    "no_activity_description": "سيظهر النشاط هنا بمجرد بدئه.",
+    "no_notifications": "لا توجد إشعارات",
+    "no_notifications_description": "لقد اطلعت على كل شيء.",
+    "try_refresh": "تحديث",
+    "add_first": "أضف أول إدخال"
+  },
   "nav": {
     "home": "الرئيسية",
     "sectors": "القطاعات",
