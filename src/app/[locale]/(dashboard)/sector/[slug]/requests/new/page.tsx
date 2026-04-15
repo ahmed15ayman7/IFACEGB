@@ -27,8 +27,9 @@ export default async function SectorRequestsNewPage({ params }: Props) {
   });
   if (!sector) notFound();
 
+  // All sectors except the current one (current sector is the sender)
   const sectors = await prisma.sector.findMany({
-    where: { id: { not: sector.id } },
+    where: { id: { not: sector.id }, isActive: true },
     orderBy: { nameEn: "asc" },
     select: { id: true, nameEn: true, nameAr: true },
   });
@@ -54,7 +55,11 @@ export default async function SectorRequestsNewPage({ params }: Props) {
         {t("new_request")}
       </h1>
 
-      <IsrNewForm sectors={sectors} />
+      <IsrNewForm
+        sectors={sectors}
+        fromSector={sector}
+        redirectTo={`/${locale}/sector/${slug}/requests`}
+      />
     </div>
   );
 }

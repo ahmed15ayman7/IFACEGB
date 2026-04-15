@@ -9,7 +9,15 @@ import { Send } from "lucide-react";
 
 type Sector = { id: string; nameEn: string; nameAr: string | null };
 
-export function IsrNewForm({ sectors }: { sectors: Sector[] }) {
+type Props = {
+  sectors: Sector[];
+  /** Pre-set the sending sector (used when creating from inside a specific sector page) */
+  fromSector?: Sector;
+  /** Where to redirect after successful submission. Defaults to /isr */
+  redirectTo?: string;
+};
+
+export function IsrNewForm({ sectors, fromSector, redirectTo }: Props) {
   const t = useTranslations("dashboard.isr");
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -40,17 +48,22 @@ export function IsrNewForm({ sectors }: { sectors: Sector[] }) {
     setLoading(true);
     setError(null);
     try {
+      const payload = {
+        ...form,
+        ...(fromSector ? { fromSectorId: fromSector.id } : {}),
+      };
       const res = await fetch("/api/isr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error ?? "Error");
       }
       setSuccess(true);
-      setTimeout(() => router.push(`/${locale}/isr`), 1500);
+      const destination = redirectTo ?? `/${locale}/isr`;
+      setTimeout(() => router.push(destination), 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("form_error"));
     } finally {
@@ -70,8 +83,19 @@ export function IsrNewForm({ sectors }: { sectors: Sector[] }) {
     );
   }
 
+  const fromSectorLabel = fromSector
+    ? (isRtl ? (fromSector.nameAr ?? fromSector.nameEn) : fromSector.nameEn)
+    : null;
+
   return (
     <motion.form {...fadeInUp} onSubmit={handleSubmit} className="max-w-2xl space-y-5">
+      {fromSectorLabel && (
+        <div className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg border border-[rgba(201,162,39,0.15)] bg-[rgba(201,162,39,0.05)] text-[#6e7d93]">
+          <span className="text-[#C9A227] font-medium">{t("detail_from")}:</span>
+          <span className="text-[#A8B5C8] font-semibold">{fromSectorLabel}</span>
+          <span className="ms-auto text-[10px] text-[#6e7d93] opacity-60">auto-filled</span>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelCls}>{t("form_title_en")} *</label>

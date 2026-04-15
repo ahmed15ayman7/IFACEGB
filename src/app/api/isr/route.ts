@@ -20,6 +20,7 @@ const createSchema = z.object({
   type: z.string().min(1),
   priority: z.enum(["urgent", "high", "normal", "low"]).default("normal"),
   toSectorId: z.string().min(1),
+  fromSectorId: z.string().optional(), // admins can override; regular users fall back to sectorId
 });
 
 export async function GET(req: NextRequest) {
@@ -72,12 +73,19 @@ export async function POST(req: NextRequest) {
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const { titleEn, titleAr, descriptionEn, descriptionAr, type, priority, toSectorId } = parsed.data;
+  const { titleEn, titleAr, descriptionEn, descriptionAr, type, priority, toSectorId, fromSectorId: bodyFromSectorId } = parsed.data;
+
+  // Allow admins/super_admins to specify fromSectorId in the body (e.g. when submitting on behalf of a sector).
+  // Regular users always use their own sectorId.
+  const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
+  const resolvedFromSectorId = isAdmin
+    ? (bodyFromSectorId ?? session.user.sectorId ?? null)
+    : (session.user.sectorId ?? null);
 
   const request = await prisma.serviceRequest.create({
     data: {
       requesterId: session.user.id,
-      fromSectorId: session.user.sectorId ?? null,
+      fromSectorId: resolvedFromSectorId,
       toSectorId,
       type,
       titleEn,
