@@ -13,6 +13,7 @@ import {
   Building,
   Building2,
   CalendarDays,
+  CalendarCheck2,
   Cpu,
   Eye,
   Globe,
@@ -51,6 +52,8 @@ type NavKey =
   | "portal"
   | "rewards"
   | "attendance"
+  | "leaves"
+  | "hr_requests"
   | "franchise"
   | "settings";
 
@@ -76,6 +79,8 @@ const NAV_ICONS: Record<NavKey, LucideIcon> = {
   portal: UserCircle,
   rewards: Award,
   attendance: CalendarDays,
+  leaves: CalendarCheck2,
+  hr_requests: CalendarCheck2,
   franchise: Network,
   settings: Settings,
 };
@@ -91,6 +96,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/god-view`, navKey: "god_view" },
       { href: `${base}/admin/sectors`, navKey: "sectors" },
       { href: `${base}/admin/employees`, navKey: "hr" },
+      { href: `${base}/admin/hr-requests`, navKey: "hr_requests" },
       { href: `${base}/admin/finance`, navKey: "finance" },
       { href: `${base}/sector/training`, navKey: "training" },
       { href: `${base}/sector/accreditation`, navKey: "accreditation" },
@@ -108,6 +114,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       ...commonItems,
       { href: `${base}/admin/sectors`, navKey: "sectors" },
       { href: `${base}/admin/employees`, navKey: "hr" },
+      { href: `${base}/admin/hr-requests`, navKey: "hr_requests" },
       { href: `${base}/admin/finance`, navKey: "finance" },
       { href: `${base}/connect`, navKey: "connect" },
       settingsItem,
@@ -132,6 +139,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/employee`, navKey: "portal" },
       { href: `${base}/employee/wallet`, navKey: "wallet" },
       { href: `${base}/employee/attendance`, navKey: "attendance" },
+      { href: `${base}/employee/leaves`, navKey: "leaves" },
       { href: `${base}/employee/rewards`, navKey: "rewards" },
       { href: `${base}/lms`, navKey: "lms" },
       { href: `${base}/connect`, navKey: "connect" },

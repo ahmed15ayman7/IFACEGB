@@ -115,8 +115,8 @@ export default async function AdminEmployeeDetailPage({ params }: Props) {
               {employee.user.isActive ? t("active") : t("inactive")}
             </span>
             <Link
-              href={`/${locale}/admin/employees/new`}
-              className="h-8 px-3 text-xs rounded-lg border border-[rgba(201,162,39,0.25)] text-[#C9A227] hover:bg-[rgba(201,162,39,0.08)] transition-colors"
+              href={`/${locale}/admin/employees/${id}/edit`}
+              className="h-8 px-3 text-xs rounded-lg border border-[rgba(201,162,39,0.25)] text-[#C9A227] hover:bg-[rgba(201,162,39,0.08)] transition-colors inline-flex items-center gap-1"
             >
               {t("detail_edit")}
             </Link>
