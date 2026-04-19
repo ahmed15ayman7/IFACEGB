@@ -12,13 +12,22 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Returns sector codes that currently have an active lock in the DB. */
-async function getDbLockedSectors(): Promise<string[]> {
+/** Returns sector codes AND ids that currently have an active lock in the DB. */
+async function getDbLockedSectors(): Promise<{ codes: string[]; ids: string[] }> {
   const rows = await prisma.killSwitchLog.findMany({
     where: { targetType: "sector", isActive: true },
     select: { targetId: true },
   });
-  return rows.map((r) => r.targetId).filter(Boolean) as string[];
+  const codes = rows.map((r) => r.targetId).filter(Boolean) as string[];
+
+  // Resolve codes → sector IDs
+  if (codes.length === 0) return { codes: [], ids: [] };
+  const sectors = await prisma.sector.findMany({
+    where: { code: { in: codes } },
+    select: { id: true, code: true },
+  });
+  const ids = sectors.map((s) => s.id);
+  return { codes, ids };
 }
 
 /** Is the global platform kill switch active in the DB? */
@@ -180,24 +189,20 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
-  if (searchParams.get("check") === "sectors") {
-    // Try DB first, fallback to Redis cache
-    try {
-      const lockedSectors = await getDbLockedSectors();
-      return NextResponse.json({ lockedSectors });
-    } catch {
-      // DB failed: fallback to Redis
-      const lockedSectors = await redisCacheGetLocked().catch(() => []);
-      return NextResponse.json({ lockedSectors });
-    }
-  }
-
-  // Full status (for the admin dashboard)
+  // Full status (used by both admin dashboard and the proxy cache layer)
   try {
-    const [globalActive, lockedSectors] = await Promise.all([
+    const [globalActive, locked] = await Promise.all([
       isGlobalActive(),
-      getDbLockedSectors(),
+      getDbLockedSectors().catch(() => ({ codes: [] as string[], ids: [] as string[] })),
     ]);
+
+    if (searchParams.get("check") === "sectors") {
+      // Lightweight response used only by the proxy
+      return NextResponse.json({
+        lockedSectors: locked.codes,      // sector codes (for URL code matching)
+        lockedSectorIds: locked.ids,      // sector UUIDs (for user sectorId matching)
+      });
+    }
 
     const activeLog = globalActive
       ? await prisma.killSwitchLog.findFirst({
@@ -206,8 +211,18 @@ export async function GET(req: NextRequest) {
         })
       : null;
 
-    return NextResponse.json({ active: globalActive, log: activeLog, lockedSectors });
+    return NextResponse.json({
+      active: globalActive,
+      log: activeLog,
+      lockedSectors: locked.codes,
+      lockedSectorIds: locked.ids,
+    });
   } catch {
-    return NextResponse.json({ active: false, log: null, lockedSectors: [] });
+    return NextResponse.json({
+      active: false,
+      log: null,
+      lockedSectors: [],
+      lockedSectorIds: [],
+    });
   }
 }
