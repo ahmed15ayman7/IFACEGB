@@ -64,7 +64,7 @@ export default async function EventDetailPage({ params }: Props) {
 
   return (
     <PublicShell className="py-14 sm:py-20">
-      <div className="container mx-auto max-w-3xl px-4">
+      <div className="container mx-auto max-w-7xl px-4">
         <PublicFadeIn delay={0}>
           <Link
             href={`/${locale}/events`}

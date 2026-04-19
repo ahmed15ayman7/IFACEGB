@@ -96,7 +96,7 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
   }
 
   return (
-    <motion.form {...fadeInUp} onSubmit={handleSubmit} className="space-y-5 max-w-3xl">
+    <motion.form {...fadeInUp} onSubmit={handleSubmit} className="space-y-5 max-w-7xl">
 
       {/* Section 1: Account */}
       <div className={sectionCls}>

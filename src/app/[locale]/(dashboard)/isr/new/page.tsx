@@ -26,7 +26,7 @@ export default async function IsrNewPage() {
   const isRtl = locale === "ar";
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 max-w-3xl">
+    <div className="p-4 lg:p-6 space-y-6 max-w-7xl">
       <div className="flex items-center gap-3">
         <Link
           href={`/${locale}/isr`}

@@ -48,7 +48,7 @@ export default async function IsrDetailPage({ params }: Props) {
     !["resolved", "rejected"].includes(request.status);
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 max-w-3xl">
+    <div className="p-4 lg:p-6 space-y-6 max-w-7xl">
       <Link
         href={`/${locale}/isr`}
         className="text-xs text-[#6e7d93] hover:text-[#C9A227] inline-flex items-center gap-1 transition-colors"

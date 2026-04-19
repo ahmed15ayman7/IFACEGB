@@ -61,7 +61,7 @@ export default async function AboutPage() {
           <BookOpen className="size-7 sm:size-8" strokeWidth={1.25} aria-hidden />
         </PublicPageHeader>
 
-        <PublicFadeIn delay={0.06} className="mx-auto max-w-3xl space-y-5 text-sm leading-relaxed text-[#A8B5C8] sm:text-[15px]">
+        <PublicFadeIn delay={0.06} className="mx-auto max-w-7xl space-y-5 text-sm leading-relaxed text-[#A8B5C8] sm:text-[15px]">
           <p>{t("p1")}</p>
           <p>{t("p2")}</p>
         </PublicFadeIn>

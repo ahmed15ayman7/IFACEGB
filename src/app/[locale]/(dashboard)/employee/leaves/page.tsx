@@ -51,7 +51,7 @@ export default async function EmployeeLeavesPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#060f1e] px-4 sm:px-6 lg:px-10 py-8 max-w-3xl">
+    <div className="min-h-screen bg-[#060f1e] px-4 sm:px-6 lg:px-10 py-8 max-w-7xl">
       <LeavesClient initial={serialized} />
     </div>
   );

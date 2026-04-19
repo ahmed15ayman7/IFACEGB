@@ -970,7 +970,7 @@ export function PublicLanding({ statsOverride, successStories, partners }: Landi
       </section>
 
       <section className="px-4 pb-24 pt-4">
-        <div className="container mx-auto max-w-3xl text-center">
+        <div className="container mx-auto max-w-7xl text-center">
           <motion.div {...viewAnim} className="flex items-center justify-center gap-3">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[rgba(201,162,39,0.4)]" />
             <Sparkles className="size-4 text-[rgba(201,162,39,0.6)]" aria-hidden />

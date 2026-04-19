@@ -37,7 +37,7 @@ export default async function SectorRequestsNewPage({ params }: Props) {
   const isRtl = locale === "ar";
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 max-w-3xl">
+    <div className="p-4 lg:p-6 space-y-6 max-w-7xl">
       <div className="flex items-center gap-2">
         <Link
           href={`/${locale}/sector/${slug}/requests`}

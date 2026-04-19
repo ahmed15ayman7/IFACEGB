@@ -23,7 +23,7 @@ export default async function PrivacyPage() {
 
   return (
     <PublicShell ambient="minimal" className="py-16 sm:py-24">
-      <div className="container mx-auto max-w-3xl px-4">
+      <div className="container mx-auto max-w-7xl px-4">
         <PublicPageHeader
           align="start"
           eyebrow={`${t("updated")}: ${year}`}
