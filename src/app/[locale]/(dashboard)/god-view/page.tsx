@@ -5,6 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { GodViewKPIStrip } from "@/features/god-view/components/KPIStrip";
 import { GodViewKillSwitch } from "@/features/god-view/components/KillSwitch";
+import { SectorLockPanel } from "@/features/god-view/components/SectorLockPanel";
 import { EDirectiveComposer } from "@/features/god-view/components/EDirectiveComposer";
 import { AuditTrailFeed } from "@/features/god-view/components/AuditTrailFeed";
 import { SectorWalletChart } from "@/features/god-view/components/SectorWalletChart";
@@ -26,6 +27,7 @@ async function getGodViewData() {
     criticalAlerts,
     recentAudit,
     employees,
+    sectors,
   ] = await Promise.all([
     prisma.certificate.count({ where: { issueDate: { gte: today } } }),
     prisma.coinTransaction.aggregate({
@@ -58,6 +60,10 @@ async function getGodViewData() {
       },
       take: 50,
     }),
+    prisma.sector.findMany({
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, code: true, nameEn: true, nameAr: true, color: true, isActive: true },
+    }),
   ]);
 
   return {
@@ -72,6 +78,7 @@ async function getGodViewData() {
     sectorWallets,
     recentAudit,
     employees,
+    sectors,
   };
 }
 
@@ -129,6 +136,8 @@ export default async function GodViewPage() {
       </div>
 
       <GodViewKillSwitch adminId={session.user.id} />
+
+      <SectorLockPanel sectors={data.sectors} adminId={session.user.id} />
 
       <GodViewKPIStrip kpis={data.kpis} />
 
