@@ -48,14 +48,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       // Record transaction
       await prisma.coinTransaction.create({
         data: {
-          fromWalletId: null,
-          toWalletId: (await prisma.wallet.findFirst({ where: { ownerId: employee.userId, walletType: "EmployeeWallet" }, select: { id: true } }))?.id ?? "",
-          walletId: (await prisma.wallet.findFirst({ where: { ownerId: employee.userId, walletType: "EmployeeWallet" }, select: { id: true } }))?.id ?? "",
-          userId: employee.userId,
-          type: "bonus_payment",
+          receiverWalletId: (await prisma.wallet.findFirst({ where: { ownerId: employee.userId, walletType: "EmployeeWallet" }, select: { id: true } }))?.id ?? "",
+          initiatedBy: employee.userId,
+          type: "bonus",
           amountCoins: existing.amountCoins,
           status: "completed",
-          description: `Bonus payment #${id}`,
+          reason: `Bonus payment #${id}`,
         },
       }).catch(() => null);
     }
