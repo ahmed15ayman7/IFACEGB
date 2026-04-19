@@ -8,6 +8,7 @@ import {
   ArrowLeft, ArrowRight, User, Briefcase, Coins,
   CalendarCheck, FileText, Phone, MapPin, Shield,
 } from "lucide-react";
+import { AdminContractsPanel } from "@/components/dashboard/AdminContractsPanel";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -42,9 +43,16 @@ export default async function AdminEmployeeDetailPage({ params }: Props) {
 
   if (!employee) notFound();
 
-  const wallet = await prisma.wallet.findFirst({
-    where: { ownerId: employee.userId, walletType: "EmployeeWallet" },
-  });
+  const [wallet, contracts] = await Promise.all([
+    prisma.wallet.findFirst({
+      where: { ownerId: employee.userId, walletType: "EmployeeWallet" },
+    }),
+    prisma.electronicContract.findMany({
+      where: { employeeId: employee.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, templateType: true, status: true, signedAt: true, createdAt: true, content: true },
+    }),
+  ]);
 
   const isRtl = locale === "ar";
   const name = isRtl ? (employee.user.nameAr ?? employee.user.name ?? "—") : (employee.user.name ?? "—");
@@ -269,6 +277,22 @@ export default async function AdminEmployeeDetailPage({ params }: Props) {
           </div>
         )}
       </div>
+
+      {/* ── Contracts & Salary Panel ─────────────────────── */}
+      <AdminContractsPanel
+        employeeId={employee.id}
+        initialContracts={contracts.map((c) => ({
+          ...c,
+          signedAt: c.signedAt?.toISOString() ?? null,
+          createdAt: c.createdAt.toISOString(),
+        }))}
+        salary={{
+          contractType: employee.contractType,
+          salaryBase: Number(employee.salaryBase),
+          salaryCurrency: employee.salaryCurrency,
+          profitSharePct: Number(employee.profitSharePct),
+        }}
+      />
     </div>
   );
 }

@@ -15,7 +15,7 @@ export default async function AdminRewardsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
   if (!["super_admin", "admin"].includes(session.user.role)) {
-    redirect(getRoleHomePath(session.user.role));
+    redirect(getRoleHomePath(await getLocale(), session.user.role, session.user.sectorId ?? null));
   }
 
   const locale = await getLocale();
