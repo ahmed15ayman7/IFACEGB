@@ -67,6 +67,9 @@ export function RewardsClient({ kineticPoints, profitSharePct, bonuses, targets 
   const paidTotal = bonuses
     .filter((b) => b.status === "paid")
     .reduce((s, b) => s + b.amountCoins, 0);
+  const approvedTotal = bonuses
+    .filter((b) => b.status === "approved")
+    .reduce((s, b) => s + b.amountCoins, 0);
 
   return (
     <div className="space-y-6 pb-10">
@@ -150,6 +153,10 @@ export function RewardsClient({ kineticPoints, profitSharePct, bonuses, targets 
           {
             icon: Coins, label: "Paid bonuses", value: `${paidTotal.toLocaleString()} coins`,
             color: "#22c55e", bg: "rgba(34,197,94,0.08)",
+          },
+          {
+            icon: Coins, label: "Approved bonuses", value: `${approvedTotal.toLocaleString()} coins`,
+            color: "#C9A227", bg: "rgba(201,162,39,0.08)",
           },
           {
             icon: TrendingUp, label: t("profit_rate"), value: `${profitSharePct}%`,
