@@ -174,6 +174,9 @@ export default async function proxy(req: NextRequest) {
         if (token) {
           const role = token.role as UserRole | undefined;
           const sectorId = (token.sectorId as string | null | undefined) ?? null;
+          console.log("sectorId", sectorId);
+          console.log("role", role);
+          console.log("ks.lockedSectorIds", ks.lockedSectorIds);
           if (
             sectorId &&
             !SECTOR_LOCK_BYPASS_ROLES.includes(role as UserRole) &&
