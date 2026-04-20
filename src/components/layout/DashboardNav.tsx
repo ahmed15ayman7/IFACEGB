@@ -16,6 +16,7 @@ import {
   CalendarCheck2,
   Cpu,
   Eye,
+  FileText,
   Globe,
   GraduationCap,
   Inbox,
@@ -26,7 +27,10 @@ import {
   MessageCircle,
   Network,
   Scale,
+  ScrollText,
   Settings,
+  Shield,
+  Ticket,
   UserCircle,
   Users,
   Wallet,
@@ -55,6 +59,12 @@ type NavKey =
   | "leaves"
   | "hr_requests"
   | "franchise"
+  | "centers"
+  | "license"
+  | "tickets"
+  | "courses"
+  | "certificates"
+  | "trainers"
   | "settings";
 
 type NavItem = { href: string; navKey: NavKey };
@@ -66,7 +76,7 @@ const NAV_ICONS: Record<NavKey, LucideIcon> = {
   hr: Users,
   finance: Landmark,
   training: GraduationCap,
-  accreditation: Building2,
+  accreditation: Shield,
   consultancy: Scale,
   tech: Cpu,
   partnerships: Globe,
@@ -82,6 +92,12 @@ const NAV_ICONS: Record<NavKey, LucideIcon> = {
   leaves: CalendarCheck2,
   hr_requests: CalendarCheck2,
   franchise: Network,
+  centers: Building,
+  license: ScrollText,
+  tickets: Ticket,
+  courses: BookOpen,
+  certificates: FileText,
+  trainers: Users,
   settings: Settings,
 };
 
@@ -136,7 +152,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
     ];
   }
 
-  if (role === "employee" || role === "trainer") {
+  if (role === "employee") {
     return [
       { href: `${base}/employee`, navKey: "portal" },
       { href: `${base}/employee/wallet`, navKey: "wallet" },
@@ -149,11 +165,56 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
     ];
   }
 
+  if (role === "trainer") {
+    return [
+      { href: `${base}/trainer`, navKey: "portal" },
+      { href: `${base}/trainer/courses`, navKey: "courses" },
+      { href: `${base}/trainer/certificates`, navKey: "certificates" },
+      { href: `${base}/trainer/wallet`, navKey: "wallet" },
+      { href: `${base}/trainer/accreditation`, navKey: "accreditation" },
+      { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
+    ];
+  }
+
   if (role === "agent") {
     return [
-      ...commonItems,
       { href: `${base}/franchise`, navKey: "franchise" },
+      { href: `${base}/franchise/centers`, navKey: "centers" },
+      { href: `${base}/franchise/license`, navKey: "license" },
+      { href: `${base}/franchise/tickets`, navKey: "tickets" },
       { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
+    ];
+  }
+
+  if (role === "center") {
+    return [
+      { href: `${base}/center`, navKey: "portal" },
+      { href: `${base}/center/trainers`, navKey: "trainers" },
+      { href: `${base}/center/certificates`, navKey: "certificates" },
+      { href: `${base}/center/wallet`, navKey: "wallet" },
+      { href: `${base}/center/accreditation`, navKey: "accreditation" },
+      { href: `${base}/connect`, navKey: "connect" },
+      settingsItem,
+    ];
+  }
+
+  if (role === "client") {
+    return [
+      { href: `${base}/client`, navKey: "portal" },
+      { href: `${base}/client/courses`, navKey: "courses" },
+      { href: `${base}/client/certificates`, navKey: "certificates" },
+      { href: `${base}/client/tickets`, navKey: "tickets" },
+      settingsItem,
+    ];
+  }
+
+  if (role === "user") {
+    return [
+      { href: `${base}/user`, navKey: "portal" },
+      { href: `${base}/user/courses`, navKey: "courses" },
+      { href: `${base}/user/certificates`, navKey: "certificates" },
       settingsItem,
     ];
   }

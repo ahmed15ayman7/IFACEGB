@@ -15,13 +15,16 @@ export function getRoleHomePath(locale: string, role: UserRole, sectorId: string
     case "sector_manager":
       return sectorId ? `${base}/sector/${sectorId}` : `${base}/lms`;
     case "employee":
-    case "trainer":
       return `${base}/employee`;
+    case "trainer":
+      return `${base}/trainer`;
     case "agent":
       return `${base}/franchise`;
     case "center":
+      return `${base}/center`;
     case "client":
+      return `${base}/client`;
     case "user":
-      return `${base}/lms`;
+      return `${base}/user`;
   }
 }

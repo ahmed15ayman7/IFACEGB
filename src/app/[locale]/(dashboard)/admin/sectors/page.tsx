@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import EmptyState from "@/components/ui/EmptyState";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export async function generateMetadata({
   params,

@@ -39,7 +39,7 @@ const VARIANT_ICONS: Record<EmptyVariant, LucideIcon> = {
   no_notifications: BellOff,
 };
 
-export default function EmptyState({
+export function EmptyState({
   variant = "default",
   icon: IconOverride,
   title,

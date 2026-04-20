@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { staggerContainer } from "@/lib/motion/dashboard";
 import { IsrCard } from "./IsrCard";
-import EmptyState from "@/components/ui/EmptyState";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { InboxIcon, SendHorizonal } from "lucide-react";
 
 type IsrItem = {

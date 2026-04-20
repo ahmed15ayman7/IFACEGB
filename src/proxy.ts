@@ -78,6 +78,10 @@ const PROTECTED_PATTERNS = [
   /\/[a-z]{2}\/connect(?:\/|$)/,
   /\/[a-z]{2}\/franchise(?:\/|$)/,
   /\/[a-z]{2}\/isr(?:\/|$)/,
+  /\/[a-z]{2}\/trainer(?:\/|$)/,
+  /\/[a-z]{2}\/center(?:\/|$)/,
+  /\/[a-z]{2}\/client(?:\/|$)/,
+  /\/[a-z]{2}\/user(?:\/|$)/,
 ];
 
 function isLocaleAuthRoute(pathname: string): boolean {
