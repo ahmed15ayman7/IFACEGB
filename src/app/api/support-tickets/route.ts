@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth.config";
 import { prisma } from "@/lib/prisma";
-import { logAudit } from "@/lib/audit.service";
+import { logAudit } from "@/lib/audit/audit.service";
 import { z } from "zod";
+import type { TicketStatus } from "@prisma/client";
 
 const createSchema = z.object({
   subject: z.string().min(3).max(200),
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
   const tickets = await prisma.supportTicket.findMany({
     where: {
       ...(isAdmin ? {} : { requesterId: session.user.id }),
-      ...(status ? { status } : {}),
+      ...(status ? { status: status as TicketStatus } : {}),
     },
     include: {
       requester: { select: { name: true, email: true } },
@@ -59,8 +60,9 @@ export async function POST(req: NextRequest) {
   await logAudit({
     userId: session.user.id,
     action: "create_support_ticket",
-    target: ticket.id,
-    meta: { subject: ticket.subject, priority: ticket.priority },
+    entityType: "SupportTicket",
+    entityId: ticket.id,
+    metadata: { subject: ticket.subject, priority: ticket.priority },
   });
 
   return NextResponse.json({ ticket }, { status: 201 });
