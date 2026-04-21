@@ -65,6 +65,8 @@ type NavKey =
   | "courses"
   | "certificates"
   | "trainers"
+  | "general_admin"
+  | "departments"
   | "settings";
 
 type NavItem = { href: string; navKey: NavKey };
@@ -98,6 +100,8 @@ const NAV_ICONS: Record<NavKey, LucideIcon> = {
   courses: BookOpen,
   certificates: FileText,
   trainers: Users,
+  general_admin: Building2,
+  departments: Building,
   settings: Settings,
 };
 
@@ -115,6 +119,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/admin/hr-requests`, navKey: "hr_requests" },
       { href: `${base}/admin/rewards`, navKey: "rewards" },
       { href: `${base}/admin/finance`, navKey: "finance" },
+      { href: `${base}/general-admin`, navKey: "general_admin" },
       { href: `${base}/sector/training`, navKey: "training" },
       { href: `${base}/sector/accreditation`, navKey: "accreditation" },
       { href: `${base}/sector/consultancy`, navKey: "consultancy" },
@@ -134,6 +139,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
       { href: `${base}/admin/hr-requests`, navKey: "hr_requests" },
       { href: `${base}/admin/rewards`, navKey: "rewards" },
       { href: `${base}/admin/finance`, navKey: "finance" },
+      { href: `${base}/general-admin`, navKey: "general_admin" },
       { href: `${base}/connect`, navKey: "connect" },
       settingsItem,
     ];

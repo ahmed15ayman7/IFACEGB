@@ -1514,6 +1514,7 @@ model IfaceNews {
   bodyEn      String   @db.Text
   bodyAr      String?  @db.Text
   imageUrl    String?
+  category    String?  @default("news")
   isPublished Boolean  @default(false)
   publishedAt DateTime?
   createdAt   DateTime @default(now())
@@ -1532,6 +1533,7 @@ model IfaceEvent {
   startDate   DateTime
   endDate     DateTime?
   coverUrl    String?
+  eventType   String?  @default("conference")
   isMega      Boolean  @default(false)
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
