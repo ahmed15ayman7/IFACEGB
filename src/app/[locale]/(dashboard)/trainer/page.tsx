@@ -56,7 +56,7 @@ export default async function TrainerPortalPage() {
           { label: t("kpi_accreditation"), value: accreditation?.status ?? "—" },
           { label: t("kpi_courses"), value: activeCourses },
           { label: t("kpi_certificates"), value: totalCerts },
-          { label: t("kpi_wallet"), value: wallet ? Number(wallet.balance).toLocaleString() : "0" },
+          { label: t("kpi_wallet"), value: wallet ? Number(wallet.balanceCoins).toLocaleString() : "0" },
         ].map((kpi) => (
           <div
             key={kpi.label}

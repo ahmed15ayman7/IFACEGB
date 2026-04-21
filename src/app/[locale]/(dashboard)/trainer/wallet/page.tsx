@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { WithdrawalForm } from "@/components/dashboard/WithdrawalForm";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { format } from "date-fns";
+import { TransactionType } from "@prisma/client";
 
 export default async function TrainerWalletPage() {
   const session = await auth();
@@ -20,14 +22,14 @@ export default async function TrainerWalletPage() {
 
   const transactions = wallet
     ? await prisma.coinTransaction.findMany({
-        where: { walletId: wallet.id },
+        where: { OR: [{ senderWalletId: wallet.id }, { receiverWalletId: wallet.id }] },
         orderBy: { createdAt: "desc" },
         take: 30,
       })
     : [];
 
-  const balance = wallet ? Number(wallet.balance) : 0;
-  const reserved = wallet ? Number(wallet.reservedBalance ?? 0) : 0;
+  const balance = wallet ? Number(wallet.balanceCoins) : 0;
+  const reserved = wallet ? Number(wallet.reservedCoins ?? 0) : 0;
 
   return (
     <div className="p-6 space-y-6">
@@ -76,14 +78,14 @@ export default async function TrainerWalletPage() {
                 <div className="text-right">
                   <p
                     className={`text-sm font-semibold ${
-                      tx.direction === "credit" ? "text-green-400" : "text-red-400"
+                      tx.type === TransactionType.external_income ? "text-green-400" : "text-red-400"
                     }`}
                   >
-                    {tx.direction === "credit" ? "+" : "-"}
-                    {Number(tx.amount).toLocaleString()}
+                    {tx.type === TransactionType.external_income ? "+" : "-"}
+                    {Number(tx.amountCoins).toLocaleString()}
                   </p>
                   <p className="text-[#6e7d93] text-xs">
-                    {new Date(tx.createdAt).toLocaleDateString()}
+                    {format(tx.createdAt, "MM/dd/yyyy")}
                   </p>
                 </div>
               </div>

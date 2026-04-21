@@ -3,7 +3,8 @@ import { generateSEOMetadata } from "@/lib/seo/metadata";
 import { prisma } from "@/lib/prisma";
 import { NewPublicLanding } from "@/components/landing/NewPublicLanding";
 import { startOfMonth } from "date-fns";
-
+import { Employee, IfaceEvent, IfaceNews, Sector, SuccessPartner, User } from "@prisma/client";
+import { format } from "date-fns";
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -15,14 +16,16 @@ export default async function LandingPage() {
   const now = new Date();
   const monthStart = startOfMonth(now);
 
-  let sectors: Awaited<ReturnType<typeof prisma.sector.findMany>> = [];
-  let news: Awaited<ReturnType<typeof prisma.ifaceNews.findMany>> = [];
-  let events: Awaited<ReturnType<typeof prisma.ifaceEvent.findMany>> = [];
-  let employeeOfMonth: (Awaited<ReturnType<typeof prisma.employee.findFirst>> & {
+  let sectors: Partial<Sector>[] = [];
+  let news: Partial<IfaceNews>[] = [];
+  let events: Partial<IfaceEvent>[] = [];
+  let employeeOfMonth: (Partial<Employee> & {
+    user: Partial<User>;
+  }) & {
     _attendanceCount?: number;
     _completedProjects?: number;
-  }) | null = null;
-  let partners: Awaited<ReturnType<typeof prisma.successPartner.findMany>> = [];
+  } | null = null;
+  let partners: Partial<SuccessPartner>[] = [];
   let userCount = 0;
   let certCount = 0;
   let agentCount = 0;
@@ -98,40 +101,40 @@ export default async function LandingPage() {
     <NewPublicLanding
       sectors={sectors as Array<{ id: string; code: string; nameEn: string; nameAr: string; color: string | null; iconUrl: string | null }>}
       news={news.map((n) => ({
-        id: n.id,
-        titleEn: n.titleEn,
-        titleAr: n.titleAr ?? null,
-        imageUrl: n.imageUrl ?? null,
+        id: n.id ?? "",
+        titleEn: n.titleEn ?? "",
+        titleAr: n.titleAr ?? "",
+        imageUrl: n.imageUrl ?? "",
         category: n.category ?? "news",
-        publishedAt: (n.publishedAt ?? n.createdAt).toISOString(),
+        publishedAt: (n.publishedAt ?? n.createdAt) ? format(n.publishedAt ?? n.createdAt as Date, "yyyy-MM-dd HH:mm:ss") : "",
       }))}
       events={events.map((e) => ({
-        id: e.id,
-        titleEn: e.titleEn,
-        titleAr: e.titleAr ?? null,
-        location: e.location ?? null,
-        startDate: e.startDate.toISOString(),
+        id: e.id ?? "",
+        titleEn: e.titleEn ?? "",
+        titleAr: e.titleAr ?? "",
+        location: e.location ?? "",
+        startDate: e.startDate ? format(e.startDate, "yyyy-MM-dd HH:mm:ss") : "",
         eventType: e.eventType ?? "conference",
-        coverUrl: e.coverUrl ?? null,
+        coverUrl: e.coverUrl ?? "",
       }))}
       employeeOfMonth={
         employeeOfMonth
           ? {
-              id: employeeOfMonth.id,
-              name: employeeOfMonth.user.name ?? "",
-              nameAr: employeeOfMonth.user.nameAr ?? null,
-              avatarUrl: employeeOfMonth.user.avatarUrl ?? null,
-              jobTitleEn: employeeOfMonth.jobTitleEn ?? null,
-              jobTitleAr: employeeOfMonth.jobTitleAr ?? null,
-              departmentEn: employeeOfMonth.departmentEn ?? null,
-              departmentAr: employeeOfMonth.departmentAr ?? null,
-              kineticPoints: employeeOfMonth.kineticPoints,
+              id: employeeOfMonth.id ?? "",
+              name: employeeOfMonth.user?.name ?? "",
+              nameAr: employeeOfMonth.user?.nameAr ?? "",
+              avatarUrl: employeeOfMonth.user?.avatarUrl ?? "",
+              jobTitleEn: employeeOfMonth.jobTitleEn ?? "",
+              jobTitleAr: employeeOfMonth.jobTitleAr ?? "",
+              departmentEn: employeeOfMonth.departmentEn ?? "",
+              departmentAr: employeeOfMonth.departmentAr ?? "",
+              kineticPoints: employeeOfMonth.kineticPoints ?? 0,
               completedProjects: employeeOfMonth._completedProjects ?? 0,
               attendanceCount: employeeOfMonth._attendanceCount ?? 0,
             }
           : null
       }
-      partners={partners}
+      partners={partners as SuccessPartner[]}
       stats={{
         employees: userCount,
         certificates: certCount,

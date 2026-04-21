@@ -48,7 +48,7 @@ export default async function GeneralAdminPage() {
     ]);
 
     const wallet = await prisma.wallet.findFirst({ where: { sectorId: sector.id } });
-    if (wallet) walletBalance = Number(wallet.balance);
+    if (wallet) walletBalance = Number(wallet.balanceCoins);
 
     // Department stats
     deptStats = await Promise.all(

@@ -107,7 +107,7 @@ export function IsrRoutingHubClient({ isrs: initialIsrs, sectors }: Props) {
       )}
 
       {isrs.length === 0 ? (
-        <EmptyState Icon={Inbox} title={isRtl ? "لا توجد طلبات بعد." : "No ISRs yet."} description="" />
+        <EmptyState icon={Inbox} title={isRtl ? "لا توجد طلبات بعد." : "No ISRs yet."} description="" />
       ) : (
         <div className="rounded-xl border border-[#1E293B] overflow-hidden">
           <table className="w-full text-sm">

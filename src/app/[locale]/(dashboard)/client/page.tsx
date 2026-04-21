@@ -36,7 +36,7 @@ export default async function ClientPortalPage() {
     { label: t("kpi_courses"), value: enrollmentCount },
     { label: t("kpi_certificates"), value: certCount },
     { label: t("kpi_tickets"), value: openTickets },
-    { label: t("kpi_wallet"), value: wallet ? Number(wallet.balance).toLocaleString() : "0" },
+    { label: t("kpi_wallet"), value: wallet ? Number(wallet.balanceCoins).toLocaleString() : "0" },
   ];
 
   return (

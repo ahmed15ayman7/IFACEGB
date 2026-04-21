@@ -83,7 +83,7 @@ export default function GeneralAdminEmployeesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          Icon={Users}
+          icon={Users}
           title={t("emp_empty")}
           description=""
         />

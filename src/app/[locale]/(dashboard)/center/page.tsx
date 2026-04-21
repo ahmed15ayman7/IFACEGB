@@ -33,7 +33,7 @@ export default async function CenterPortalPage() {
     { label: t("kpi_accreditation"), value: center?.isActive ? "Active" : "Inactive" },
     { label: t("kpi_trainers"), value: trainerCount },
     { label: t("kpi_certificates"), value: certCount },
-    { label: t("kpi_wallet"), value: wallet ? Number(wallet.balance).toLocaleString() : "0" },
+    { label: t("kpi_wallet"), value: wallet ? Number(wallet.balanceCoins).toLocaleString() : "0" },
   ];
 
   return (
