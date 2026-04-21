@@ -246,11 +246,12 @@ export default async function proxy(req: NextRequest) {
 
     const role = token.role as UserRole | undefined;
     const sectorId = (token.sectorId as string | null | undefined) ?? null;
+    const sectorCode = (token.sectorCode as string | null | undefined) ?? null;
 
     // Only super_admin can access god-view
     if (pathname.includes("/god-view") && role !== "super_admin") {
       if (!role) return NextResponse.redirect(new URL(`/${locale}/auth/login`, req.url));
-      return NextResponse.redirect(new URL(getRoleHomePath(locale, role, sectorId), req.url));
+      return NextResponse.redirect(new URL(getRoleHomePath(locale, role, sectorId, sectorCode), req.url));
     }
   }
 

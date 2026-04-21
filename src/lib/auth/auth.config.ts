@@ -49,6 +49,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const isValid = await bcrypt.compare(password, user.passwordHash);
         if (!isValid) return null;
 
+        // Fetch sector code if applicable
+        let sectorCode: string | null = null;
+        if (user.sectorId) {
+          const sector = await prisma.sector.findUnique({
+            where: { id: user.sectorId },
+            select: { code: true },
+          });
+          sectorCode = sector?.code ?? null;
+        }
+
         // Update last login
         await prisma.user.update({
           where: { id: user.id },
@@ -63,6 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           image: user.avatarUrl,
           role: user.role,
           sectorId: user.sectorId,
+          sectorCode,
           locale: user.locale,
         };
       },
@@ -74,6 +85,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id ?? "";
         token.role = (user as { role: UserRole }).role;
         token.sectorId = (user as { sectorId: string | null }).sectorId;
+        token.sectorCode = (user as { sectorCode: string | null }).sectorCode;
         token.name = user.name ?? token.name;
         token.nameAr = (user as { nameAr: string | null }).nameAr;
         token.locale = (user as { locale: string | null }).locale ?? "en";
@@ -95,6 +107,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.role = token.role as UserRole;
         session.user.sectorId = token.sectorId as string | null;
+        session.user.sectorCode = token.sectorCode as string | null;
         session.user.name = (token.name as string | null | undefined) ?? session.user.name;
         session.user.nameAr = token.nameAr as string | null;
         session.user.locale = (token.locale as string | undefined) ?? "en";

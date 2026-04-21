@@ -4,7 +4,12 @@ import type { UserRole } from "@prisma/client";
  * Single canonical "home" URL per role — use for post-login routing and RBAC redirects
  * so we never bounce between /dashboard and /employee (or similar).
  */
-export function getRoleHomePath(locale: string, role: UserRole, sectorId: string | null): string {
+export function getRoleHomePath(
+  locale: string,
+  role: UserRole,
+  sectorId: string | null,
+  sectorCode?: string | null,
+): string {
   const base = `/${locale}`;
 
   switch (role) {
@@ -13,6 +18,7 @@ export function getRoleHomePath(locale: string, role: UserRole, sectorId: string
     case "admin":
       return `${base}/admin/employees`;
     case "sector_manager":
+      if (sectorCode === "general-admin") return `${base}/general-admin`;
       return sectorId ? `${base}/sector/${sectorId}` : `${base}/lms`;
     case "employee":
       return `${base}/employee`;

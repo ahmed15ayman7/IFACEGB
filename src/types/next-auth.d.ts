@@ -7,6 +7,7 @@ declare module "next-auth" {
       id: string;
       role: UserRole;
       sectorId: string | null;
+      sectorCode: string | null;
       nameAr: string | null;
       locale: string;
     };
@@ -14,6 +15,7 @@ declare module "next-auth" {
   interface User extends DefaultUser {
     role: UserRole;
     sectorId: string | null;
+    sectorCode: string | null;
     nameAr: string | null;
     locale: string;
   }
@@ -24,6 +26,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: UserRole;
     sectorId: string | null;
+    sectorCode: string | null;
     name?: string | null;
     nameAr: string | null;
     locale: string;

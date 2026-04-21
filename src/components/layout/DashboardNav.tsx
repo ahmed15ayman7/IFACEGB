@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { UserRole } from "@prisma/client";
 import type { LucideIcon } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
 import {
   Award,
@@ -279,15 +280,14 @@ export function DashboardNav({
       </nav>
 
       <div className="px-2 py-4 border-t border-[rgba(201,162,39,0.1)]">
-        <form action="/api/auth/signout" method="POST">
-          <button
-            type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#6e7d93] hover:text-[#9C2A2A] hover:bg-[rgba(156,42,42,0.08)] transition-all"
-          >
-            <LogOut className="size-[18px] shrink-0" aria-hidden />
-            <span>{t("sign_out")}</span>
-          </button>
-        </form>
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/auth/login" })}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#6e7d93] hover:text-[#9C2A2A] hover:bg-[rgba(156,42,42,0.08)] transition-all"
+        >
+          <LogOut className="size-[18px] shrink-0" aria-hidden />
+          <span>{t("sign_out")}</span>
+        </button>
       </div>
     </aside>
   );
