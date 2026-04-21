@@ -7,7 +7,6 @@ import { NewsSection } from "./sections/NewsSection";
 import { EventsSection } from "./sections/EventsSection";
 import { EmployeeOfMonthSection } from "./sections/EmployeeOfMonthSection";
 import { PartnersSection } from "./sections/PartnersSection";
-import { FooterSection } from "./sections/FooterSection";
 
 interface Sector {
   id: string;
@@ -100,7 +99,6 @@ export function NewPublicLanding({
       <EventsSection events={events} />
       <EmployeeOfMonthSection employee={employeeOfMonth} />
       <PartnersSection partners={partners} />
-      <FooterSection />
     </div>
   );
 }
