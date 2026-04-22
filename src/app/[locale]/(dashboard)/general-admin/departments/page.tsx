@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ChevronDown, Building, Plus, Users } from "lucide-react";
 import Link from "next/link";
+import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
 
-const ALLOWED_ROLES = ["super_admin", "admin", "sector_manager"] as const;
 const DEPARTMENTS = ["Secretariat", "Public Relations", "Sales"] as const;
 
 const JOB_LEVEL_ORDER = [
@@ -32,7 +32,13 @@ export default async function GeneralAdminDepartmentsPage() {
   const t = await getTranslations("dashboard.generalAdmin");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (!ALLOWED_ROLES.includes(session.user.role as (typeof ALLOWED_ROLES)[number])) {
+  if (
+    !(await canAccessGeneralAdminDashboard(
+      session.user.role,
+      session.user.sectorId ?? null,
+      session.user.sectorCode ?? null
+    ))
+  ) {
     redirect(`/${locale}/dashboard`);
   }
 

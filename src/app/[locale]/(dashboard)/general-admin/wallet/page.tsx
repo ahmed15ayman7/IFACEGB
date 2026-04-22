@@ -5,8 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Coins, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { WithdrawalForm } from "@/components/dashboard/WithdrawalForm";
 import { format } from "date-fns";
-
-const ALLOWED_ROLES = ["super_admin", "admin", "sector_manager"] as const;
+import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
 
 export default async function GeneralAdminWalletPage() {
   const session = await auth();
@@ -14,7 +13,13 @@ export default async function GeneralAdminWalletPage() {
   const t = await getTranslations("dashboard.generalAdmin");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (!ALLOWED_ROLES.includes(session.user.role as (typeof ALLOWED_ROLES)[number])) {
+  if (
+    !(await canAccessGeneralAdminDashboard(
+      session.user.role,
+      session.user.sectorId ?? null,
+      session.user.sectorCode ?? null
+    ))
+  ) {
     redirect(`/${locale}/dashboard`);
   }
 

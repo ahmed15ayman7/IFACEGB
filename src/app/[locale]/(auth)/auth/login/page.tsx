@@ -13,10 +13,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return generateSEOMetadata("login", locale as "en" | "ar");
 }
 
-export default async function LoginPage() {
+type LoginProps = { searchParams: Promise<{ error?: string }> };
+
+export default async function LoginPage({ searchParams }: LoginProps) {
   const locale = await getLocale();
   const t = await getTranslations("auth");
   const tCommon = await getTranslations("common");
+  const sp = await searchParams;
+  const showDisabled = sp.error === "disabled";
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 relative">
@@ -49,6 +53,9 @@ export default async function LoginPage() {
           <p className="text-[#6e7d93] text-sm mt-1">{t("login_subtitle")}</p>
         </div>
 
+        {showDisabled && (
+          <p className="mb-4 text-center text-sm text-amber-400/95 px-2">{t("login_error_disabled")}</p>
+        )}
         <div className="rounded-2xl border border-[rgba(201,162,39,0.18)] bg-[rgba(10,31,61,0.6)] backdrop-blur-md p-8 shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
           <LoginForm />
         </div>

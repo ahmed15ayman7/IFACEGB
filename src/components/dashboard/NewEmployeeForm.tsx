@@ -9,11 +9,11 @@ import { UserPlus, ChevronDown, FileText } from "lucide-react";
 
 type Sector = { id: string; nameEn: string; nameAr: string | null };
 
-const ROLES = ["employee", "trainer", "sector_manager", "admin"] as const;
-const CONTRACT_TYPES = ["full_time", "part_time", "contract", "intern"] as const;
+const ROLES = [{label: "employee", value: "employee",valueAr: "employee"}, {label: "trainer", value: "trainer",valueAr: "trainer"}, {label: "sector_manager", value: "sector_manager",valueAr: "sector_manager"}, {label: "admin", value: "admin",valueAr: "admin"}] as const;
+const CONTRACT_TYPES = [{label: "full_time", value: "full_time"}, {label: "part_time", value: "part_time"}, {label: "contract", value: "contract"}, {label: "intern", value: "intern"}] as const;
 const TEMPLATE_TYPES = [
-  "employment_contract", "non_disclosure", "offer_letter",
-  "salary_amendment", "termination", "other",
+  {label: "employment_contract", value: "employment_contract"}, {label: "non_disclosure", value: "non_disclosure"}, {label: "offer_letter", value: "offer_letter"},
+  {label: "salary_amendment", value: "salary_amendment"}, {label: "termination", value: "termination"}, {label: "other", value: "other"},
 ] as const;
 
 export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
@@ -27,14 +27,14 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
     name: "",
     nameAr: "",
     password: "",
-    role: "employee" as typeof ROLES[number],
+    role: "employee" as (typeof ROLES)[number]["value"],
     sectorId: "",
     employeeCode: "",
     jobTitleEn: "",
     jobTitleAr: "",
     departmentEn: "",
     departmentAr: "",
-    contractType: "full_time" as typeof CONTRACT_TYPES[number],
+    contractType: "full_time" as (typeof CONTRACT_TYPES)[number]["value"],
     salaryBase: "0",
     salaryCurrency: "EGP",
     profitSharePct: "0",
@@ -47,7 +47,7 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
   // Optional initial contract
   const [addContract, setAddContract] = useState(false);
   const [contractForm, setContractForm] = useState({
-    templateType: "employment_contract" as typeof TEMPLATE_TYPES[number],
+    templateType: "employment_contract" as (typeof TEMPLATE_TYPES)[number]["value"],
     status: "pending" as "draft" | "pending",
     content: "",
   });
@@ -148,7 +148,7 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
             <div className="relative">
               <select required className={inputCls} value={form.role} onChange={(e) => set("role", e.target.value)}>
                 {ROLES.map((r) => (
-                  <option key={r} value={r}>{r.replace("_", " ")}</option>
+                  <option key={r.value} value={r.value}>{r.label}</option>
                 ))}
               </select>
               <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 size-4 text-[#6e7d93] pointer-events-none" aria-hidden />
@@ -225,7 +225,7 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
             <div className="relative">
               <select className={inputCls} value={form.contractType} onChange={(e) => set("contractType", e.target.value)}>
                 {CONTRACT_TYPES.map((c) => (
-                  <option key={c} value={c}>{t(`contract_${c}` as Parameters<typeof t>[0])}</option>
+                  <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
               <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 size-4 text-[#6e7d93] pointer-events-none" aria-hidden />
@@ -287,11 +287,11 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
                 <label className={labelCls}>{t("contract_type")}</label>
                 <select
                   value={contractForm.templateType}
-                  onChange={(e) => setContractForm((p) => ({ ...p, templateType: e.target.value as typeof TEMPLATE_TYPES[number] }))}
+                  onChange={(e) => setContractForm((p) => ({ ...p, templateType: e.target.value as (typeof TEMPLATE_TYPES)[number]["value"] }))}
                   className={inputCls}
                 >
                   {TEMPLATE_TYPES.map((tmpl) => (
-                    <option key={tmpl} value={tmpl}>{t(`contract_tmpl_${tmpl}` as Parameters<typeof t>[0])}</option>
+                    <option key={tmpl.value} value={tmpl.value}>{tmpl.label}</option>
                   ))}
                 </select>
               </div>

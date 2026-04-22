@@ -87,6 +87,11 @@ enum ReconciliationStatus {
   failed
 }
 
+enum SectorAccessLevel {
+  manager
+  read_only
+}
+
 enum AttendanceStatus {
   present
   absent
@@ -191,6 +196,7 @@ model User {
   serviceRequests     ServiceRequest[]
   hrRequests          HrRequest[]
   permissions         UserPermission[]
+  userSectorAccesses  UserSectorAccess[]
   presence            UserPresence?
   sessions            Session[]
   accounts            Account[]
@@ -201,6 +207,23 @@ model User {
   @@index([role])
   @@index([sectorId])
   @@map("users")
+}
+
+model UserSectorAccess {
+  id          String   @id @default(cuid())
+  userId      String
+  sectorId    String
+  accessLevel SectorAccessLevel @default(manager)
+  createdAt   DateTime @default(now())
+  createdBy   String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sector Sector @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sectorId])
+  @@index([userId])
+  @@index([sectorId])
+  @@map("user_sector_access")
 }
 
 model UserPermission {
@@ -278,6 +301,7 @@ model Sector {
   updatedAt    DateTime @updatedAt
 
   users              User[]
+  userSectorAccesses UserSectorAccess[]
   employees          Employee[]
   wallets            Wallet[]
   serviceRequests    ServiceRequest[]

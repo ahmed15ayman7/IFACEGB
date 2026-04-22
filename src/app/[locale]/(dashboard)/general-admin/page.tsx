@@ -5,8 +5,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Users, Inbox, Ticket, Coins, Building } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
 
-const ALLOWED_ROLES = ["super_admin", "admin", "sector_manager"] as const;
 const DEPARTMENTS = ["Secretariat", "Public Relations", "Sales"] as const;
 
 export default async function GeneralAdminPage() {
@@ -15,7 +15,12 @@ export default async function GeneralAdminPage() {
   const t = await getTranslations("dashboard.generalAdmin");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (!ALLOWED_ROLES.includes(session.user.role as (typeof ALLOWED_ROLES)[number])) {
+  const allowed = await canAccessGeneralAdminDashboard(
+    session.user.role,
+    session.user.sectorId ?? null,
+    session.user.sectorCode ?? null
+  );
+  if (!allowed) {
     redirect(`/${locale}/dashboard`);
   }
 
@@ -99,6 +104,39 @@ export default async function GeneralAdminPage() {
       <div>
         <h1 className="text-xl font-bold text-white">{t("title")}</h1>
         <p className="text-[#64748B] text-sm mt-1">{t("subtitle")}</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 text-xs">
+        <Link
+          href={`/${locale}/general-admin/secretariat/people`}
+          className="px-3 py-1.5 rounded-lg border border-[#1E293B] text-[#A8B5C8] hover:border-[#C9A227]/40"
+        >
+          {t("link_secretariat_people")}
+        </Link>
+        <Link
+          href={`/${locale}/general-admin/clients?view=secretariat`}
+          className="px-3 py-1.5 rounded-lg border border-[#1E293B] text-[#A8B5C8] hover:border-[#C9A227]/40"
+        >
+          {t("link_clients")}
+        </Link>
+        <Link
+          href={`/${locale}/general-admin/network/trainers`}
+          className="px-3 py-1.5 rounded-lg border border-[#1E293B] text-[#A8B5C8] hover:border-[#C9A227]/40"
+        >
+          {t("link_trainers")}
+        </Link>
+        <Link
+          href={`/${locale}/general-admin/network/agents`}
+          className="px-3 py-1.5 rounded-lg border border-[#1E293B] text-[#A8B5C8] hover:border-[#C9A227]/40"
+        >
+          {t("link_agents")}
+        </Link>
+        <Link
+          href={`/${locale}/general-admin/network/centers`}
+          className="px-3 py-1.5 rounded-lg border border-[#1E293B] text-[#A8B5C8] hover:border-[#C9A227]/40"
+        >
+          {t("link_centers")}
+        </Link>
       </div>
 
       {/* KPI strip */}

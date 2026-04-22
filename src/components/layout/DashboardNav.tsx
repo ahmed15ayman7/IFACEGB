@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import type { UserRole } from "@prisma/client";
 import type { LucideIcon } from "lucide-react";
 import { signOut } from "next-auth/react";
+import type { SessionExtraSectorAccess } from "@/types/next-auth";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
 import {
   Award,
@@ -68,9 +69,10 @@ type NavKey =
   | "trainers"
   | "general_admin"
   | "departments"
+  | "all_users"
   | "settings";
 
-type NavItem = { href: string; navKey: NavKey };
+type NavItem = { href: string; navKey: NavKey; label?: string; sectionKey?: string };
 
 const NAV_ICONS: Record<NavKey, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -103,10 +105,52 @@ const NAV_ICONS: Record<NavKey, LucideIcon> = {
   trainers: Users,
   general_admin: Building2,
   departments: Building,
+  all_users: Users,
   settings: Settings,
 };
 
-function getNavItems(role: UserRole, sectorId: string | null, locale: string): NavItem[] {
+/** Extra sector dashboards the user is allowed to open (in addition to home sector). */
+function appendCrossSectorItems(
+  base: string,
+  items: NavItem[],
+  extra: SessionExtraSectorAccess[] | undefined,
+  primarySectorId: string | null
+): NavItem[] {
+  if (!extra?.length) return items;
+  const seen = new Set<string>();
+  if (primarySectorId) seen.add(primarySectorId);
+  const out = [...items];
+  for (const e of extra) {
+    if (seen.has(e.sectorId)) continue;
+    seen.add(e.sectorId);
+    const prefix = e.nameEn.length > 24 ? `${e.nameEn.slice(0, 22)}…` : e.nameEn;
+    if (e.code === "general-admin") {
+      out.push(
+        { href: `${base}/general-admin`, navKey: "my_sector", label: `${prefix} — Home` },
+        { href: `${base}/general-admin/isr`, navKey: "isr", label: `${prefix} — ISR` },
+        { href: `${base}/general-admin/wallet`, navKey: "wallet", label: `${prefix} — Wallet` },
+        { href: `${base}/general-admin/departments`, navKey: "departments", label: `${prefix} — Depts` }
+      );
+    } else {
+      const root = `${base}/sector/${e.sectorId}`;
+      out.push(
+        { href: root, navKey: "my_sector", label: `${prefix} — Home` },
+        { href: `${root}/requests`, navKey: "isr", label: `${prefix} — ISR` },
+        { href: `${root}/inter-ops`, navKey: "inter_ops", label: `${prefix} — Inter-ops` },
+        { href: `${root}/wallet`, navKey: "wallet", label: `${prefix} — Wallet` }
+      );
+    }
+  }
+  return out;
+}
+
+function getNavItems(
+  role: UserRole,
+  sectorId: string | null,
+  sectorCode: string | null,
+  locale: string,
+  extraSectorAccess?: SessionExtraSectorAccess[]
+): NavItem[] {
   const base = `/${locale}`;
   const settingsItem: NavItem = { href: `${base}/settings`, navKey: "settings" };
 
@@ -116,6 +160,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
     return [
       { href: `${base}/god-view`, navKey: "god_view" },
       { href: `${base}/admin/sectors`, navKey: "sectors" },
+      { href: `${base}/admin/users`, navKey: "all_users" },
       { href: `${base}/admin/employees`, navKey: "hr" },
       { href: `${base}/admin/hr-requests`, navKey: "hr_requests" },
       { href: `${base}/admin/rewards`, navKey: "rewards" },
@@ -136,6 +181,7 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
     return [
       ...commonItems,
       { href: `${base}/admin/sectors`, navKey: "sectors" },
+      { href: `${base}/admin/users`, navKey: "all_users" },
       { href: `${base}/admin/employees`, navKey: "hr" },
       { href: `${base}/admin/hr-requests`, navKey: "hr_requests" },
       { href: `${base}/admin/rewards`, navKey: "rewards" },
@@ -147,29 +193,48 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
   }
 
   if (role === "sector_manager" && sectorId) {
-    return [
-      ...commonItems,
-      { href: `${base}/sector/${sectorId}`, navKey: "my_sector" },
-      { href: `${base}/sector/${sectorId}/requests`, navKey: "isr" },
-      { href: `${base}/sector/${sectorId}/inter-ops`, navKey: "inter_ops" },
-      { href: `${base}/sector/${sectorId}/wallet`, navKey: "wallet" },
-      { href: `${base}/lms`, navKey: "lms" },
-      { href: `${base}/connect`, navKey: "connect" },
-      settingsItem,
-    ];
+    const isGeneralAdmin = sectorCode === "general-admin";
+    const home = isGeneralAdmin ? `${base}/general-admin` : `${base}/sector/${sectorId}`;
+    const isr = isGeneralAdmin ? `${base}/general-admin/isr` : `${base}/sector/${sectorId}/requests`;
+    const interOps = isGeneralAdmin
+      ? `${base}/general-admin/departments`
+      : `${base}/sector/${sectorId}/inter-ops`;
+    const wallet = isGeneralAdmin
+      ? `${base}/general-admin/wallet`
+      : `${base}/sector/${sectorId}/wallet`;
+    return appendCrossSectorItems(
+      base,
+      [
+        ...commonItems,
+        { href: home, navKey: "my_sector" },
+        { href: isr, navKey: "isr" },
+        { href: interOps, navKey: isGeneralAdmin ? "departments" : "inter_ops" },
+        { href: wallet, navKey: "wallet" },
+        { href: `${base}/lms`, navKey: "lms" },
+        { href: `${base}/connect`, navKey: "connect" },
+        settingsItem,
+      ],
+      extraSectorAccess,
+      sectorId
+    );
   }
 
   if (role === "employee") {
-    return [
-      { href: `${base}/employee`, navKey: "portal" },
-      { href: `${base}/employee/wallet`, navKey: "wallet" },
-      { href: `${base}/employee/attendance`, navKey: "attendance" },
-      { href: `${base}/employee/leaves`, navKey: "leaves" },
-      { href: `${base}/employee/rewards`, navKey: "rewards" },
-      { href: `${base}/lms`, navKey: "lms" },
-      { href: `${base}/connect`, navKey: "connect" },
-      settingsItem,
-    ];
+    return appendCrossSectorItems(
+      base,
+      [
+        { href: `${base}/employee`, navKey: "portal" },
+        { href: `${base}/employee/wallet`, navKey: "wallet" },
+        { href: `${base}/employee/attendance`, navKey: "attendance" },
+        { href: `${base}/employee/leaves`, navKey: "leaves" },
+        { href: `${base}/employee/rewards`, navKey: "rewards" },
+        { href: `${base}/lms`, navKey: "lms" },
+        { href: `${base}/connect`, navKey: "connect" },
+        settingsItem,
+      ],
+      extraSectorAccess,
+      sectorId
+    );
   }
 
   if (role === "trainer") {
@@ -232,14 +297,18 @@ function getNavItems(role: UserRole, sectorId: string | null, locale: string): N
 export function DashboardNav({
   role,
   sectorId,
+  sectorCode = null,
   locale,
+  extraSectorAccess = [],
 }: {
   role: UserRole;
   sectorId: string | null;
+  sectorCode?: string | null;
   locale: string;
+  extraSectorAccess?: SessionExtraSectorAccess[];
 }) {
   const pathname = usePathname();
-  const items = getNavItems(role, sectorId, locale);
+  const items = getNavItems(role, sectorId, sectorCode, locale, extraSectorAccess);
   const t = useTranslations("dashboard.nav");
   const tDash = useTranslations("dashboard");
 
@@ -264,7 +333,7 @@ export function DashboardNav({
           const Icon = NAV_ICONS[item.navKey];
           return (
             <Link
-              key={item.href}
+              key={`${item.href}-${item.label ?? item.navKey}`}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                 isActive
@@ -273,7 +342,7 @@ export function DashboardNav({
               }`}
             >
               <Icon className="size-[18px] shrink-0 opacity-90" aria-hidden />
-              <span>{t(item.navKey)}</span>
+              <span className="truncate">{item.label ?? t(item.navKey)}</span>
             </Link>
           );
         })}

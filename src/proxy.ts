@@ -247,6 +247,14 @@ export default async function proxy(req: NextRequest) {
     const role = token.role as UserRole | undefined;
     const sectorId = (token.sectorId as string | null | undefined) ?? null;
     const sectorCode = (token.sectorCode as string | null | undefined) ?? null;
+    const isSuspended = token.isSuspended === true;
+    const isActive = token.isActive !== false; // default true for legacy tokens
+
+    if (isSuspended || !isActive) {
+      return NextResponse.redirect(
+        new URL(`/${locale}/auth/login?error=disabled`, req.url)
+      );
+    }
 
     // Only super_admin can access god-view
     if (pathname.includes("/god-view") && role !== "super_admin") {
