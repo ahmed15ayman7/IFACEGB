@@ -1,12 +1,11 @@
 import { auth } from "@/lib/auth/auth.config";
 import { prisma } from "@/lib/prisma";
-import { getRoleHomePath } from "@/lib/auth/role-home";
+import { assertSectorDashboardAccess } from "@/lib/auth/sector-page-access";
 import { redirect, notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Link2, CheckCircle2, Clock } from "lucide-react";
 
-const ALLOWED = ["sector_manager", "admin", "super_admin"];
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function SectorInterOpsPage({ params }: Props) {
@@ -16,14 +15,17 @@ export default async function SectorInterOpsPage({ params }: Props) {
   const t = await getTranslations("dashboard.sectorPortal");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (!ALLOWED.includes(session.user.role))
-    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
 
   const sector = await prisma.sector.findFirst({
     where: { OR: [{ code: slug }, { id: slug }] },
-    select: { id: true, nameEn: true, nameAr: true },
+    select: { id: true, code: true, nameEn: true, nameAr: true },
   });
   if (!sector) notFound();
+  const { readOnly } = assertSectorDashboardAccess(
+    session.user,
+    { id: sector.id, code: sector.code },
+    locale
+  );
 
   // Fetch all internal invoices where this sector is sender OR receiver
   const invoices = await prisma.internalInvoice.findMany({
@@ -65,6 +67,11 @@ export default async function SectorInterOpsPage({ params }: Props) {
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
+      {readOnly && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          Read-only access — invoice list is view only.
+        </p>
+      )}
       <div className="flex items-center gap-3">
         <Link
           href={`/${locale}/sector/${slug}`}

@@ -1,20 +1,15 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth.config";
 import { prisma } from "@/lib/prisma";
-import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
+import { resolveGeneralAdminAccess } from "@/lib/auth/general-admin-allowed";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (
-    !(await canAccessGeneralAdminDashboard(
-      session.user.role,
-      session.user.sectorId ?? null,
-      session.user.sectorCode ?? null
-    ))
-  ) {
+  const ga = await resolveGeneralAdminAccess(session.user);
+  if (!ga.allowed) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -124,21 +124,37 @@ function appendCrossSectorItems(
     if (seen.has(e.sectorId)) continue;
     seen.add(e.sectorId);
     const prefix = e.nameEn.length > 24 ? `${e.nameEn.slice(0, 22)}…` : e.nameEn;
+    const ro = e.accessLevel === "read_only";
     if (e.code === "general-admin") {
-      out.push(
-        { href: `${base}/general-admin`, navKey: "my_sector", label: `${prefix} — Home` },
-        { href: `${base}/general-admin/isr`, navKey: "isr", label: `${prefix} — ISR` },
-        { href: `${base}/general-admin/wallet`, navKey: "wallet", label: `${prefix} — Wallet` },
-        { href: `${base}/general-admin/departments`, navKey: "departments", label: `${prefix} — Depts` }
-      );
+      if (ro) {
+        out.push({
+          href: `${base}/general-admin`,
+          navKey: "my_sector",
+          label: `${prefix} — read-only`,
+        });
+      } else {
+        out.push(
+          { href: `${base}/general-admin`, navKey: "my_sector", label: `${prefix} — Home` },
+          { href: `${base}/general-admin/isr`, navKey: "isr", label: `${prefix} — ISR` },
+          { href: `${base}/general-admin/wallet`, navKey: "wallet", label: `${prefix} — Wallet` },
+          { href: `${base}/general-admin/departments`, navKey: "departments", label: `${prefix} — Depts` }
+        );
+      }
     } else {
       const root = `${base}/sector/${e.sectorId}`;
-      out.push(
-        { href: root, navKey: "my_sector", label: `${prefix} — Home` },
-        { href: `${root}/requests`, navKey: "isr", label: `${prefix} — ISR` },
-        { href: `${root}/inter-ops`, navKey: "inter_ops", label: `${prefix} — Inter-ops` },
-        { href: `${root}/wallet`, navKey: "wallet", label: `${prefix} — Wallet` }
-      );
+      if (ro) {
+        out.push(
+          { href: root, navKey: "my_sector", label: `${prefix} — read-only` },
+          { href: `${root}/requests`, navKey: "isr", label: `${prefix} — ISR (view)` }
+        );
+      } else {
+        out.push(
+          { href: root, navKey: "my_sector", label: `${prefix} — Home` },
+          { href: `${root}/requests`, navKey: "isr", label: `${prefix} — ISR` },
+          { href: `${root}/inter-ops`, navKey: "inter_ops", label: `${prefix} — Inter-ops` },
+          { href: `${root}/wallet`, navKey: "wallet", label: `${prefix} — Wallet` }
+        );
+      }
     }
   }
   return out;

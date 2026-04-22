@@ -27,6 +27,7 @@ interface Sector {
 interface Props {
   isrs: IsrItem[];
   sectors: Sector[];
+  readOnly?: boolean;
 }
 
 const STATUS_STYLE: Record<string, { bg: string; text: string }> = {
@@ -43,7 +44,7 @@ const PRIORITY_STYLE: Record<string, { bg: string; text: string }> = {
   critical: { bg: "#7F1D1D20", text: "#F87171" },
 };
 
-export function IsrRoutingHubClient({ isrs: initialIsrs, sectors }: Props) {
+export function IsrRoutingHubClient({ isrs: initialIsrs, sectors, readOnly = false }: Props) {
   const t = useTranslations("dashboard.generalAdmin");
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -166,7 +167,9 @@ export function IsrRoutingHubClient({ isrs: initialIsrs, sectors }: Props) {
                       {format(new Date(isr.createdAt), "d MMM yyyy")}
                     </td>
                     <td className="px-4 py-3">
-                      {isRouting ? (
+                      {readOnly ? (
+                        <span className="text-xs text-[#64748B]">—</span>
+                      ) : isRouting ? (
                         <div className="flex items-center gap-2">
                           <select
                             className="text-xs bg-[#0A0F1A] border border-[#1E293B] text-white rounded-lg px-2 py-1 focus:outline-none focus:border-[#C9A227]"

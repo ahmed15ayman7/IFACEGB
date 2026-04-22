@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { logAudit } from "@/lib/audit/audit.service";
+import { canWriteSector } from "@/lib/auth/sector-mutation";
 import { z } from "zod";
 
 const ALLOWED_ROLES = ["sector_manager", "admin", "super_admin"];
@@ -51,6 +52,10 @@ export async function PATCH(
 
   const existing = await prisma.serviceRequest.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (!(await canWriteSector(session.user, existing.toSectorId))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const updateData: Record<string, unknown> = {};
   if (parsed.data.status) {

@@ -1,13 +1,12 @@
 import { auth } from "@/lib/auth/auth.config";
 import { prisma } from "@/lib/prisma";
-import { getRoleHomePath } from "@/lib/auth/role-home";
+import { assertSectorDashboardAccess } from "@/lib/auth/sector-page-access";
 import { redirect, notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { IsrNewForm } from "@/components/dashboard/isr/IsrNewForm";
 
-const ALLOWED = ["sector_manager", "admin", "super_admin"];
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function SectorRequestsNewPage({ params }: Props) {
@@ -18,14 +17,20 @@ export default async function SectorRequestsNewPage({ params }: Props) {
   const ts = await getTranslations("dashboard.sectorPortal");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (!ALLOWED.includes(session.user.role))
-    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
 
   const sector = await prisma.sector.findFirst({
     where: { OR: [{ code: slug }, { id: slug }] },
-    select: { id: true, nameEn: true, nameAr: true },
+    select: { id: true, code: true, nameEn: true, nameAr: true },
   });
   if (!sector) notFound();
+  const { readOnly } = assertSectorDashboardAccess(
+    session.user,
+    { id: sector.id, code: sector.code },
+    locale
+  );
+  if (readOnly) {
+    redirect(`/${locale}/sector/${slug}/requests`);
+  }
 
   // All sectors except the current one (current sector is the sender)
   const sectors = await prisma.sector.findMany({

@@ -2,20 +2,15 @@ import { auth } from "@/lib/auth/auth.config";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
+import { resolveGeneralAdminAccess } from "@/lib/auth/general-admin-allowed";
 
 export default async function GaNetworkCentersPage() {
   const session = await auth();
   const locale = await getLocale();
   const t = await getTranslations("dashboard.generalAdminNetwork");
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (
-    !(await canAccessGeneralAdminDashboard(
-      session.user.role,
-      session.user.sectorId ?? null,
-      session.user.sectorCode ?? null
-    ))
-  ) {
+  const ga = await resolveGeneralAdminAccess(session.user);
+  if (!ga.allowed) {
     redirect(`/${locale}/dashboard`);
   }
 

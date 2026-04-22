@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ChevronDown, Building, Plus, Users } from "lucide-react";
 import Link from "next/link";
-import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
+import { resolveGeneralAdminAccess } from "@/lib/auth/general-admin-allowed";
 
 const DEPARTMENTS = ["Secretariat", "Public Relations", "Sales"] as const;
 
@@ -32,15 +32,11 @@ export default async function GeneralAdminDepartmentsPage() {
   const t = await getTranslations("dashboard.generalAdmin");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (
-    !(await canAccessGeneralAdminDashboard(
-      session.user.role,
-      session.user.sectorId ?? null,
-      session.user.sectorCode ?? null
-    ))
-  ) {
+  const ga = await resolveGeneralAdminAccess(session.user);
+  if (!ga.allowed) {
     redirect(`/${locale}/dashboard`);
   }
+  const readOnly = ga.readOnly;
 
   const isRtl = locale === "ar";
 
@@ -89,6 +85,11 @@ export default async function GeneralAdminDepartmentsPage() {
 
   return (
     <main className="p-6 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
+      {readOnly && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          Read-only access — you cannot add employees from this view.
+        </p>
+      )}
       <div>
         <h1 className="text-xl font-bold text-white">{t("dept_title")}</h1>
         <p className="text-[#64748B] text-sm mt-1">{t("dept_subtitle")}</p>
@@ -120,13 +121,15 @@ export default async function GeneralAdminDepartmentsPage() {
                       </p>
                     </div>
                   </div>
-                  <Link
-                    href={`/${locale}/admin/employees/new?sectorCode=general-admin&dept=${encodeURIComponent(dept)}`}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C9A227]/15 border border-[#C9A227]/30 text-[#C9A227] text-xs font-medium hover:bg-[#C9A227]/25 transition-colors"
-                  >
-                    <Plus size={13} />
-                    {t("dept_add_employee")}
-                  </Link>
+                  {!readOnly && (
+                    <Link
+                      href={`/${locale}/admin/employees/new?sectorCode=general-admin&dept=${encodeURIComponent(dept)}`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C9A227]/15 border border-[#C9A227]/30 text-[#C9A227] text-xs font-medium hover:bg-[#C9A227]/25 transition-colors"
+                    >
+                      <Plus size={13} />
+                      {t("dept_add_employee")}
+                    </Link>
+                  )}
                 </div>
 
                 {/* Org chart tree */}

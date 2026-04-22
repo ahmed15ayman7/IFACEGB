@@ -5,7 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Coins, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { WithdrawalForm } from "@/components/dashboard/WithdrawalForm";
 import { format } from "date-fns";
-import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
+import { resolveGeneralAdminAccess } from "@/lib/auth/general-admin-allowed";
 
 export default async function GeneralAdminWalletPage() {
   const session = await auth();
@@ -13,15 +13,11 @@ export default async function GeneralAdminWalletPage() {
   const t = await getTranslations("dashboard.generalAdmin");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (
-    !(await canAccessGeneralAdminDashboard(
-      session.user.role,
-      session.user.sectorId ?? null,
-      session.user.sectorCode ?? null
-    ))
-  ) {
+  const ga = await resolveGeneralAdminAccess(session.user);
+  if (!ga.allowed) {
     redirect(`/${locale}/dashboard`);
   }
+  const readOnly = ga.readOnly;
 
   const isRtl = locale === "ar";
 
@@ -54,6 +50,11 @@ export default async function GeneralAdminWalletPage() {
 
   return (
     <div className="p-4 lg:p-6 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
+      {readOnly && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          Read-only access — withdrawals are disabled.
+        </p>
+      )}
       <div className="flex items-center gap-3">
         <div className="flex size-10 items-center justify-center rounded-xl border border-[rgba(201,162,39,0.25)] bg-[rgba(201,162,39,0.1)] text-[#C9A227]">
           <Coins className="size-5" strokeWidth={1.4} aria-hidden />
@@ -80,7 +81,7 @@ export default async function GeneralAdminWalletPage() {
         </div>
       </div>
 
-      {wallet && (
+      {wallet && !readOnly && (
         <WithdrawalForm walletId={wallet.id} maxCoins={available} />
       )}
 

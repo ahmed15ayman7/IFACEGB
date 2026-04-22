@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { IsrRoutingHubClient } from "@/components/dashboard/generalAdmin/IsrRoutingHubClient";
-import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
+import { resolveGeneralAdminAccess } from "@/lib/auth/general-admin-allowed";
 
 export default async function GeneralAdminIsrPage() {
   const session = await auth();
@@ -11,15 +11,11 @@ export default async function GeneralAdminIsrPage() {
   const t = await getTranslations("dashboard.generalAdmin");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (
-    !(await canAccessGeneralAdminDashboard(
-      session.user.role,
-      session.user.sectorId ?? null,
-      session.user.sectorCode ?? null
-    ))
-  ) {
+  const ga = await resolveGeneralAdminAccess(session.user);
+  if (!ga.allowed) {
     redirect(`/${locale}/dashboard`);
   }
+  const readOnly = ga.readOnly;
 
   const sector = await prisma.sector.findFirst({ where: { code: "general-admin" } });
 
@@ -68,6 +64,11 @@ export default async function GeneralAdminIsrPage() {
 
   return (
     <main className="p-6 space-y-6">
+      {readOnly && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          Read-only access — routing is disabled.
+        </p>
+      )}
       <div>
         <h1 className="text-xl font-bold text-white">{t("isr_title")}</h1>
         <p className="text-[#64748B] text-sm mt-1">{t("isr_subtitle")}</p>
@@ -75,6 +76,7 @@ export default async function GeneralAdminIsrPage() {
       <IsrRoutingHubClient
         isrs={serializedIsrs}
         sectors={allSectors}
+        readOnly={readOnly}
       />
     </main>
   );

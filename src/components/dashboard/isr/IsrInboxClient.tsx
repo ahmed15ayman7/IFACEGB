@@ -23,9 +23,10 @@ type IsrItem = {
 type Props = {
   inbox: IsrItem[];
   sent: IsrItem[];
+  readOnly?: boolean;
 };
 
-export function IsrInboxClient({ inbox: initialInbox, sent: initialSent }: Props) {
+export function IsrInboxClient({ inbox: initialInbox, sent: initialSent, readOnly = false }: Props) {
   const t = useTranslations("dashboard.isr");
   const [activeTab, setActiveTab] = useState<"inbox" | "sent">("inbox");
   const [inbox, setInbox] = useState(initialInbox);
@@ -78,7 +79,7 @@ export function IsrInboxClient({ inbox: initialInbox, sent: initialSent }: Props
               key={item.id}
               {...item}
               direction={activeTab}
-              onAction={activeTab === "inbox" ? handleAction : undefined}
+              onAction={!readOnly && activeTab === "inbox" ? handleAction : undefined}
             />
           ))}
         </motion.div>

@@ -5,7 +5,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Users, Inbox, Ticket, Coins, Building } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { canAccessGeneralAdminDashboard } from "@/lib/auth/general-admin-allowed";
+import { resolveGeneralAdminAccess } from "@/lib/auth/general-admin-allowed";
 
 const DEPARTMENTS = ["Secretariat", "Public Relations", "Sales"] as const;
 
@@ -15,14 +15,11 @@ export default async function GeneralAdminPage() {
   const t = await getTranslations("dashboard.generalAdmin");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  const allowed = await canAccessGeneralAdminDashboard(
-    session.user.role,
-    session.user.sectorId ?? null,
-    session.user.sectorCode ?? null
-  );
-  if (!allowed) {
+  const ga = await resolveGeneralAdminAccess(session.user);
+  if (!ga.allowed) {
     redirect(`/${locale}/dashboard`);
   }
+  const readOnly = ga.readOnly;
 
   const isRtl = locale === "ar";
 
@@ -100,6 +97,11 @@ export default async function GeneralAdminPage() {
 
   return (
     <main className="p-6 space-y-6" dir={isRtl ? "rtl" : "ltr"}>
+      {readOnly && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          Read-only access to General Administration — navigation and data are view only.
+        </p>
+      )}
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white">{t("title")}</h1>

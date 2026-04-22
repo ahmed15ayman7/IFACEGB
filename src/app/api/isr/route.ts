@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { logAudit } from "@/lib/audit/audit.service";
+import { canWriteSector } from "@/lib/auth/sector-mutation";
 import { z } from "zod";
 
 const ALLOWED_ROLES = ["sector_manager", "admin", "super_admin"];
@@ -81,6 +82,10 @@ export async function POST(req: NextRequest) {
   const resolvedFromSectorId = isAdmin
     ? (bodyFromSectorId ?? session.user.sectorId ?? null)
     : (session.user.sectorId ?? null);
+
+  if (!(await canWriteSector(session.user, resolvedFromSectorId))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const request = await prisma.serviceRequest.create({
     data: {

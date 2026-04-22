@@ -7,10 +7,15 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react";
 import { NewEmployeeForm } from "@/components/dashboard/NewEmployeeForm";
 
-export default async function AdminEmployeesNewPage() {
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function AdminEmployeesNewPage({ searchParams }: Props) {
   const session = await auth();
   const locale = await getLocale();
   const t = await getTranslations("dashboard.hrEmployees");
+  const sp = await searchParams;
+  const prefillSectorCode = typeof sp.sectorCode === "string" ? sp.sectorCode : undefined;
+  const prefillDept = typeof sp.dept === "string" ? sp.dept : undefined;
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
   if (!["super_admin", "admin"].includes(session.user.role))
@@ -19,7 +24,7 @@ export default async function AdminEmployeesNewPage() {
   const sectors = await prisma.sector.findMany({
     where: { isActive: true },
     orderBy: { nameEn: "asc" },
-    select: { id: true, nameEn: true, nameAr: true },
+    select: { id: true, nameEn: true, nameAr: true, code: true },
   });
 
   const isRtl = locale === "ar";
@@ -51,7 +56,11 @@ export default async function AdminEmployeesNewPage() {
         </div>
       </div>
 
-      <NewEmployeeForm sectors={sectors} />
+      <NewEmployeeForm
+        sectors={sectors}
+        prefillSectorCode={prefillSectorCode}
+        prefillGeneralAdminDept={prefillDept}
+      />
     </div>
   );
 }

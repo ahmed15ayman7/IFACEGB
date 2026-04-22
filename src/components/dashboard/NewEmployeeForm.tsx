@@ -7,7 +7,13 @@ import { motion } from "framer-motion";
 import { fadeInUp } from "@/lib/motion/dashboard";
 import { UserPlus, ChevronDown, FileText } from "lucide-react";
 
-type Sector = { id: string; nameEn: string; nameAr: string | null };
+type Sector = { id: string; nameEn: string; nameAr: string | null; code: string };
+
+const GA_DEPARTMENTS = [
+  { en: "Secretariat", ar: "السكرتاريا" },
+  { en: "Public Relations", ar: "العلاقات العامة" },
+  { en: "Sales", ar: "المبيعات" },
+] as const;
 
 const ROLES = [{label: "employee", value: "employee",valueAr: "employee"}, {label: "trainer", value: "trainer",valueAr: "trainer"}, {label: "sector_manager", value: "sector_manager",valueAr: "sector_manager"}, {label: "admin", value: "admin",valueAr: "admin"}] as const;
 const CONTRACT_TYPES = [{label: "full_time", value: "full_time"}, {label: "part_time", value: "part_time"}, {label: "contract", value: "contract"}, {label: "intern", value: "intern"}] as const;
@@ -16,24 +22,28 @@ const TEMPLATE_TYPES = [
   {label: "salary_amendment", value: "salary_amendment"}, {label: "termination", value: "termination"}, {label: "other", value: "other"},
 ] as const;
 
-export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
-  const t = useTranslations("dashboard.hrEmployees");
-  const locale = useLocale();
-  const isRtl = locale === "ar";
-  const router = useRouter();
-
-  const [form, setForm] = useState({
+function buildInitialForm(
+  sectors: Sector[],
+  prefillSectorCode?: string,
+  prefillGeneralAdminDept?: string
+) {
+  const prefillS = prefillSectorCode ? sectors.find((s) => s.code === prefillSectorCode) : undefined;
+  const isGaPref = Boolean(prefillS?.code === "general-admin" && prefillGeneralAdminDept);
+  const prefillRow = isGaPref
+    ? GA_DEPARTMENTS.find((d) => d.en === prefillGeneralAdminDept)
+    : undefined;
+  return {
     email: "",
     name: "",
     nameAr: "",
     password: "",
     role: "employee" as (typeof ROLES)[number]["value"],
-    sectorId: "",
+    sectorId: prefillS?.id ?? "",
     employeeCode: "",
     jobTitleEn: "",
     jobTitleAr: "",
-    departmentEn: "",
-    departmentAr: "",
+    departmentEn: prefillRow?.en ?? "",
+    departmentAr: prefillRow?.ar ?? "",
     contractType: "full_time" as (typeof CONTRACT_TYPES)[number]["value"],
     salaryBase: "0",
     salaryCurrency: "EGP",
@@ -42,7 +52,29 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
     phone: "",
     nationalId: "",
     address: "",
-  });
+  };
+}
+
+export function NewEmployeeForm({
+  sectors,
+  prefillSectorCode,
+  prefillGeneralAdminDept,
+}: {
+  sectors: Sector[];
+  prefillSectorCode?: string;
+  prefillGeneralAdminDept?: string;
+}) {
+  const t = useTranslations("dashboard.hrEmployees");
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+  const router = useRouter();
+
+  const [form, setForm] = useState(() =>
+    buildInitialForm(sectors, prefillSectorCode, prefillGeneralAdminDept)
+  );
+
+  const selectedSector = sectors.find((s) => s.id === form.sectorId);
+  const isGeneralAdminSector = selectedSector?.code === "general-admin";
 
   // Optional initial contract
   const [addContract, setAddContract] = useState(false);
@@ -157,7 +189,19 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
           <div>
             <label className={labelCls}>{t("field_sector")}</label>
             <div className="relative">
-              <select className={inputCls} value={form.sectorId} onChange={(e) => set("sectorId", e.target.value)}>
+              <select
+                className={inputCls}
+                value={form.sectorId}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  const s = sectors.find((x) => x.id === v);
+                  setForm((f) => ({
+                    ...f,
+                    sectorId: v,
+                    ...(s?.code !== "general-admin" ? { departmentEn: "", departmentAr: "" } : {}),
+                  }));
+                }}
+              >
                 <option value="">— None —</option>
                 {sectors.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -194,14 +238,44 @@ export function NewEmployeeForm({ sectors }: { sectors: Sector[] }) {
             <label className={labelCls}>{t("field_job_ar")}</label>
             <input dir="rtl" className={inputCls} value={form.jobTitleAr} onChange={(e) => set("jobTitleAr", e.target.value)} />
           </div>
-          <div>
-            <label className={labelCls}>{t("field_dept_en")}</label>
-            <input className={inputCls} value={form.departmentEn} onChange={(e) => set("departmentEn", e.target.value)} />
-          </div>
-          <div>
-            <label className={labelCls}>{t("field_dept_ar")}</label>
-            <input dir="rtl" className={inputCls} value={form.departmentAr} onChange={(e) => set("departmentAr", e.target.value)} />
-          </div>
+          {isGeneralAdminSector ? (
+            <div className="sm:col-span-2">
+              <label className={labelCls}>Department (General Administration)</label>
+              <div className="relative">
+                <select
+                  className={inputCls}
+                  value={form.departmentEn}
+                  onChange={(e) => {
+                    const row = GA_DEPARTMENTS.find((d) => d.en === e.target.value);
+                    if (row) {
+                      setForm((f) => ({ ...f, departmentEn: row.en, departmentAr: row.ar }));
+                    } else {
+                      setForm((f) => ({ ...f, departmentEn: "", departmentAr: "" }));
+                    }
+                  }}
+                >
+                  <option value="">— Select department —</option>
+                  {GA_DEPARTMENTS.map((d) => (
+                    <option key={d.en} value={d.en}>
+                      {isRtl ? d.ar : d.en}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 size-4 text-[#6e7d93] pointer-events-none" aria-hidden />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={labelCls}>{t("field_dept_en")}</label>
+                <input className={inputCls} value={form.departmentEn} onChange={(e) => set("departmentEn", e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}>{t("field_dept_ar")}</label>
+                <input dir="rtl" className={inputCls} value={form.departmentAr} onChange={(e) => set("departmentAr", e.target.value)} />
+              </div>
+            </>
+          )}
           <div>
             <label className={labelCls}>{t("field_national_id")}</label>
             <input className={inputCls} value={form.nationalId} onChange={(e) => set("nationalId", e.target.value)} />

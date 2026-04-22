@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
+import { assertSectorDashboardAccess } from "@/lib/auth/sector-page-access";
 import { getLocale, getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
@@ -151,12 +152,20 @@ export default async function SectorDashboard({ params }: Props) {
       if (!fallback) notFound();
       data = fallback;
     } else {
-      redirect(getRoleHomePath(locale, role, session.user.sectorId ?? null));
+      redirect(getRoleHomePath(locale, role, session.user.sectorId ?? null, session.user.sectorCode ?? null));
     }
   }
 
   const { sector, metrics, revenueChart } = data;
-  const sectorRow = sector as { nameEn: string; nameAr?: string | null; description: string | null };
+  const sectorRow = sector as { id?: string; code?: string; nameEn: string; nameAr?: string | null; description: string | null };
+  let readOnly = false;
+  if (sectorRow.id && sectorRow.code) {
+    ({ readOnly } = assertSectorDashboardAccess(
+      session.user,
+      { id: sectorRow.id, code: sectorRow.code },
+      locale
+    ));
+  }
   const displayName = locale === "ar" ? sectorRow.nameAr ?? sectorRow.nameEn : sectorRow.nameEn;
 
   const kpiItems = [
@@ -193,7 +202,9 @@ export default async function SectorDashboard({ params }: Props) {
   ];
 
   const quickActions = [
-    { href: `/${locale}/sector/${slug}/requests/new`, label: t("action_new_request"), icon: "plus" as const },
+    ...(!readOnly
+      ? [{ href: `/${locale}/sector/${slug}/requests/new`, label: t("action_new_request"), icon: "plus" as const }]
+      : []),
     { href: `/${locale}/sector/${slug}/employees`, label: t("action_employees"), icon: "users" as const },
     { href: `/${locale}/sector/${slug}/wallet`, label: t("action_wallet"), icon: "wallet" as const },
     { href: `/${locale}/sector/${slug}/certificates`, label: t("action_certificates"), icon: "award" as const },
@@ -202,6 +213,11 @@ export default async function SectorDashboard({ params }: Props) {
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
+      {readOnly && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          Read-only access to this sector — actions that change data are hidden.
+        </p>
+      )}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <div className="flex items-center gap-3 mb-1">

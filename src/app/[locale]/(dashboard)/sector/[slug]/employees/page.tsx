@@ -1,12 +1,11 @@
 import { auth } from "@/lib/auth/auth.config";
 import { prisma } from "@/lib/prisma";
-import { getRoleHomePath } from "@/lib/auth/role-home";
+import { assertSectorDashboardAccess } from "@/lib/auth/sector-page-access";
 import { redirect, notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Users } from "lucide-react";
 
-const ALLOWED = ["sector_manager", "admin", "super_admin"];
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function SectorEmployeesPage({ params }: Props) {
@@ -16,14 +15,13 @@ export default async function SectorEmployeesPage({ params }: Props) {
   const t = await getTranslations("dashboard.sectorPortal");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (!ALLOWED.includes(session.user.role))
-    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
 
   const sector = await prisma.sector.findFirst({
     where: { OR: [{ code: slug }, { id: slug }] },
-    select: { id: true, nameEn: true, nameAr: true },
+    select: { id: true, code: true, nameEn: true, nameAr: true },
   });
   if (!sector) notFound();
+  assertSectorDashboardAccess(session.user, { id: sector.id, code: sector.code }, locale);
 
   const employees = await prisma.employee.findMany({
     where: { sectorId: sector.id, isActive: true },

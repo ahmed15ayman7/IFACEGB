@@ -1,13 +1,12 @@
 import { auth } from "@/lib/auth/auth.config";
 import { prisma } from "@/lib/prisma";
-import { getRoleHomePath } from "@/lib/auth/role-home";
+import { assertSectorDashboardAccess } from "@/lib/auth/sector-page-access";
 import { redirect, notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { IsrInboxClient } from "@/components/dashboard/isr/IsrInboxClient";
 
-const ALLOWED = ["sector_manager", "admin", "super_admin"];
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function SectorRequestsPage({ params }: Props) {
@@ -17,14 +16,17 @@ export default async function SectorRequestsPage({ params }: Props) {
   const t = await getTranslations("dashboard.sectorPortal");
 
   if (!session?.user) redirect(`/${locale}/auth/login`);
-  if (!ALLOWED.includes(session.user.role))
-    redirect(getRoleHomePath(locale, session.user.role, session.user.sectorId ?? null));
 
   const sector = await prisma.sector.findFirst({
     where: { OR: [{ code: slug }, { id: slug }] },
     select: { id: true, nameEn: true, nameAr: true, code: true },
   });
   if (!sector) notFound();
+  const { readOnly } = assertSectorDashboardAccess(
+    session.user,
+    { id: sector.id, code: sector.code },
+    locale
+  );
 
   const isRtl = locale === "ar";
   const sectorName = isRtl ? (sector.nameAr ?? sector.nameEn) : sector.nameEn;
@@ -59,6 +61,11 @@ export default async function SectorRequestsPage({ params }: Props) {
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
+      {readOnly && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+          Read-only access — you cannot create requests or change ISR status.
+        </p>
+      )}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <Link
@@ -76,18 +83,20 @@ export default async function SectorRequestsPage({ params }: Props) {
             {t("requests_title")}
           </h1>
         </div>
-        <Link
-          href={`/${locale}/sector/${slug}/requests/new`}
-          className="inline-flex h-9 items-center gap-2 rounded-lg bg-[rgba(201,162,39,0.9)] px-4 text-xs font-semibold text-[#060f1e] hover:bg-[#C9A227] transition-colors"
-        >
-          <Plus className="size-3.5" aria-hidden />
-          {t("action_new_request")}
-        </Link>
+        {!readOnly && (
+          <Link
+            href={`/${locale}/sector/${slug}/requests/new`}
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[rgba(201,162,39,0.9)] px-4 text-xs font-semibold text-[#060f1e] hover:bg-[#C9A227] transition-colors"
+          >
+            <Plus className="size-3.5" aria-hidden />
+            {t("action_new_request")}
+          </Link>
+        )}
       </div>
 
       <p className="text-xs text-[#6e7d93]">{t("requests_subtitle")}</p>
 
-      <IsrInboxClient inbox={serialize(inbox)} sent={serialize(sent)} />
+      <IsrInboxClient inbox={serialize(inbox)} sent={serialize(sent)} readOnly={readOnly} />
     </div>
   );
 }
