@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth/auth.config";
 import { getRoleHomePath } from "@/lib/auth/role-home";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Globe2 } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { GodViewKPIStrip } from "@/features/god-view/components/KPIStrip";
@@ -129,9 +131,18 @@ export default async function GodViewPage() {
             })}
           </p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(201,162,39,0.3)] bg-[rgba(201,162,39,0.06)]">
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-[#C9A227] text-xs font-medium">{t("live")}</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={`/${locale}/god-view/globe`}
+            className="inline-flex items-center gap-2 rounded-lg border border-[rgba(201,162,39,0.35)] bg-[rgba(6,15,30,0.6)] px-3 py-1.5 text-xs font-medium text-[#C9A227] hover:bg-[rgba(201,162,39,0.1)] transition-colors"
+          >
+            <Globe2 className="size-4 shrink-0" aria-hidden />
+            الشبكة العالمية
+          </Link>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(201,162,39,0.3)] bg-[rgba(201,162,39,0.06)]">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-[#C9A227] text-xs font-medium">{t("live")}</span>
+          </div>
         </div>
       </div>
 
