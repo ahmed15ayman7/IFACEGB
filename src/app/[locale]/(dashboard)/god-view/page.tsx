@@ -12,6 +12,7 @@ import { EDirectiveComposer } from "@/features/god-view/components/EDirectiveCom
 import { AuditTrailFeed } from "@/features/god-view/components/AuditTrailFeed";
 import { SectorWalletChart } from "@/features/god-view/components/SectorWalletChart";
 import { EmployeeStatusGrid } from "@/features/god-view/components/EmployeeStatusGrid";
+import { SovereignGlobeView } from "@/features/god-view/components/SovereignGlobeView";
 
 export const dynamic = "force-dynamic";
 
@@ -172,6 +173,7 @@ export default async function GodViewPage() {
         <AuditTrailFeed entries={data.recentAudit} />
         <EmployeeStatusGrid employees={data.employees} />
       </div>
+      <SovereignGlobeView />
     </div>
   );
 }
