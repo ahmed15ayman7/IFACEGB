@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
+export type ApplicationType = "agent" | "center" | "trainer";
+
 const schema = z.object({
+  applicationType: z.enum(["agent", "center", "trainer"]),
   applicantName: z.string().min(2),
   email: z.string().email(),
   phone: z.string().optional(),
@@ -14,8 +18,25 @@ const schema = z.object({
   motivation: z.string().min(50),
 });
 
-export function ApplyAgencyForm() {
+function parseType(raw: string | null): ApplicationType {
+  if (raw === "center" || raw === "trainer") return raw;
+  return "agent";
+}
+
+type Props = {
+  initialType?: ApplicationType;
+};
+
+export function ApplyAgencyForm({ initialType = "agent" }: Props) {
   const t = useTranslations("public.applyAgency");
+  const searchParams = useSearchParams();
+  const [applicationType, setApplicationType] = useState<ApplicationType>(initialType);
+
+  useEffect(() => {
+    const fromUrl = parseType(searchParams.get("type"));
+    setApplicationType(fromUrl);
+  }, [searchParams]);
+
   const [form, setForm] = useState({
     applicantName: "",
     email: "",
@@ -33,7 +54,8 @@ export function ApplyAgencyForm() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = schema.safeParse(form);
+    const payload = { ...form, applicationType };
+    const parsed = schema.safeParse(payload);
     if (!parsed.success) {
       const errs: Record<string, string> = {};
       parsed.error.issues.forEach((i) => {
@@ -47,10 +69,24 @@ export function ApplyAgencyForm() {
     const res = await fetch("/api/apply-agency", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
     setStatus(res.ok ? "success" : "error");
   }
+
+  const motivationKey =
+    applicationType === "center"
+      ? "motivation_center"
+      : applicationType === "trainer"
+        ? "motivation_trainer"
+        : "motivation_agent";
+
+  const typeBadgeKey =
+    applicationType === "center"
+      ? "type_badge_center"
+      : applicationType === "trainer"
+        ? "type_badge_trainer"
+        : "type_badge_agent";
 
   if (status === "success") {
     return (
@@ -76,6 +112,11 @@ export function ApplyAgencyForm() {
 
   return (
     <div className="w-full">
+      <div className="mb-4 flex justify-center">
+        <span className="inline-flex rounded-full border border-[rgba(201,162,39,0.35)] bg-[rgba(201,162,39,0.08)] px-3 py-1 text-xs font-medium text-[#C9A227]">
+          {t(typeBadgeKey)}
+        </span>
+      </div>
       <form onSubmit={submit} className="space-y-4">
         <div>
           <label className="block text-xs text-[#A8B5C8] mb-1">{t("applicantName")}</label>
@@ -137,7 +178,7 @@ export function ApplyAgencyForm() {
         </div>
         <div>
           <label className="block text-xs text-[#A8B5C8] mb-1">
-            {t("motivation")}{" "}
+            {t(motivationKey)}{" "}
             <span className="text-[#6e7d93]">({t("motivation_hint")})</span>
           </label>
           <textarea

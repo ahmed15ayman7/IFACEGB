@@ -4,6 +4,10 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { Star } from "lucide-react";
+import {
+  ExcellenceNetworkSection,
+  type ExcellenceNetworkData,
+} from "./ExcellenceNetworkSection";
 
 interface EmployeeOfMonth {
   id: string;
@@ -21,6 +25,7 @@ interface EmployeeOfMonth {
 
 interface EmployeeOfMonthSectionProps {
   employee: EmployeeOfMonth | null;
+  excellenceNetwork: ExcellenceNetworkData;
 }
 
 function getStarRating(points: number): number {
@@ -53,7 +58,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export function EmployeeOfMonthSection({ employee }: EmployeeOfMonthSectionProps) {
+export function EmployeeOfMonthSection({ employee, excellenceNetwork }: EmployeeOfMonthSectionProps) {
   const t = useTranslations("landing.eom");
   const locale = useLocale();
   const isRTL = locale === "ar";
@@ -172,6 +177,8 @@ export function EmployeeOfMonthSection({ employee }: EmployeeOfMonthSectionProps
         ) : (
           <p className="text-center text-[#64748B]">{t("no_data")}</p>
         )}
+
+        <ExcellenceNetworkSection data={excellenceNetwork} />
       </div>
     </section>
   );

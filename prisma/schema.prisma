@@ -967,15 +967,17 @@ model LicenseActionsLog {
 }
 
 model AgencyApplication {
-  id            String   @id @default(cuid())
-  sectorId      String?
-  applicantName String
-  email         String
-  phone         String?
-  countryCode   String
-  businessName  String?
-  motivation    String?  @db.Text
-  status        String   @default("pending")
+  id               String   @id @default(cuid())
+  sectorId         String?
+  /// agent | center | trainer — set from the public application flow
+  applicationType  String   @default("agent")
+  applicantName    String
+  email            String
+  phone            String?
+  countryCode      String
+  businessName     String?
+  motivation       String?  @db.Text
+  status           String   @default("pending")
   reviewedBy    String?
   approvedAt    DateTime?
   createdAt     DateTime @default(now())

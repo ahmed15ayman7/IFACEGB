@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { generateSEOMetadata } from "@/lib/seo/metadata";
 import { prisma } from "@/lib/prisma";
-import { ApplyAgencyForm } from "@/components/public/ApplyAgencyForm";
+import { ApplyAgencyForm, type ApplicationType } from "@/components/public/ApplyAgencyForm";
 import { getLocale, getTranslations } from "next-intl/server";
 import {
   Network,
@@ -13,17 +14,34 @@ import {
 } from "lucide-react";
 import { PublicShell, PublicPageHeader, PublicFadeIn, PublicGlowCard } from "@/components/public/motion";
 
-type Props = { params: Promise<{ locale: string }> };
+type Props = { params: Promise<{ locale: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+function parseAppType(v: string | string[] | undefined): ApplicationType {
+  const s = Array.isArray(v) ? v[0] : v;
+  if (s === "center" || s === "trainer") return s;
+  return "agent";
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   return generateSEOMetadata("apply-agency", locale as "en" | "ar");
 }
 
-export default async function ApplyAgencyPage() {
+export default async function ApplyAgencyPage({ searchParams }: Props) {
   const locale = await getLocale();
+  const sp = await searchParams;
+  const appType = parseAppType(sp.type);
   const t = await getTranslations("public.applyAgency");
   const isRtl = locale === "ar";
+
+  const pageTitleKey =
+    appType === "center" ? "page_title_center" : appType === "trainer" ? "page_title_trainer" : "page_title_agent";
+  const pageSubKey =
+    appType === "center"
+      ? "page_subtitle_center"
+      : appType === "trainer"
+        ? "page_subtitle_trainer"
+        : "page_subtitle_agent";
 
   const countries = await prisma.franchiseCountry
     .findMany({ orderBy: { countryEn: "asc" } })
@@ -57,7 +75,7 @@ export default async function ApplyAgencyPage() {
   return (
     <PublicShell className="py-16 sm:py-24">
       <div className="container mx-auto max-w-5xl px-4">
-        <PublicPageHeader title={t("title")} subtitle={t("subtitle")}>
+        <PublicPageHeader title={t(pageTitleKey)} subtitle={t(pageSubKey)}>
           <Network className="size-7 sm:size-8" strokeWidth={1.25} aria-hidden />
         </PublicPageHeader>
 
@@ -148,7 +166,13 @@ export default async function ApplyAgencyPage() {
             {t("form_title")}
           </h2>
           <PublicFadeIn delay={0.12}>
-            <ApplyAgencyForm />
+            <Suspense
+              fallback={
+                <div className="h-64 animate-pulse rounded-xl border border-[rgba(201,162,39,0.1)] bg-[rgba(6,15,30,0.4)]" />
+              }
+            >
+              <ApplyAgencyForm initialType={appType} />
+            </Suspense>
           </PublicFadeIn>
         </div>
       </div>

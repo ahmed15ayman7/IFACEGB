@@ -169,7 +169,7 @@ export function PublicLanding({ statsOverride, successStories, partners }: Landi
         { href: `/${locale}/verify`, title: tNav("verify"), descKey: "hub_verify_desc" as const, icon: ShieldCheck },
         { href: `/${locale}/contact`, title: t("hub_contact_title"), descKey: "hub_contact_desc" as const, icon: Mail },
         {
-          href: `/${locale}/apply-agency`,
+          href: `/${locale}/apply-agency?type=agent`,
           title: tNav("apply_agency"),
           descKey: "hub_apply_desc" as const,
           icon: UserPlus,
@@ -722,7 +722,7 @@ export function PublicLanding({ statsOverride, successStories, partners }: Landi
                 </h3>
                 <p className="text-sm leading-relaxed text-[#6e7d93]">{t("agents_card_body")}</p>
                 <Link
-                  href={`/${locale}/apply-agency`}
+                  href={`/${locale}/apply-agency?type=agent`}
                   className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[#e8c84a] hover:text-[#C9A227]"
                 >
                   {tNav("apply_agency")}

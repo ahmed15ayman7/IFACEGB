@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 const schema = z.object({
+  applicationType: z.enum(["agent", "center", "trainer"]).default("agent"),
   applicantName: z.string().min(2),
   email: z.string().email(),
   phone: z.string().optional(),
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
 
   const application = await prisma.agencyApplication.create({
     data: {
+      applicationType: parsed.data.applicationType,
       applicantName: parsed.data.applicantName,
       email: parsed.data.email,
       phone: parsed.data.phone,

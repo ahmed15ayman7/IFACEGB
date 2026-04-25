@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Menu,
@@ -18,6 +18,8 @@ import {
   Home,
   BookOpen,
   UserPlus,
+  GraduationCap,
+  ChevronDown,
 } from "lucide-react";
 
 const SECTORS: { key: string; href: string; labelEn: string; labelAr: string }[] = [
@@ -36,6 +38,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sectorsOpen, setSectorsOpen] = useState(false);
+  const [joinOpen, setJoinOpen] = useState(false);
+  const joinCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -46,7 +50,19 @@ export function Header() {
   useEffect(() => {
     setMobileOpen(false);
     setSectorsOpen(false);
+    setJoinOpen(false);
   }, [pathname]);
+
+  function openJoinMenu() {
+    if (joinCloseTimer.current) {
+      clearTimeout(joinCloseTimer.current);
+      joinCloseTimer.current = null;
+    }
+    setJoinOpen(true);
+  }
+  function scheduleCloseJoinMenu() {
+    joinCloseTimer.current = setTimeout(() => setJoinOpen(false), 220);
+  }
 
   function switchLocale() {
     const next = locale === "en" ? "ar" : "en";
@@ -61,8 +77,28 @@ export function Header() {
     { href: `/${locale}/news`, label: t("news"), icon: Newspaper },
     { href: `/${locale}/events`, label: t("events"), icon: CalendarDays },
     { href: `/${locale}/verify`, label: t("verify"), icon: ShieldCheck },
-    { href: `/${locale}/apply-agency`, label: t("apply_agency"), icon: UserPlus },
   ];
+
+  const joinMenuItems = [
+    {
+      href: `/${locale}/apply-agency?type=agent`,
+      label: t("join_as_agent"),
+      desc: t("join_as_agent_desc"),
+      icon: UserPlus,
+    },
+    {
+      href: `/${locale}/apply-agency?type=center`,
+      label: t("join_as_center"),
+      desc: t("join_as_center_desc"),
+      icon: Building2,
+    },
+    {
+      href: `/${locale}/apply-agency?type=trainer`,
+      label: t("join_as_trainer"),
+      desc: t("join_as_trainer_desc"),
+      icon: GraduationCap,
+    },
+  ] as const;
 
   const linkClass =
     "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2.5 text-[13px] leading-none text-[#A8B5C8] transition-colors hover:bg-[rgba(201,162,39,0.08)] hover:text-[#C9A227]";
@@ -105,6 +141,66 @@ export function Header() {
                   </Link>
                 );
               })}
+
+              <div
+                className="relative"
+                onMouseEnter={openJoinMenu}
+                onMouseLeave={scheduleCloseJoinMenu}
+              >
+                <button
+                  type="button"
+                  className={`${linkClass} gap-1 ${joinOpen ? "bg-[rgba(201,162,39,0.1)] text-[#C9A227]" : ""}`}
+                  aria-expanded={joinOpen}
+                  aria-haspopup="true"
+                >
+                  <UserPlus className="size-3.5 shrink-0 opacity-80" aria-hidden />
+                  <span>{t("apply_agency")}</span>
+                  <ChevronDown
+                    className={`size-3.5 shrink-0 transition-transform ${joinOpen ? "rotate-180" : ""}`}
+                    aria-hidden
+                  />
+                </button>
+                <AnimatePresence>
+                  {joinOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                      className="absolute start-0 top-full z-[80] mt-1.5 w-[min(calc(100vw-2rem),28rem)] rounded-2xl border border-[rgba(201,162,39,0.22)] bg-[#060f1e]/98 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md"
+                      role="menu"
+                    >
+                      {joinMenuItems.map((item, i) => {
+                        const Icon = item.icon;
+                        return (
+                          <motion.div
+                            key={item.href}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.05, duration: 0.2 }}
+                          >
+                            <Link
+                              href={item.href}
+                              role="menuitem"
+                              className="flex gap-3 rounded-xl p-3 text-start transition-colors hover:bg-[rgba(201,162,39,0.08)]"
+                            >
+                              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-[rgba(201,162,39,0.25)] bg-[rgba(201,162,39,0.08)] text-[#C9A227]">
+                                <Icon className="size-5" aria-hidden />
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block text-sm font-semibold text-[#e8c84a]">{item.label}</span>
+                                <span className="mt-0.5 block text-xs leading-relaxed text-[#6e7d93]">
+                                  {item.desc}
+                                </span>
+                              </span>
+                            </Link>
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <div className="relative">
                 <button
@@ -250,6 +346,35 @@ export function Header() {
                   transition={{ delay: navLinks.length * 0.04, duration: 0.2 }}
                   className="px-3 pt-1"
                 >
+                  <p className="mb-2 text-xs font-semibold text-[#C9A227]">{t("apply_agency")}</p>
+                  <div className="flex flex-col gap-1.5">
+                    {joinMenuItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="flex items-start gap-2 rounded-lg border border-[rgba(201,162,39,0.16)] bg-[rgba(6,15,30,0.4)] px-3 py-2.5 text-sm text-[#A8B5C8] hover:border-[rgba(201,162,39,0.32)]"
+                        >
+                          <Icon className="size-4 shrink-0 text-[#C9A227] mt-0.5" aria-hidden />
+                          <span>
+                            <span className="block font-medium text-[#e8c84a]">{item.label}</span>
+                            <span className="mt-0.5 block text-[11px] leading-snug text-[#6e7d93]">
+                              {item.desc}
+                            </span>
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: (navLinks.length + 1) * 0.04, duration: 0.2 }}
+                  className="px-3 pt-1"
+                >
                   <p className="mb-1 text-xs font-semibold text-[#C9A227]">{t("sectors")}</p>
                   <div className="flex flex-wrap gap-2">
                     {SECTORS.map((s) => (
@@ -267,7 +392,7 @@ export function Header() {
                 <motion.div
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (navLinks.length + 1) * 0.04, duration: 0.2 }}
+                  transition={{ delay: (navLinks.length + 2) * 0.04, duration: 0.2 }}
                   className="mt-2 px-3"
                 >
                   <Link

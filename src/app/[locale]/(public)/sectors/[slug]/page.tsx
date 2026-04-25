@@ -195,7 +195,7 @@ export default async function SectorPublicPage({ params }: Props) {
               {t("cta_primary")}
             </Link>
             <Link
-              href={`/${locale}/apply-agency`}
+              href={`/${locale}/apply-agency?type=agent`}
               className="inline-flex h-12 items-center rounded-xl border border-[rgba(201,162,39,0.35)] px-8 text-sm font-semibold text-[#C9A227] transition-all hover:bg-[rgba(201,162,39,0.08)]"
             >
               {t("cta_agency")}

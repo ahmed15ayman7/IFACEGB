@@ -6,6 +6,7 @@ import { SectorsDirectory } from "./sections/SectorsDirectory";
 import { NewsSection } from "./sections/NewsSection";
 import { EventsSection } from "./sections/EventsSection";
 import { EmployeeOfMonthSection } from "./sections/EmployeeOfMonthSection";
+import type { ExcellenceNetworkData } from "./sections/ExcellenceNetworkSection";
 import { PartnersSection } from "./sections/PartnersSection";
 
 interface Sector {
@@ -69,6 +70,7 @@ export interface NewPublicLandingProps {
   news: NewsItem[];
   events: EventItem[];
   employeeOfMonth: EmployeeOfMonth | null;
+  excellenceNetwork: ExcellenceNetworkData;
   partners: Partner[];
   stats: Stats;
 }
@@ -78,6 +80,7 @@ export function NewPublicLanding({
   news,
   events,
   employeeOfMonth,
+  excellenceNetwork,
   partners,
   stats,
 }: NewPublicLandingProps) {
@@ -97,7 +100,7 @@ export function NewPublicLanding({
       <SectorsDirectory sectors={sectors} />
       <NewsSection news={news} />
       <EventsSection events={events} />
-      <EmployeeOfMonthSection employee={employeeOfMonth} />
+      <EmployeeOfMonthSection employee={employeeOfMonth} excellenceNetwork={excellenceNetwork} />
       <PartnersSection partners={partners} />
     </div>
   );
