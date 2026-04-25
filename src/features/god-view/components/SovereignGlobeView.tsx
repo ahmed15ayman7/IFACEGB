@@ -36,13 +36,23 @@ type Point = {
   name: string;
 };
 
+/** Network colors — all hex (Tailwind v4 + @theme: avoid palette classes like `bg-sky-400` that may not resolve). */
+const GLOBE_CATEGORY_HEX: Record<Category, string> = {
+  hq: "#EAB308",
+  founding_partner: "#F97316",
+  exclusive_sovereign: "#8B5CF6",
+  exclusive_agent: "#D97706",
+  center: "#3B82F6",
+  trainer: "#10B981",
+};
+
 /** Placeholder markers aligned with network legend (Arabic labels in filter UI). */
 const PLACEHOLDER_POINTS: Point[] = [
-  { lat: 30.0444, lng: 31.2357, color: "#EAB308", r: 0.38, category: "hq", name: "المقر" },
+  { lat: 30.0444, lng: 31.2357, color: GLOBE_CATEGORY_HEX.hq, r: 0.38, category: "hq", name: "المقر" },
   {
     lat: 25.2048,
     lng: 55.2708,
-    color: "#F59E0B",
+    color: GLOBE_CATEGORY_HEX.founding_partner,
     r: 0.36,
     category: "founding_partner",
     name: "MEA founding",
@@ -50,7 +60,7 @@ const PLACEHOLDER_POINTS: Point[] = [
   {
     lat: 24.7136,
     lng: 46.6753,
-    color: "#C9A227",
+    color: GLOBE_CATEGORY_HEX.exclusive_sovereign,
     r: 0.32,
     category: "exclusive_sovereign",
     name: "Sovereign agent",
@@ -58,15 +68,22 @@ const PLACEHOLDER_POINTS: Point[] = [
   {
     lat: 21.4225,
     lng: 39.8262,
-    color: "#D4AF37",
+    color: GLOBE_CATEGORY_HEX.exclusive_agent,
     r: 0.3,
     category: "exclusive_agent",
     name: "Exclusive agent",
   },
-  { lat: 15.5, lng: 32.56, color: "#60A5FA", r: 0.33, category: "center", name: "Accredited center" },
-  { lat: 30.8, lng: 29.9, color: "#34D399", r: 0.3, category: "trainer", name: "Certified trainer" },
-  { lat: 51.5, lng: -0.12, color: "#EAB308", r: 0.28, category: "hq", name: "Liaison" },
-  { lat: 40.7, lng: -74.0, color: "#60A5FA", r: 0.3, category: "center", name: "Center" },
+  {
+    lat: 15.5,
+    lng: 32.56,
+    color: GLOBE_CATEGORY_HEX.center,
+    r: 0.33,
+    category: "center",
+    name: "Accredited center",
+  },
+  { lat: 30.8, lng: 29.9, color: GLOBE_CATEGORY_HEX.trainer, r: 0.3, category: "trainer", name: "Certified trainer" },
+  { lat: 51.5, lng: -0.12, color: GLOBE_CATEGORY_HEX.hq, r: 0.28, category: "hq", name: "Liaison" },
+  { lat: 40.7, lng: -74.0, color: GLOBE_CATEGORY_HEX.center, r: 0.3, category: "center", name: "Center" },
 ];
 
 function toggleFilter(current: "all" | Category, key: Category): "all" | Category {
@@ -77,37 +94,80 @@ const LEGEND: { id: Category; label: string; leading: React.ReactNode }[] = [
   {
     id: "hq",
     label: "المقر الرئيسي",
-    leading: <span className="size-2.5 rounded-full bg-[#EAB308] shadow-[0_0_6px_rgba(234,179,8,0.7)]" />,
+    leading: (
+      <span
+        className="size-2.5 shrink-0 rounded-full"
+        style={{
+          backgroundColor: GLOBE_CATEGORY_HEX.hq,
+          boxShadow: "0 0 6px rgba(234, 179, 8, 0.85)",
+        }}
+      />
+    ),
   },
   {
     id: "founding_partner",
     label: "الشريك المؤسس (وكيل الشرق الأوسط)",
-    leading: <span className="size-3 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-[0_0_8px_rgba(245,158,11,0.7)]" />,
+    leading: (
+      <span
+        className="size-2.5 shrink-0 rounded-full"
+        style={{
+          backgroundColor: GLOBE_CATEGORY_HEX.founding_partner,
+          boxShadow: "0 0 7px rgba(249, 115, 22, 0.85)",
+        }}
+      />
+    ),
   },
   {
     id: "exclusive_sovereign",
     label: "وكيل حصري (سيادي)",
     leading: (
-      <span className="relative flex size-4 items-center justify-center">
-        <span className="absolute size-4 rounded-full border-2 border-[#C9A227]" />
-        <span className="absolute size-2.5 rounded-full border border-[#e8c84a]/80" />
-      </span>
+      <span
+        className="size-2.5 shrink-0 rounded-full border border-[#e8c84a]/90"
+        style={{
+          backgroundColor: GLOBE_CATEGORY_HEX.exclusive_sovereign,
+          boxShadow: "0 0 8px rgba(139, 92, 246, 0.9)",
+        }}
+      />
     ),
   },
   {
     id: "exclusive_agent",
     label: "وكيل حصري",
-    leading: <span className="size-2.5 rounded-full bg-[#D4AF37] shadow-[0_0_6px_rgba(201,162,39,0.6)]" />,
+    leading: (
+      <span
+        className="size-2.5 shrink-0 rounded-full"
+        style={{
+          backgroundColor: GLOBE_CATEGORY_HEX.exclusive_agent,
+          boxShadow: "0 0 6px rgba(217, 119, 6, 0.85)",
+        }}
+      />
+    ),
   },
   {
     id: "center",
     label: "مركز معتمد",
-    leading: <span className="size-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(96,165,250,0.9)]" />,
+    leading: (
+      <span
+        className="size-2.5 shrink-0 rounded-full"
+        style={{
+          backgroundColor: GLOBE_CATEGORY_HEX.center,
+          boxShadow: "0 0 8px rgba(59, 130, 246, 0.9)",
+        }}
+      />
+    ),
   },
   {
     id: "trainer",
     label: "مدرب معتمد",
-    leading: <span className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.75)]" />,
+    leading: (
+      <span
+        className="size-2.5 shrink-0 rounded-full"
+        style={{
+          backgroundColor: GLOBE_CATEGORY_HEX.trainer,
+          boxShadow: "0 0 8px rgba(16, 185, 129, 0.9)",
+        }}
+      />
+    ),
   },
 ];
 
