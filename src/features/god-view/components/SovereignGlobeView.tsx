@@ -36,23 +36,13 @@ type Point = {
   name: string;
 };
 
-/** Network colors — all hex (Tailwind v4 + @theme: avoid palette classes like `bg-sky-400` that may not resolve). */
-const GLOBE_CATEGORY_HEX: Record<Category, string> = {
-  hq: "#EAB308",
-  founding_partner: "#F97316",
-  exclusive_sovereign: "#8B5CF6",
-  exclusive_agent: "#D97706",
-  center: "#3B82F6",
-  trainer: "#10B981",
-};
-
 /** Placeholder markers aligned with network legend (Arabic labels in filter UI). */
 const PLACEHOLDER_POINTS: Point[] = [
-  { lat: 30.0444, lng: 31.2357, color: GLOBE_CATEGORY_HEX.hq, r: 0.38, category: "hq", name: "المقر" },
+  { lat: 30.0444, lng: 31.2357, color: "#FACC15", r: 0.38, category: "hq", name: "المقر" },
   {
     lat: 25.2048,
     lng: 55.2708,
-    color: GLOBE_CATEGORY_HEX.founding_partner,
+    color: "#EA580C",
     r: 0.36,
     category: "founding_partner",
     name: "MEA founding",
@@ -60,7 +50,7 @@ const PLACEHOLDER_POINTS: Point[] = [
   {
     lat: 24.7136,
     lng: 46.6753,
-    color: GLOBE_CATEGORY_HEX.exclusive_sovereign,
+    color: "#C9A227",
     r: 0.32,
     category: "exclusive_sovereign",
     name: "Sovereign agent",
@@ -68,108 +58,95 @@ const PLACEHOLDER_POINTS: Point[] = [
   {
     lat: 21.4225,
     lng: 39.8262,
-    color: GLOBE_CATEGORY_HEX.exclusive_agent,
+    color: "#A16207",
     r: 0.3,
     category: "exclusive_agent",
     name: "Exclusive agent",
   },
-  {
-    lat: 15.5,
-    lng: 32.56,
-    color: GLOBE_CATEGORY_HEX.center,
-    r: 0.33,
-    category: "center",
-    name: "Accredited center",
-  },
-  { lat: 30.8, lng: 29.9, color: GLOBE_CATEGORY_HEX.trainer, r: 0.3, category: "trainer", name: "Certified trainer" },
-  { lat: 51.5, lng: -0.12, color: GLOBE_CATEGORY_HEX.hq, r: 0.28, category: "hq", name: "Liaison" },
-  { lat: 40.7, lng: -74.0, color: GLOBE_CATEGORY_HEX.center, r: 0.3, category: "center", name: "Center" },
+  { lat: 15.5, lng: 32.56, color: "#3B82F6", r: 0.33, category: "center", name: "Accredited center" },
+  { lat: 30.8, lng: 29.9, color: "#10B981", r: 0.3, category: "trainer", name: "Certified trainer" },
+  { lat: 51.5, lng: -0.12, color: "#FACC15", r: 0.28, category: "hq", name: "Liaison" },
+  { lat: 40.7, lng: -74.0, color: "#3B82F6", r: 0.3, category: "center", name: "Center" },
 ];
 
 function toggleFilter(current: "all" | Category, key: Category): "all" | Category {
   return current === key ? "all" : key;
 }
 
-const LEGEND: { id: Category; label: string; leading: React.ReactNode }[] = [
-  {
-    id: "hq",
-    label: "المقر الرئيسي",
-    leading: (
-      <span
-        className="size-2.5 shrink-0 rounded-full"
-        style={{
-          backgroundColor: GLOBE_CATEGORY_HEX.hq,
-          boxShadow: "0 0 6px rgba(234, 179, 8, 0.85)",
-        }}
-      />
-    ),
-  },
-  {
-    id: "founding_partner",
-    label: "الشريك المؤسس (وكيل الشرق الأوسط)",
-    leading: (
-      <span
-        className="size-2.5 shrink-0 rounded-full"
-        style={{
-          backgroundColor: GLOBE_CATEGORY_HEX.founding_partner,
-          boxShadow: "0 0 7px rgba(249, 115, 22, 0.85)",
-        }}
-      />
-    ),
-  },
-  {
-    id: "exclusive_sovereign",
-    label: "وكيل حصري (سيادي)",
-    leading: (
-      <span
-        className="size-2.5 shrink-0 rounded-full border border-[#e8c84a]/90"
-        style={{
-          backgroundColor: GLOBE_CATEGORY_HEX.exclusive_sovereign,
-          boxShadow: "0 0 8px rgba(139, 92, 246, 0.9)",
-        }}
-      />
-    ),
-  },
-  {
-    id: "exclusive_agent",
-    label: "وكيل حصري",
-    leading: (
-      <span
-        className="size-2.5 shrink-0 rounded-full"
-        style={{
-          backgroundColor: GLOBE_CATEGORY_HEX.exclusive_agent,
-          boxShadow: "0 0 6px rgba(217, 119, 6, 0.85)",
-        }}
-      />
-    ),
-  },
-  {
-    id: "center",
-    label: "مركز معتمد",
-    leading: (
-      <span
-        className="size-2.5 shrink-0 rounded-full"
-        style={{
-          backgroundColor: GLOBE_CATEGORY_HEX.center,
-          boxShadow: "0 0 8px rgba(59, 130, 246, 0.9)",
-        }}
-      />
-    ),
-  },
-  {
-    id: "trainer",
-    label: "مدرب معتمد",
-    leading: (
-      <span
-        className="size-2.5 shrink-0 rounded-full"
-        style={{
-          backgroundColor: GLOBE_CATEGORY_HEX.trainer,
-          boxShadow: "0 0 8px rgba(16, 185, 129, 0.9)",
-        }}
-      />
-    ),
-  },
+/** Must use inline colors so markers stay visible in production (no reliance on purged utility classes). */
+const CATEGORY_LEGEND: { id: Category; label: string }[] = [
+  { id: "hq", label: "المقر الرئيسي" },
+  { id: "founding_partner", label: "الشريك المؤسس (وكيل الشرق الأوسط)" },
+  { id: "exclusive_sovereign", label: "وكيل حصري (سيادي)" },
+  { id: "exclusive_agent", label: "وكيل حصري" },
+  { id: "center", label: "مركز معتمد" },
+  { id: "trainer", label: "مدرب معتمد" },
 ];
+
+function CategoryLegendIcon({ id }: { id: Category }) {
+  const solid = (fill: string, glow: string) => (
+    <span
+      className="inline-block shrink-0 rounded-full"
+      style={{
+        width: 16,
+        height: 16,
+        background: fill,
+        boxShadow: `0 0 10px ${glow}, inset 0 0 0 1px rgba(255,255,255,0.12)`,
+      }}
+      aria-hidden
+    />
+  );
+
+  switch (id) {
+    case "hq":
+      return solid("#FACC15", "rgba(250, 204, 21, 0.95)");
+    case "founding_partner":
+      return (
+        <span
+          className="inline-block shrink-0 rounded-full"
+          style={{
+            width: 16,
+            height: 16,
+            background: "linear-gradient(145deg, #FDBA74 0%, #EA580C 100%)",
+            boxShadow: "0 0 10px rgba(234, 88, 12, 0.9), inset 0 0 0 1px rgba(255,255,255,0.1)",
+          }}
+          aria-hidden
+        />
+      );
+    case "exclusive_sovereign":
+      return (
+        <span
+          className="relative inline-flex shrink-0 items-center justify-center"
+          style={{ width: 18, height: 18 }}
+          aria-hidden
+        >
+          <span
+            className="absolute rounded-full"
+            style={{
+              inset: 0,
+              border: "2.5px solid #C9A227",
+              boxShadow: "0 0 10px rgba(201, 162, 39, 0.95), inset 0 0 4px rgba(232, 200, 74, 0.35)",
+            }}
+          />
+          <span
+            className="absolute left-1/2 top-1/2 rounded-full -translate-x-1/2 -translate-y-1/2"
+            style={{
+              width: 8,
+              height: 8,
+              border: "1.5px solid #FEF9C3",
+              boxShadow: "0 0 6px rgba(254, 249, 195, 0.85)",
+            }}
+          />
+        </span>
+      );
+    case "exclusive_agent":
+      return solid("#A16207", "rgba(180, 83, 9, 0.85)");
+    case "center":
+      return solid("#3B82F6", "rgba(59, 130, 246, 0.95)");
+    case "trainer":
+      return solid("#10B981", "rgba(16, 185, 129, 0.9)");
+  }
+}
 
 export function SovereignGlobeView() {
   const locale = useLocale();
@@ -258,13 +235,13 @@ export function SovereignGlobeView() {
         dir="rtl"
       >
         <div className="flex flex-col gap-1.5">
-          {LEGEND.map(({ id, label, leading }) => (
+          {CATEGORY_LEGEND.map(({ id, label }) => (
             <FilterChip
               key={id}
               pressed={activeFilter === id}
               onClick={() => setActiveFilter((f) => toggleFilter(f, id))}
               label={label}
-              leading={leading}
+              leading={<CategoryLegendIcon id={id} />}
             />
           ))}
         </div>
@@ -298,7 +275,7 @@ function FilterChip({
           : "border-[rgba(201,162,39,0.2)] bg-[rgba(6,15,30,0.8)] text-silver-muted hover:border-[rgba(201,162,39,0.35)]"
       }`}
     >
-      <span className="shrink-0">{leading}</span>
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center">{leading}</span>
       <span className="min-w-0 text-silver">{label}</span>
     </button>
   );
