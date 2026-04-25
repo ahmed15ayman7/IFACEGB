@@ -1190,6 +1190,8 @@
       "field_job_ar": "Job title (Arabic)",
       "field_dept_en": "Department (English)",
       "field_dept_ar": "Department (Arabic)",
+      "field_ga_department": "Department (General Administration)",
+      "field_ga_department_placeholder": "— Select department —",
       "field_contract": "Contract type",
       "field_salary": "Base salary",
       "field_currency": "Currency",

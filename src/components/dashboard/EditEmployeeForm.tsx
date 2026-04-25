@@ -4,10 +4,17 @@ import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Camera, Loader2, CheckCircle2, AlertCircle, User } from "lucide-react";
+import { Camera, Loader2, CheckCircle2, AlertCircle, User, ChevronDown } from "lucide-react";
 import Image from "next/image";
 
-type Sector = { id: string; nameEn: string; nameAr: string | null };
+type Sector = { id: string; nameEn: string; nameAr: string | null; code: string };
+
+/** Same departments as NewEmployeeForm — General Administration sector only */
+const GA_DEPARTMENTS = [
+  { en: "Secretariat", ar: "السكرتاريا" },
+  { en: "Public Relations", ar: "العلاقات العامة" },
+  { en: "Sales", ar: "المبيعات" },
+] as const;
 
 type EmployeeData = {
   id: string;
@@ -87,6 +94,9 @@ export function EditEmployeeForm({
 
   const set = (k: keyof typeof form, v: string | boolean) =>
     setForm((p) => ({ ...p, [k]: v }));
+
+  const selectedSector = sectors.find((s) => s.id === form.sectorId);
+  const isGeneralAdminSector = selectedSector?.code === "general-admin";
 
   // ─── Avatar upload ──────────────────────────────────────────────────────
   const handleAvatarChange = useCallback(
@@ -296,18 +306,32 @@ export function EditEmployeeForm({
           </div>
           <div>
             <label className={labelClass}>{t("field_sector")}</label>
-            <select
-              value={form.sectorId}
-              onChange={(e) => set("sectorId", e.target.value)}
-              className={inputClass}
-            >
-              <option value="" className="bg-[#0d1929]">— None —</option>
-              {sectors.map((s) => (
-                <option key={s.id} value={s.id} className="bg-[#0d1929]">
-                  {isRtl ? (s.nameAr ?? s.nameEn) : s.nameEn}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={form.sectorId}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  const s = sectors.find((x) => x.id === v);
+                  setForm((f) => ({
+                    ...f,
+                    sectorId: v,
+                    ...(s?.code !== "general-admin" ? { departmentEn: "", departmentAr: "" } : {}),
+                  }));
+                }}
+                className={inputClass}
+              >
+                <option value="" className="bg-[#0d1929]">— None —</option>
+                {sectors.map((s) => (
+                  <option key={s.id} value={s.id} className="bg-[#0d1929]">
+                    {isRtl ? (s.nameAr ?? s.nameEn) : s.nameEn}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 size-4 text-white/30"
+                aria-hidden
+              />
+            </div>
           </div>
         </div>
 
@@ -336,8 +360,6 @@ export function EditEmployeeForm({
             [
               ["field_job_en", "jobTitleEn"],
               ["field_job_ar", "jobTitleAr"],
-              ["field_dept_en", "departmentEn"],
-              ["field_dept_ar", "departmentAr"],
               ["field_phone", "phone"],
               ["field_national_id", "nationalId"],
               ["field_passport", "passportNo"],
@@ -348,13 +370,64 @@ export function EditEmployeeForm({
               <input
                 value={form[fieldKey] as string}
                 onChange={(e) => set(fieldKey, e.target.value)}
-                dir={
-                  fieldKey === "jobTitleAr" || fieldKey === "departmentAr" ? "rtl" : undefined
-                }
+                dir={fieldKey === "jobTitleAr" ? "rtl" : undefined}
                 className={inputClass}
               />
             </div>
           ))}
+
+          {isGeneralAdminSector ? (
+            <div className="sm:col-span-2">
+              <label className={labelClass}>{t("field_ga_department")}</label>
+              <div className="relative">
+                <select
+                  className={inputClass}
+                  value={form.departmentEn}
+                  onChange={(e) => {
+                    const row = GA_DEPARTMENTS.find((d) => d.en === e.target.value);
+                    if (row) {
+                      setForm((f) => ({ ...f, departmentEn: row.en, departmentAr: row.ar }));
+                    } else {
+                      setForm((f) => ({ ...f, departmentEn: "", departmentAr: "" }));
+                    }
+                  }}
+                >
+                  <option value="" className="bg-[#0d1929]">
+                    {t("field_ga_department_placeholder")}
+                  </option>
+                  {GA_DEPARTMENTS.map((d) => (
+                    <option key={d.en} value={d.en} className="bg-[#0d1929]">
+                      {isRtl ? d.ar : d.en}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 size-4 text-white/30"
+                  aria-hidden
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className={labelClass}>{t("field_dept_en")}</label>
+                <input
+                  value={form.departmentEn}
+                  onChange={(e) => set("departmentEn", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>{t("field_dept_ar")}</label>
+                <input
+                  value={form.departmentAr}
+                  onChange={(e) => set("departmentAr", e.target.value)}
+                  dir="rtl"
+                  className={inputClass}
+                />
+              </div>
+            </>
+          )}
 
           <div className="sm:col-span-2">
             <label className={labelClass}>{t("field_address")}</label>

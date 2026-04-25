@@ -51,7 +51,7 @@ export default async function AdminEmployeeEditPage({ params }: Props) {
     prisma.sector.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: "asc" },
-      select: { id: true, nameEn: true, nameAr: true },
+      select: { id: true, nameEn: true, nameAr: true, code: true },
     }),
   ]);
 

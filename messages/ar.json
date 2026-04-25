@@ -1190,6 +1190,8 @@
       "field_job_ar": "المسمى الوظيفي (عربي)",
       "field_dept_en": "القسم (إنجليزي)",
       "field_dept_ar": "القسم (عربي)",
+      "field_ga_department": "القسم (الإدارة العامة)",
+      "field_ga_department_placeholder": "— اختر القسم —",
       "field_contract": "نوع العقد",
       "field_salary": "الراتب الأساسي",
       "field_currency": "العملة",
