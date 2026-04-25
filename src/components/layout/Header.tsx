@@ -40,6 +40,7 @@ export function Header() {
   const [sectorsOpen, setSectorsOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(false);
   const joinCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sectorsCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -62,6 +63,17 @@ export function Header() {
   }
   function scheduleCloseJoinMenu() {
     joinCloseTimer.current = setTimeout(() => setJoinOpen(false), 220);
+  }
+
+  function openSectorsMenu() {
+    if (sectorsCloseTimer.current) {
+      clearTimeout(sectorsCloseTimer.current);
+      sectorsCloseTimer.current = null;
+    }
+    setSectorsOpen(true);
+  }
+  function scheduleCloseSectorsMenu() {
+    sectorsCloseTimer.current = setTimeout(() => setSectorsOpen(false), 220);
   }
 
   function switchLocale() {
@@ -130,8 +142,8 @@ export function Header() {
             </span>
           </Link>
 
-          <nav className="hidden min-w-0 justify-self-center lg:block" aria-label="Primary">
-            <div className="flex max-w-[54rem] items-center justify-center gap-0.5 overflow-x-auto overflow-y-visible py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <nav className="hidden min-w-0 justify-self-center lg:block overflow-visible" aria-label="Primary">
+            <div className="flex max-w-[54rem] flex-wrap items-center justify-center gap-0.5 py-1">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 return (
@@ -167,47 +179,52 @@ export function Header() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.98 }}
                       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute start-0 top-full z-[80] mt-1.5 w-[min(calc(100vw-2rem),28rem)] rounded-2xl border border-[rgba(201,162,39,0.22)] bg-[#060f1e]/98 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md"
+                      className="absolute start-0 top-full z-[80] w-[min(calc(100vw-2rem),28rem)] pt-1.5"
                       role="menu"
                     >
-                      {joinMenuItems.map((item, i) => {
-                        const Icon = item.icon;
-                        return (
-                          <motion.div
-                            key={item.href}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.05, duration: 0.2 }}
-                          >
-                            <Link
-                              href={item.href}
-                              role="menuitem"
-                              className="flex gap-3 rounded-xl p-3 text-start transition-colors hover:bg-[rgba(201,162,39,0.08)]"
+                      <div className="rounded-2xl border border-[rgba(201,162,39,0.22)] bg-[#060f1e]/98 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md">
+                        {joinMenuItems.map((item, i) => {
+                          const Icon = item.icon;
+                          return (
+                            <motion.div
+                              key={item.href}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.05, duration: 0.2 }}
                             >
-                              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-[rgba(201,162,39,0.25)] bg-[rgba(201,162,39,0.08)] text-[#C9A227]">
-                                <Icon className="size-5" aria-hidden />
-                              </span>
-                              <span className="min-w-0 flex-1">
-                                <span className="block text-sm font-semibold text-[#e8c84a]">{item.label}</span>
-                                <span className="mt-0.5 block text-xs leading-relaxed text-[#6e7d93]">
-                                  {item.desc}
+                              <Link
+                                href={item.href}
+                                role="menuitem"
+                                className="flex gap-3 rounded-xl p-3 text-start transition-colors hover:bg-[rgba(201,162,39,0.08)]"
+                              >
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-[rgba(201,162,39,0.25)] bg-[rgba(201,162,39,0.08)] text-[#C9A227]">
+                                  <Icon className="size-5" aria-hidden />
                                 </span>
-                              </span>
-                            </Link>
-                          </motion.div>
-                        );
-                      })}
+                                <span className="min-w-0 flex-1">
+                                  <span className="block text-sm font-semibold text-[#e8c84a]">{item.label}</span>
+                                  <span className="mt-0.5 block text-xs leading-relaxed text-[#6e7d93]">
+                                    {item.desc}
+                                  </span>
+                                </span>
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              <div className="relative">
+              <div
+                className="relative"
+                onMouseEnter={openSectorsMenu}
+                onMouseLeave={scheduleCloseSectorsMenu}
+              >
                 <button
                   type="button"
                   onClick={() => setSectorsOpen((prev) => !prev)}
-                  onBlur={() => setTimeout(() => setSectorsOpen(false), 150)}
-                  className={`${linkClass} gap-1`}
+                  className={`${linkClass} gap-1 ${sectorsOpen ? "bg-[rgba(201,162,39,0.1)] text-[#C9A227]" : ""}`}
                   aria-expanded={sectorsOpen}
                   aria-haspopup="true"
                 >
@@ -230,26 +247,30 @@ export function Header() {
                 </button>
                 <AnimatePresence>
                   {sectorsOpen && (
-                    <motion.ul
+                    <motion.div
                       initial={{ opacity: 0, y: 6, scale: 0.97 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 4, scale: 0.97 }}
                       transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute start-0 top-full mt-1.5 min-w-[200px] rounded-xl border border-[rgba(201,162,39,0.18)] bg-[#060f1e]/98 py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.5)] backdrop-blur-md"
-                      role="menu"
+                      className="absolute start-0 top-full z-[80] min-w-[200px] pt-1.5"
                     >
-                      {SECTORS.map((s) => (
-                        <li key={s.key} role="none">
-                          <Link
-                            href={`/${locale}/sectors/${s.href}`}
-                            role="menuitem"
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-[#A8B5C8] transition-colors hover:bg-[rgba(201,162,39,0.06)] hover:text-[#C9A227]"
-                          >
-                            {locale === "ar" ? s.labelAr : s.labelEn}
-                          </Link>
-                        </li>
-                      ))}
-                    </motion.ul>
+                      <ul
+                        className="m-0 list-none rounded-xl border border-[rgba(201,162,39,0.18)] bg-[#060f1e]/98 py-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.5)] backdrop-blur-md"
+                        role="menu"
+                      >
+                        {SECTORS.map((s) => (
+                          <li key={s.key} role="none">
+                            <Link
+                              href={`/${locale}/sectors/${s.href}`}
+                              role="menuitem"
+                              className="flex items-center gap-2 px-4 py-2 text-sm text-[#A8B5C8] transition-colors hover:bg-[rgba(201,162,39,0.06)] hover:text-[#C9A227]"
+                            >
+                              {locale === "ar" ? s.labelAr : s.labelEn}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
                   )}
                 </AnimatePresence>
               </div>
